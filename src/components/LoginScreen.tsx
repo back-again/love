@@ -22,6 +22,13 @@ interface LoginScreenProps {
   onLoginSuccess: (user: any) => void;
 }
 
+// Google Client IDs config (Replace with actual Client IDs in production)
+const GOOGLE_WEB_CLIENT_ID = 'YOUR_GOOGLE_WEB_CLIENT_ID.apps.googleusercontent.com';
+const GOOGLE_IOS_CLIENT_ID = 'YOUR_GOOGLE_IOS_CLIENT_ID.apps.googleusercontent.com';
+const GOOGLE_ANDROID_CLIENT_ID = 'YOUR_GOOGLE_ANDROID_CLIENT_ID.apps.googleusercontent.com';
+
+const isGoogleConfigValid = GOOGLE_WEB_CLIENT_ID !== 'YOUR_GOOGLE_WEB_CLIENT_ID.apps.googleusercontent.com' && GOOGLE_WEB_CLIENT_ID !== '';
+
 export default function LoginScreen({ onLoginSuccess }: LoginScreenProps) {
   const [loading, setLoading] = useState(false);
   const [recentLoginDetected, setRecentLoginDetected] = useState(false);
@@ -29,10 +36,9 @@ export default function LoginScreen({ onLoginSuccess }: LoginScreenProps) {
 
   // Setup Google Sign In Request
   const [request, response, promptAsync] = Google.useAuthRequest({
-    // Placeholders - Replace with actual Client IDs in production
-    webClientId: 'YOUR_GOOGLE_WEB_CLIENT_ID.apps.googleusercontent.com',
-    iosClientId: 'YOUR_GOOGLE_IOS_CLIENT_ID.apps.googleusercontent.com',
-    androidClientId: 'YOUR_GOOGLE_ANDROID_CLIENT_ID.apps.googleusercontent.com',
+    webClientId: GOOGLE_WEB_CLIENT_ID,
+    iosClientId: GOOGLE_IOS_CLIENT_ID,
+    androidClientId: GOOGLE_ANDROID_CLIENT_ID,
   });
 
   useEffect(() => {
@@ -51,7 +57,7 @@ export default function LoginScreen({ onLoginSuccess }: LoginScreenProps) {
       const { authentication } = response;
       const idToken = authentication?.idToken;
 
-      if (isConfigValid && supabase && idToken) {
+      if (isConfigValid && isGoogleConfigValid && supabase && idToken) {
         setLoading(true);
         supabase.auth.signInWithIdToken({
           provider: 'google',
@@ -95,10 +101,10 @@ export default function LoginScreen({ onLoginSuccess }: LoginScreenProps) {
     setTimeout(() => {
       setLoading(false);
       // Inform user that mock auth is being used
-      if (!isConfigValid) {
+      if (!isConfigValid || !isGoogleConfigValid) {
         Alert.alert(
           "모의 로그인 안내",
-          "Supabase 자격 증명이 설정되지 않아 로컬 테스트용 모의 계정으로 로그인했습니다.",
+          "Supabase 설정 또는 구글 로그인 키 설정이 되지 않아 로컬 테스트용 모의 계정으로 로그인했습니다.",
           [{ text: "확인", onPress: () => onLoginSuccess(mockUser) }]
         );
       } else {
@@ -108,7 +114,7 @@ export default function LoginScreen({ onLoginSuccess }: LoginScreenProps) {
   };
 
   const handleGoogleLogin = () => {
-    if (isConfigValid && supabase) {
+    if (isConfigValid && isGoogleConfigValid && supabase) {
       promptAsync();
     } else {
       triggerMockLogin('google');
