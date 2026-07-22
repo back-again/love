@@ -176,7 +176,7 @@ export default function LoginScreen({ onLoginSuccess }: LoginScreenProps) {
 
   return (
     <SafeAreaView style={styles.container}>
-      
+      <Text>test</Text>
       {/* Content Wrapper (Stretching to fit viewport, aligning frames with exactly 108px gap) */}
       <View style={styles.contentWrapper}>
         
