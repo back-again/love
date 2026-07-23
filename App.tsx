@@ -2,12 +2,15 @@ import React, { useState } from 'react';
 import { StyleSheet, View, Text, Image, TouchableOpacity, SafeAreaView } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import LoginScreen from './src/components/LoginScreen';
+import OnboardingScreen from './src/components/OnboardingScreen';
 
 export default function App() {
   const [user, setUser] = useState<any>(null);
+  const [onboardingData, setOnboardingData] = useState<any>(null);
 
   const handleLogout = () => {
     setUser(null);
+    setOnboardingData(null);
   };
 
   return (
@@ -15,6 +18,11 @@ export default function App() {
       <StatusBar style="dark" />
       {!user ? (
         <LoginScreen onLoginSuccess={(userData) => setUser(userData)} />
+      ) : !onboardingData ? (
+        <OnboardingScreen 
+          user={user} 
+          onComplete={(data) => setOnboardingData(data)} 
+        />
       ) : (
         <SafeAreaView style={styles.loggedInContainer}>
           <View style={styles.content}>
@@ -30,24 +38,26 @@ export default function App() {
             {/* Welcome Text */}
             <View style={styles.welcomeContainer}>
               <Text style={styles.welcomeTitle}>
-                반가워요, <Text style={styles.userName}>{user.displayName}</Text>님!
+                환영합니다, <Text style={styles.userName}>{user.displayName}</Text>님!
               </Text>
               <Text style={styles.userEmail}>{user.email}</Text>
             </View>
 
-            {/* Info Card */}
+            {/* Info Card with Onboarding Summary */}
             <View style={styles.infoCard}>
               <Text style={styles.infoEmoji}>🎉</Text>
               <View style={styles.infoTextContainer}>
-                <Text style={styles.infoTitle}>로그인에 성공했습니다</Text>
-                <Text style={styles.infoSubtitle}>연애오답 메인화면 준비 중입니다.</Text>
+                <Text style={styles.infoTitle}>온보딩 프로필 생성이 완료되었습니다</Text>
+                <Text style={styles.infoSubtitle}>
+                  성별: {onboardingData.gender === 'male' ? '남성' : '여성'} | 출생년도: {onboardingData.birthYear || '미입력'}
+                </Text>
               </View>
             </View>
           </View>
 
-          {/* Logout Button */}
+          {/* Reset / Logout Button */}
           <TouchableOpacity style={styles.logoutButton} onPress={handleLogout} activeOpacity={0.8}>
-            <Text style={styles.logoutButtonText}>다른 계정으로 로그인하기 (로그아웃)</Text>
+            <Text style={styles.logoutButtonText}>다시 로그인하기 (처음부터 테스트)</Text>
           </TouchableOpacity>
         </SafeAreaView>
       )}

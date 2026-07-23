@@ -7,12 +7,15 @@ import {
   TouchableOpacity,
   SafeAreaView,
   Alert,
-  Dimensions
+  Dimensions,
+  Platform
 } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
 import * as WebBrowser from 'expo-web-browser';
 import * as Google from 'expo-auth-session/providers/google';
 import * as AppleAuthentication from 'expo-apple-authentication';
+import MaskedView from '@react-native-masked-view/masked-view';
+import { LinearGradient } from 'expo-linear-gradient';
 import { supabase, isConfigValid } from '../lib/supabase';
 
 // WebBrowser is required to complete auth session in mobile webviews
@@ -31,7 +34,6 @@ const isGoogleConfigValid = GOOGLE_WEB_CLIENT_ID !== 'YOUR_GOOGLE_WEB_CLIENT_ID.
 
 export default function LoginScreen({ onLoginSuccess }: LoginScreenProps) {
   const [loading, setLoading] = useState(false);
-  const [recentLoginDetected, setRecentLoginDetected] = useState(false);
   const [isAppleAuthAvailable, setIsAppleAuthAvailable] = useState(false);
 
   // Setup Google Sign In Request
@@ -46,9 +48,6 @@ export default function LoginScreen({ onLoginSuccess }: LoginScreenProps) {
     AppleAuthentication.isAvailableAsync().then((available) => {
       setIsAppleAuthAvailable(available);
     });
-
-    // Simulated recent login detection
-    setRecentLoginDetected(true);
   }, []);
 
   // Handle Google Sign In response
@@ -100,30 +99,34 @@ export default function LoginScreen({ onLoginSuccess }: LoginScreenProps) {
 
     setTimeout(() => {
       setLoading(false);
-      // Inform user that mock auth is being used
-      if (!isConfigValid || !isGoogleConfigValid) {
-        Alert.alert(
-          "모의 로그인 안내",
-          "Supabase 설정 또는 구글 로그인 키 설정이 되지 않아 로컬 테스트용 모의 계정으로 로그인했습니다.",
-          [{ text: "확인", onPress: () => onLoginSuccess(mockUser) }]
-        );
-      } else {
+      if (Platform.OS === 'web') {
+        // On web browser, Alert.alert onPress callbacks do not execute reliably, so we directly log in!
         onLoginSuccess(mockUser);
+      } else {
+        if (!isConfigValid || !isGoogleConfigValid) {
+          Alert.alert(
+            "모의 로그인 안내",
+            "Supabase 설정 또는 구글 로그인 키 설정이 되지 않아 로컬 테스트용 모의 계정으로 로그인했습니다.",
+            [{ text: "확인", onPress: () => onLoginSuccess(mockUser) }]
+          );
+        } else {
+          onLoginSuccess(mockUser);
+        }
       }
-    }, 600);
+    }, 400);
   };
 
   const handleGoogleLogin = () => {
-    if (isConfigValid && isGoogleConfigValid && supabase) {
-      promptAsync();
-    } else {
+    if (Platform.OS === 'web' || !isConfigValid || !isGoogleConfigValid || !supabase) {
       triggerMockLogin('google');
+    } else {
+      promptAsync();
     }
   };
 
   const handleAppleLogin = async () => {
-    if (!isAppleAuthAvailable) {
-      // Bypasses with mock Apple login on non-iOS environments
+    if (Platform.OS === 'web' || !isAppleAuthAvailable) {
+      // Bypasses with mock Apple login on web or non-iOS environments
       triggerMockLogin('apple');
       return;
     }
@@ -188,8 +191,28 @@ export default function LoginScreen({ onLoginSuccess }: LoginScreenProps) {
             resizeMode="contain"
           />
 
-          {/* Brand Name */}
-          <Text style={styles.brandName}>집단지성 오답노트</Text>
+          {/* Brand Name (Linear Gradient #FFA1A9 -> #FFC880, Left to Right) */}
+          {Platform.OS === 'web' ? (
+            <Text style={styles.brandNameWeb}>집단지성 오답노트</Text>
+          ) : (
+            <MaskedView
+              maskElement={
+                <Text style={[styles.brandName, { backgroundColor: 'transparent' }]}>
+                  집단지성 오답노트
+                </Text>
+              }
+            >
+              <LinearGradient
+                colors={['#FFA1A9', '#FFC880']}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 0 }}
+              >
+                <Text style={[styles.brandName, { opacity: 0 }]}>
+                  집단지성 오답노트
+                </Text>
+              </LinearGradient>
+            </MaskedView>
+          )}
 
           {/* Slogan Description (18px, leading 26px, black, normal weight) */}
           <Text style={styles.slogan}>
@@ -201,16 +224,7 @@ export default function LoginScreen({ onLoginSuccess }: LoginScreenProps) {
         {/* Bottom Section: Buttons & Notices Frame (No top padding/margin) */}
         <View style={styles.bottomSection}>
 
-          {/* Tooltip Badge: "최근에 로그인했어요" */}
-          {recentLoginDetected && (
-            <View style={styles.tooltipContainer}>
-              <View style={styles.tooltip}>
-                <Text style={styles.tooltipText}>최근에 로그인했어요</Text>
-                {/* Micro downwards arrow pointer */}
-                <View style={styles.tooltipArrow} />
-              </View>
-            </View>
-          )}
+
 
           {/* Google Login Button */}
           <TouchableOpacity
@@ -300,7 +314,21 @@ const styles = StyleSheet.create({
     marginTop: 0,
     marginBottom: 24,
     letterSpacing: -0.5,
-    color: '#FF8E7A',
+    color: '#FFA1A9',
+  },
+  brandNameWeb: {
+    fontSize: 34,
+    fontWeight: '900',
+    textAlign: 'center',
+    marginTop: 0,
+    marginBottom: 24,
+    letterSpacing: -0.5,
+    // @ts-ignore
+    backgroundImage: 'linear-gradient(to right, #FFA1A9 0%, #FFC880 100%)',
+    // @ts-ignore
+    WebkitBackgroundClip: 'text',
+    // @ts-ignore
+    WebkitTextFillColor: 'transparent',
   },
   slogan: {
     color: '#000000',
@@ -314,53 +342,13 @@ const styles = StyleSheet.create({
     width: '100%',
     position: 'relative',
   },
-  tooltipContainer: {
-    position: 'absolute',
-    top: -46,
-    left: 0,
-    right: 0,
-    alignItems: 'center',
-    zIndex: 30,
-  },
-  tooltip: {
-    backgroundColor: '#FF8E7A',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 8,
-    alignItems: 'center',
-    justifyContent: 'center',
-    position: 'relative',
-    shadowColor: '#FF8E7A',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.15,
-    shadowRadius: 6,
-    elevation: 3,
-  },
-  tooltipText: {
-    color: '#ffffff',
-    fontSize: 11,
-    fontWeight: 'bold',
-  },
-  tooltipArrow: {
-    position: 'absolute',
-    top: '100%',
-    left: '50%',
-    marginLeft: -5,
-    width: 0,
-    height: 0,
-    borderLeftWidth: 5,
-    borderLeftColor: 'transparent',
-    borderRightWidth: 5,
-    borderRightColor: 'transparent',
-    borderTopWidth: 5,
-    borderTopColor: '#FF8E7A',
-  },
+
   googleButton: {
     width: '100%',
     height: 56,
     backgroundColor: '#ffffff',
     borderWidth: 1,
-    borderColor: '#e2e8f0',
+    borderColor: '#EBEBEB',
     borderRadius: 28,
     flexDirection: 'row',
     alignItems: 'center',
@@ -371,7 +359,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.05,
     shadowRadius: 2,
     elevation: 1,
-    marginBottom: 12,
+    marginBottom: 16,
   },
   buttonIcon: {
     marginRight: 4,
@@ -400,7 +388,7 @@ const styles = StyleSheet.create({
   termsText: {
     textAlign: 'center',
     fontSize: 14,
-    color: '#94a3b8',
+    color: '#9C9C9C',
     marginTop: 0,
   },
 });
