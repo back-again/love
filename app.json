@@ -1,0 +1,27 @@
+{
+  "expo": {
+    "name": "오답연애",
+    "slug": "love-app",
+    "scheme": "oxlove",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/logo.png",
+    "userInterfaceStyle": "light",
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "app.ox.love"
+    },
+    "android": {
+      "package": "app.ox.love",
+      "adaptiveIcon": {
+        "backgroundColor": "#FFFFFF",
+        "foregroundImage": "./assets/logo.png"
+      },
+      "predictiveBackGestureEnabled": false
+    },
+    "web": {
+      "favicon": "./assets/logo.png"
+    },
+    "plugins": ["expo-web-browser"]
+  }
+}
