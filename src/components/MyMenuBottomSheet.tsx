@@ -14,6 +14,7 @@ import {
   KeyboardAvoidingView,
 } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
+import { LogoutAction } from '@/_action/Logout.action';
 
 export type MyMenuType = 'feedback' | 'inquiry' | 'terms' | 'privacy' | 'settings' | 'settings_hub' | 'write_review' | 'view_review' | null;
 
@@ -452,16 +453,14 @@ export default function MyMenuBottomSheet({
 
                   {/* Logout & Withdrawal Buttons */}
                   <View style={styles.dangerZoneGroup}>
-                    <TouchableOpacity
+                    <LogoutAction
                       style={styles.logoutBtn}
-                      onPress={() => {
+                      textStyle={styles.logoutBtnText}
+                      onLogoutSuccess={() => {
                         handleClose();
                         if (onLogout) onLogout();
                       }}
-                      activeOpacity={0.7}
-                    >
-                      <Text style={styles.logoutBtnText}>로그아웃</Text>
-                    </TouchableOpacity>
+                    />
 
                     <TouchableOpacity
                       style={styles.withdrawBtn}

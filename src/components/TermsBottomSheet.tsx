@@ -1,5 +1,6 @@
 import React from 'react';
-import MyMenuBottomSheet from './MyMenuBottomSheet';
+import TermsScreen from '@/screens/terms/TermsScreen';
+import PrivacyScreen from '@/screens/privacy/PrivacyScreen';
 
 interface TermsBottomSheetProps {
   visible: boolean;
@@ -12,11 +13,9 @@ export default function TermsBottomSheet({
   onClose,
   contentType = 'terms',
 }: TermsBottomSheetProps) {
-  return (
-    <MyMenuBottomSheet
-      visible={visible}
-      menuType={contentType}
-      onClose={onClose}
-    />
-  );
+  if (contentType === 'privacy') {
+    return <PrivacyScreen visible={visible} onClose={onClose} />;
+  }
+
+  return <TermsScreen visible={visible} onClose={onClose} />;
 }
