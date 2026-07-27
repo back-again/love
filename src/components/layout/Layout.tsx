@@ -24,10 +24,16 @@ const NAV_TABS: { type: MainTabType; label: string }[] = [
 interface LayoutProps {
   activeTab: MainTabType;
   onTabChange: (tab: MainTabType) => void;
+  onSettingsPress?: () => void;
   children: ReactNode;
 }
 
-export function Layout({ activeTab, onTabChange, children }: LayoutProps) {
+export function Layout({
+  activeTab,
+  onTabChange,
+  onSettingsPress,
+  children,
+}: LayoutProps) {
   const insets = useSafeAreaInsets();
 
   return (
@@ -65,6 +71,29 @@ export function Layout({ activeTab, onTabChange, children }: LayoutProps) {
                 d="M18 6L6 18M6 6l12 12"
                 stroke="#9C9C9C"
                 strokeWidth={2.2}
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </Svg>
+          </TouchableOpacity>
+        ) : activeTab === 'my' ? (
+          <TouchableOpacity
+            style={styles.notificationButton}
+            activeOpacity={0.7}
+            onPress={onSettingsPress}
+          >
+            <Svg width={24} height={24} viewBox="0 0 24 24" fill="none">
+              <Path
+                d="M12 15a3 3 0 100-6 3 3 0 000 6z"
+                stroke="#334155"
+                strokeWidth={2}
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+              <Path
+                d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"
+                stroke="#334155"
+                strokeWidth={2}
                 strokeLinecap="round"
                 strokeLinejoin="round"
               />
