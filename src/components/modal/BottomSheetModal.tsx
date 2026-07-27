@@ -1,6 +1,7 @@
 import React, { useRef, useEffect, useCallback, ReactNode } from 'react';
-import { StyleSheet } from 'react-native';
+import { StyleSheet, Modal, Platform } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import BottomSheet, {
   BottomSheetScrollView,
   BottomSheetBackdrop,
@@ -38,41 +39,66 @@ export function BottomSheetModal({
         appearsOnIndex={0}
         opacity={0.45}
         pressBehavior="close"
+        onPress={onClose}
       />
     ),
-    []
+    [onClose],
   );
 
   if (!visible) return null;
 
   return (
-    <BottomSheet
-      ref={bottomSheetRef}
-      snapPoints={snapPoints}
-      topInset={insets.top}
-      bottomInset={insets.bottom}
-      enablePanDownToClose={true}
-      backdropComponent={renderBackdrop}
-      onChange={(index: number) => {
-        if (index === -1) {
-          onClose();
-        }
-      }}
-      backgroundStyle={styles.sheetBackground}
-      handleIndicatorStyle={styles.handleIndicator}
+    <Modal
+      transparent
+      visible={visible}
+      animationType="none"
+      onRequestClose={onClose}
+      statusBarTranslucent
     >
-      <BottomSheetScrollView
-        style={styles.scrollArea}
-        contentContainerStyle={styles.scrollContent}
-        showsVerticalScrollIndicator={false}
-      >
-        {children}
-      </BottomSheetScrollView>
-    </BottomSheet>
+      <GestureHandlerRootView style={styles.flexOne}>
+        <BottomSheet
+          ref={bottomSheetRef}
+          snapPoints={snapPoints}
+          topInset={insets.top}
+          enablePanDownToClose={true}
+          keyboardBehavior={Platform.OS === 'ios' ? 'interactive' : 'extend'}
+          keyboardBlurBehavior="restore"
+          android_keyboardInputMode="adjustResize"
+          backdropComponent={renderBackdrop}
+          onChange={(index: number) => {
+            if (index === -1) {
+              onClose();
+            }
+          }}
+          containerStyle={styles.containerStyle}
+          backgroundStyle={styles.sheetBackground}
+          handleIndicatorStyle={styles.handleIndicator}
+        >
+          <BottomSheetScrollView
+            style={styles.scrollArea}
+            contentContainerStyle={[
+              styles.scrollContent,
+              { paddingBottom: Math.max(insets.bottom, 24) + 16 },
+            ]}
+            showsVerticalScrollIndicator={false}
+            keyboardShouldPersistTaps="handled"
+          >
+            {children}
+          </BottomSheetScrollView>
+        </BottomSheet>
+      </GestureHandlerRootView>
+    </Modal>
   );
 }
 
 const styles = StyleSheet.create({
+  flexOne: {
+    flex: 1,
+  },
+  containerStyle: {
+    zIndex: 9999,
+    elevation: 9999,
+  },
   sheetBackground: {
     backgroundColor: '#FFFFFF',
     borderTopLeftRadius: 24,
@@ -89,6 +115,5 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     paddingTop: 12,
-    paddingBottom: 40,
   },
 });

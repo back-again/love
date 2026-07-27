@@ -32,8 +32,10 @@ const SAMPLE_POSTS = [
     id: 'post-1',
     variantName: '사진 1개',
     title: '아니 너네는 남친이\n피엑스에서 선물사주면 어떰?',
-    storySummary: '아니 내가 생일 2주전부터 얘기했는데 글쎄 내 생일에 PX에서 달팽이크림이랑 선크림을 사가지고 줬더라고 ㅋㅋㅋ 진짜 당황스러웠음...',
-    fullStory: '아니 내가 생일 2주전부터 얘기했는데 글쎄 내 생일에 PX에서 달팽이크림이랑 선크림을 사가지고 줬더라고 ㅋㅋㅋ 진짜 당황스러워서 선물 받고도 기분이 묘한데 너네라면 어떨 거 같아?',
+    storySummary:
+      '아니 내가 생일 2주전부터 얘기했는데 글쎄 내 생일에 PX에서 달팽이크림이랑 선크림을 사가지고 줬더라고 ㅋㅋㅋ 진짜 당황스러웠음...',
+    fullStory:
+      '아니 내가 생일 2주전부터 얘기했는데 글쎄 내 생일에 PX에서 달팽이크림이랑 선크림을 사가지고 줬더라고 ㅋㅋㅋ 진짜 당황스러워서 선물 받고도 기분이 묘한데 너네라면 어떨 거 같아?',
     images: [
       'https://images.unsplash.com/photo-1577563908411-5077b6dc7624?w=800&auto=format&fit=crop&q=80',
     ],
@@ -41,8 +43,18 @@ const SAMPLE_POSTS = [
     voteX: '난 싫어',
     topComments: [
       { id: 'c1', user: '익명1', text: '그딴 ㅃ을 만나고있네 ㅋ', likes: 153 },
-      { id: 'c2', user: '익명2', text: 'PX 달팽이크림 은근 비싸고 좋은데 서운할 순 있음 ㅠ', likes: 98 },
-      { id: 'c3', user: '익명3', text: '생일선물로 PX는 솔직히 좀 성의 없어 보인다...', likes: 64 },
+      {
+        id: 'c2',
+        user: '익명2',
+        text: 'PX 달팽이크림 은근 비싸고 좋은데 서운할 순 있음 ㅠ',
+        likes: 98,
+      },
+      {
+        id: 'c3',
+        user: '익명3',
+        text: '생일선물로 PX는 솔직히 좀 성의 없어 보인다...',
+        likes: 64,
+      },
     ],
     reviewStatus: '후기 보기',
     hasReview: true,
@@ -54,8 +66,10 @@ const SAMPLE_POSTS = [
     id: 'post-2',
     variantName: '사진 2개 이상',
     title: '아니 너네는 남친이\n피엑스에서 선물사주면 어떰?',
-    storySummary: '아니 내가 생일 2주전부터 얘기했는데 글쎄 내 생일에 PX에서 달팽이크림 선크림 들고 나타남 ㅋ 카톡 캡처 첨부함...',
-    fullStory: '아니 내가 생일 2주전부터 얘기했는데 글쎄 내 생일에 PX에서 달팽이크림이랑 선크림을 사가지고 줬더라고 ㅋㅋㅋ 카톡 캡처랑 사다준 선크림 첨부함.',
+    storySummary:
+      '아니 내가 생일 2주전부터 얘기했는데 글쎄 내 생일에 PX에서 달팽이크림 선크림 들고 나타남 ㅋ 카톡 캡처 첨부함...',
+    fullStory:
+      '아니 내가 생일 2주전부터 얘기했는데 글쎄 내 생일에 PX에서 달팽이크림이랑 선크림을 사가지고 줬더라고 ㅋㅋㅋ 카톡 캡처랑 사다준 선크림 첨부함.',
     images: [
       'https://images.unsplash.com/photo-1577563908411-5077b6dc7624?w=400&auto=format&fit=crop&q=80',
       'https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=400&auto=format&fit=crop&q=80',
@@ -63,9 +77,24 @@ const SAMPLE_POSTS = [
     voteO: '괜찮은데?',
     voteX: '난 싫어',
     topComments: [
-      { id: 'c1', user: '익명1', text: '카톡 캡처 보니까 남친 말하는 게 더 열받네 ㅋㅋ', likes: 142 },
-      { id: 'c2', user: '익명2', text: '선크림 피부타입은 맞춰서 사온 거임? ㅋㅋㅋ', likes: 87 },
-      { id: 'c3', user: '익명3', text: '다음 남친 생일 때 똑같이 PX 선물 ㄱㄱ', likes: 53 },
+      {
+        id: 'c1',
+        user: '익명1',
+        text: '카톡 캡처 보니까 남친 말하는 게 더 열받네 ㅋㅋ',
+        likes: 142,
+      },
+      {
+        id: 'c2',
+        user: '익명2',
+        text: '선크림 피부타입은 맞춰서 사온 거임? ㅋㅋㅋ',
+        likes: 87,
+      },
+      {
+        id: 'c3',
+        user: '익명3',
+        text: '다음 남친 생일 때 똑같이 PX 선물 ㄱㄱ',
+        likes: 53,
+      },
     ],
     reviewStatus: '후기 요청',
     hasReview: false,
@@ -77,15 +106,32 @@ const SAMPLE_POSTS = [
     id: 'post-3',
     variantName: '사진 안넣음',
     title: '아니 너네는 남친이\n피엑스에서 선물사주면 어떰?',
-    storySummary: '아니 내가 생일 2주전부터 얘기했는데 글쎄 내 생일에 PX에서 달팽이크림이랑 선크림 사가지고 줬더라고 진짜...',
-    fullStory: '아니 내가 생일 2주전부터 얘기했는데 글쎄 내 생일에 PX에서 달팽이크림이랑 선크림을 사가지고 줬더라고 ㅋㅋㅋ 진짜 당황스러워서.. 사진 없이 글로만 써보는데 너희들 의견은 어때?',
+    storySummary:
+      '아니 내가 생일 2주전부터 얘기했는데 글쎄 내 생일에 PX에서 달팽이크림이랑 선크림 사가지고 줬더라고 진짜...',
+    fullStory:
+      '아니 내가 생일 2주전부터 얘기했는데 글쎄 내 생일에 PX에서 달팽이크림이랑 선크림을 사가지고 줬더라고 ㅋㅋㅋ 진짜 당황스러워서.. 사진 없이 글로만 써보는데 너희들 의견은 어때?',
     images: [],
     voteO: '괜찮은데?',
     voteX: '난 싫어',
     topComments: [
-      { id: 'c1', user: '익명1', text: '사진 없어도 상황 다 이해됨 헤어지는 게 답임', likes: 115 },
-      { id: 'c2', user: '익명2', text: '미리 갖고 싶은 거 말해줬는데도 이러면 관심 없는 거임', likes: 76 },
-      { id: 'c3', user: '익명3', text: '실수로 까먹고 급하게 PX에서 사온 듯 ㅠㅠ', likes: 41 },
+      {
+        id: 'c1',
+        user: '익명1',
+        text: '사진 없어도 상황 다 이해됨 헤어지는 게 답임',
+        likes: 115,
+      },
+      {
+        id: 'c2',
+        user: '익명2',
+        text: '미리 갖고 싶은 거 말해줬는데도 이러면 관심 없는 거임',
+        likes: 76,
+      },
+      {
+        id: 'c3',
+        user: '익명3',
+        text: '실수로 까먹고 급하게 PX에서 사온 듯 ㅠㅠ',
+        likes: 41,
+      },
     ],
     reviewStatus: '후기 요청',
     fireCount: 12,
@@ -96,17 +142,34 @@ const SAMPLE_POSTS = [
     id: 'post-4',
     variantName: '연락 문제 사연',
     title: '주말마다 게임하느라\n카톡 5시간씩 답장 안하는 남친',
-    storySummary: '평일에는 연락 엄청 잘 되는데 주말만 되면 친구들이랑 피씨방 가서 롤하느라 카톡 읽씹하고 5시간 뒤에 나 집에 왔어 한마디 남기는데...',
-    fullStory: '평일에는 연락 엄청 잘 되는데 주말만 되면 친구들이랑 피씨방 가서 카톡 읽씹하거나 5시간 뒤에 나 집에 왔어 ㅋㅋㅋ 한마디 남김. 내가 서운하다고 하니까 주말엔 좀 쉬게 해달라는데 팩폭 좀 해줘.',
+    storySummary:
+      '평일에는 연락 엄청 잘 되는데 주말만 되면 친구들이랑 피씨방 가서 롤하느라 카톡 읽씹하고 5시간 뒤에 나 집에 왔어 한마디 남기는데...',
+    fullStory:
+      '평일에는 연락 엄청 잘 되는데 주말만 되면 친구들이랑 피씨방 가서 카톡 읽씹하거나 5시간 뒤에 나 집에 왔어 ㅋㅋㅋ 한마디 남김. 내가 서운하다고 하니까 주말엔 좀 쉬게 해달라는데 팩폭 좀 해줘.',
     images: [
       'https://images.unsplash.com/photo-1542751371-adc38448a05e?w=800&auto=format&fit=crop&q=80',
     ],
     voteO: '이해해줘',
     voteX: '헤어져라',
     topComments: [
-      { id: 'c1', user: '익명1', text: '5시간이면 이미 우선순위에서 밀린 거임', likes: 210 },
-      { id: 'c2', user: '익명2', text: '게임할 때 미리 말만 해주면 괜찮지 않나?', likes: 84 },
-      { id: 'c3', user: '익명3', text: '주말 내내 그러는 건 선 넘었지 ㅋㅋㅋ', likes: 62 },
+      {
+        id: 'c1',
+        user: '익명1',
+        text: '5시간이면 이미 우선순위에서 밀린 거임',
+        likes: 210,
+      },
+      {
+        id: 'c2',
+        user: '익명2',
+        text: '게임할 때 미리 말만 해주면 괜찮지 않나?',
+        likes: 84,
+      },
+      {
+        id: 'c3',
+        user: '익명3',
+        text: '주말 내내 그러는 건 선 넘었지 ㅋㅋㅋ',
+        likes: 62,
+      },
     ],
     reviewStatus: '후기 보기',
     fireCount: 56,
@@ -117,8 +180,10 @@ const SAMPLE_POSTS = [
     id: 'post-5',
     variantName: '데리러 오는 문제 사연',
     title: '데이트 끝날 때마다\n집까지 안바래다주는 남친 서운해',
-    storySummary: '우리 집이랑 남친 집 지하철 3정거장 거리인데 데이트 끝나면 항상 중간 지하철역까지만 인사하고 바로 자기 집으로 가버리는데...',
-    fullStory: '우리 집이랑 남친 집 지하철 3정거장 거진데 데이트 끝나면 항상 중간 지하철역까지만 인사하고 가버림. 가끔 밤 늦을 땐 집 앞까지 같이 가주면 안 되나 싶은데 내가 너무 징징대는 거야?',
+    storySummary:
+      '우리 집이랑 남친 집 지하철 3정거장 거리인데 데이트 끝나면 항상 중간 지하철역까지만 인사하고 바로 자기 집으로 가버리는데...',
+    fullStory:
+      '우리 집이랑 남친 집 지하철 3정거장 거진데 데이트 끝나면 항상 중간 지하철역까지만 인사하고 가버림. 가끔 밤 늦을 땐 집 앞까지 같이 가주면 안 되나 싶은데 내가 너무 징징대는 거야?',
     images: [
       'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=800&auto=format&fit=crop&q=80',
       'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=800&auto=format&fit=crop&q=80',
@@ -126,9 +191,24 @@ const SAMPLE_POSTS = [
     voteO: '서운할만함',
     voteX: '과한 욕심',
     topComments: [
-      { id: 'c1', user: '익명1', text: '밤 11시 넘으면 당연히 바래다줘야지..', likes: 178 },
-      { id: 'c2', user: '익명2', text: '매번 집 앞까지 가주는 것도 체력적으로 힘듦', likes: 92 },
-      { id: 'c3', user: '익명3', text: '서로 타협해서 밤 늦을 때만 가달라고 해봐', likes: 45 },
+      {
+        id: 'c1',
+        user: '익명1',
+        text: '밤 11시 넘으면 당연히 바래다줘야지..',
+        likes: 178,
+      },
+      {
+        id: 'c2',
+        user: '익명2',
+        text: '매번 집 앞까지 가주는 것도 체력적으로 힘듦',
+        likes: 92,
+      },
+      {
+        id: 'c3',
+        user: '익명3',
+        text: '서로 타협해서 밤 늦을 때만 가달라고 해봐',
+        likes: 45,
+      },
     ],
     reviewStatus: '후기 요청',
     fireCount: 29,
@@ -147,7 +227,6 @@ function MyPageContent({
   onOpenMenu: (type: MyMenuType) => void;
   onOpenViewReview?: () => void;
 }) {
-
   const writtenPosts = [
     {
       id: 'my-1',
@@ -171,11 +250,6 @@ function MyPageContent({
       views: '1,234',
       hasReview: true,
     },
-  ];
-
-  const menuItems: { name: string; type: MyMenuType }[] = [
-    { name: '피드백 보내기', type: 'feedback' },
-    { name: '문의 사항', type: 'inquiry' },
   ];
 
   return (
@@ -207,21 +281,37 @@ function MyPageContent({
                     <View
                       style={[
                         styles.myPostVoteBarO,
-                        { flex: post.voteO, backgroundColor: isODominant ? '#FFC8B3' : '#F1F5F9' },
+                        {
+                          flex: post.voteO,
+                          backgroundColor: isODominant ? '#FFC8B3' : '#F1F5F9',
+                        },
                       ]}
                     />
                     <View
                       style={[
                         styles.myPostVoteBarX,
-                        { flex: post.voteX, backgroundColor: isXDominant ? '#FFB4BB' : '#F1F5F9' },
+                        {
+                          flex: post.voteX,
+                          backgroundColor: isXDominant ? '#FFB4BB' : '#F1F5F9',
+                        },
                       ]}
                     />
                   </View>
                   <View style={styles.myPostVotePercentRow}>
-                    <Text style={[styles.myPostVotePercentO, !isODominant && { color: '#9C9C9C' }]}>
+                    <Text
+                      style={[
+                        styles.myPostVotePercentO,
+                        !isODominant && { color: '#9C9C9C' },
+                      ]}
+                    >
                       괜찮은데? O {post.percentO}%
                     </Text>
-                    <Text style={[styles.myPostVotePercentX, !isXDominant && { color: '#9C9C9C' }]}>
+                    <Text
+                      style={[
+                        styles.myPostVotePercentX,
+                        !isXDominant && { color: '#9C9C9C' },
+                      ]}
+                    >
                       난 싫어 X {post.percentX}%
                     </Text>
                   </View>
@@ -234,7 +324,11 @@ function MyPageContent({
                     </Text>
                     {!post.hasReview && (
                       <Text style={styles.myPostMetaRow2}>
-                        ✉️ <Text style={{ color: '#FF8E7A', fontWeight: '700' }}>{post.curiousCount}명</Text>이 후기를 기다려요
+                        ✉️{' '}
+                        <Text style={{ color: '#FF8E7A', fontWeight: '700' }}>
+                          {post.curiousCount}명
+                        </Text>
+                        이 후기를 기다려요
                       </Text>
                     )}
                   </View>
@@ -247,7 +341,9 @@ function MyPageContent({
                       }}
                       activeOpacity={0.8}
                     >
-                      <Text style={styles.myPostReviewedBtnText}>후기 보기</Text>
+                      <Text style={styles.myPostReviewedBtnText}>
+                        후기 보기
+                      </Text>
                     </TouchableOpacity>
                   ) : (
                     <TouchableOpacity
@@ -255,7 +351,9 @@ function MyPageContent({
                       onPress={() => onOpenMenu('write_review')}
                       activeOpacity={0.8}
                     >
-                      <Text style={styles.myPostReviewBtnText}>후기 남기기</Text>
+                      <Text style={styles.myPostReviewBtnText}>
+                        후기 남기기
+                      </Text>
                     </TouchableOpacity>
                   )}
                 </View>
@@ -297,7 +395,8 @@ function CreatePageContent({ onComplete }: { onComplete: () => void }) {
 
   const handleAddImage = () => {
     if (images.length >= 3) {
-      if (Platform.OS === 'web') alert('이미지는 최대 3개까지 첨부할 수 있습니다.');
+      if (Platform.OS === 'web')
+        alert('이미지는 최대 3개까지 첨부할 수 있습니다.');
       else Alert.alert('안내', '이미지는 최대 3개까지 첨부할 수 있습니다.');
       return;
     }
@@ -307,18 +406,20 @@ function CreatePageContent({ onComplete }: { onComplete: () => void }) {
       'https://picsum.photos/400/300?random=103',
     ];
     // 방금 추가한 사진이 '+' 버튼 바로 우측(맨 앞)에 위치하고 먼저 추가한 사진이 오른쪽으로 밀려남
-    setImages((prev) => [sampleImgs[prev.length % sampleImgs.length], ...prev]);
+    setImages(prev => [sampleImgs[prev.length % sampleImgs.length], ...prev]);
   };
 
   const handleRemoveImage = (index: number) => {
-    setImages((prev) => prev.filter((_, i) => i !== index));
+    setImages(prev => prev.filter((_, i) => i !== index));
   };
 
-  const isFormValid = questionTitle.trim().length > 0 && detailSituation.trim().length > 0;
+  const isFormValid =
+    questionTitle.trim().length > 0 && detailSituation.trim().length > 0;
 
   const handleSubmit = () => {
     if (!isFormValid) return;
-    if (Platform.OS === 'web') alert('오답노트에 사연이 성공적으로 등록되었습니다!');
+    if (Platform.OS === 'web')
+      alert('오답노트에 사연이 성공적으로 등록되었습니다!');
     else Alert.alert('완료', '오답노트에 사연이 성공적으로 등록되었습니다!');
     onComplete();
   };
@@ -347,8 +448,12 @@ function CreatePageContent({ onComplete }: { onComplete: () => void }) {
 
       {/* 2. 구체적인 상황을 알려주세요 */}
       <View style={styles.createSection}>
-        <Text style={styles.createSectionTitle}>구체적인 상황을 알려주세요</Text>
-        <Text style={styles.createSectionSub}>어떤 배경이 있었고, 당시 어떻게 대처했나요?</Text>
+        <Text style={styles.createSectionTitle}>
+          구체적인 상황을 알려주세요
+        </Text>
+        <Text style={styles.createSectionSub}>
+          어떤 배경이 있었고, 당시 어떻게 대처했나요?
+        </Text>
         <TextInput
           style={styles.detailInput}
           placeholder="자유롭게 작성해주세요."
@@ -364,12 +469,22 @@ function CreatePageContent({ onComplete }: { onComplete: () => void }) {
       {/* 3. 파일 첨부 */}
       <View style={styles.createSection}>
         <Text style={styles.createSectionTitle}>파일 첨부</Text>
-        <Text style={styles.createSectionSub}>참고할만한 이미지가 있다면 업로드해주세요</Text>
+        <Text style={styles.createSectionSub}>
+          참고할만한 이미지가 있다면 업로드해주세요
+        </Text>
 
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.imageScrollRow}>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          style={styles.imageScrollRow}
+        >
           {/* 3개 미만일 때 가장 왼쪽에 '+' 업로드 버튼 고정 노출 */}
           {images.length < 3 && (
-            <TouchableOpacity style={styles.uploadSlotBtn} onPress={handleAddImage} activeOpacity={0.7}>
+            <TouchableOpacity
+              style={styles.uploadSlotBtn}
+              onPress={handleAddImage}
+              activeOpacity={0.7}
+            >
               <Svg width={28} height={28} viewBox="0 0 24 24" fill="none">
                 <Path
                   d="M12 5v14M5 12h14"
@@ -386,7 +501,10 @@ function CreatePageContent({ onComplete }: { onComplete: () => void }) {
           {images.map((imgUrl, idx) => (
             <View key={idx} style={styles.imageSlot}>
               <Image source={{ uri: imgUrl }} style={styles.uploadedImg} />
-              <TouchableOpacity style={styles.removeImgBtn} onPress={() => handleRemoveImage(idx)}>
+              <TouchableOpacity
+                style={styles.removeImgBtn}
+                onPress={() => handleRemoveImage(idx)}
+              >
                 <Text style={styles.removeImgText}>✕</Text>
               </TouchableOpacity>
             </View>
@@ -396,12 +514,20 @@ function CreatePageContent({ onComplete }: { onComplete: () => void }) {
 
       {/* 4. 하단 작성 완료 버튼 */}
       <TouchableOpacity
-        style={[styles.submitButton, !isFormValid && styles.submitButtonDisabled]}
+        style={[
+          styles.submitButton,
+          !isFormValid && styles.submitButtonDisabled,
+        ]}
         onPress={handleSubmit}
         disabled={!isFormValid}
         activeOpacity={0.8}
       >
-        <Text style={[styles.submitButtonText, !isFormValid && styles.submitButtonTextDisabled]}>
+        <Text
+          style={[
+            styles.submitButtonText,
+            !isFormValid && styles.submitButtonTextDisabled,
+          ]}
+        >
           작성 완료
         </Text>
       </TouchableOpacity>
@@ -445,7 +571,7 @@ function FeedCardItem({
           useNativeDriver: true,
         }),
       ]).start(() => {
-        setCommentIndex((prev) => (prev + 1) % post.topComments.length);
+        setCommentIndex(prev => (prev + 1) % post.topComments.length);
         translateYAnim.setValue(12);
 
         Animated.parallel([
@@ -477,7 +603,11 @@ function FeedCardItem({
           /* Case 1: No Images -> Permanently expanded down to image section location (minHeight: 270px) */
           <View style={styles.storyNoImagesCard}>
             {Platform.OS !== 'web' && (
-              <BlurView intensity={35} tint="light" style={StyleSheet.absoluteFillObject} />
+              <BlurView
+                intensity={35}
+                tint="light"
+                style={StyleSheet.absoluteFillObject}
+              />
             )}
             <Text style={styles.storyDropdownTextExpanded}>
               {post.fullStory}
@@ -494,9 +624,16 @@ function FeedCardItem({
                 activeOpacity={0.85}
               >
                 {Platform.OS !== 'web' && (
-                  <BlurView intensity={35} tint="light" style={StyleSheet.absoluteFillObject} />
+                  <BlurView
+                    intensity={35}
+                    tint="light"
+                    style={StyleSheet.absoluteFillObject}
+                  />
                 )}
-                <Text style={styles.storyDropdownTextCollapsed} numberOfLines={2}>
+                <Text
+                  style={styles.storyDropdownTextCollapsed}
+                  numberOfLines={2}
+                >
                   {post.storySummary}
                 </Text>
                 {/* Black Down Arrow Caret ▼ */}
@@ -513,7 +650,11 @@ function FeedCardItem({
                   activeOpacity={0.95}
                 >
                   {Platform.OS !== 'web' && (
-                    <BlurView intensity={35} tint="light" style={StyleSheet.absoluteFillObject} />
+                    <BlurView
+                      intensity={35}
+                      tint="light"
+                      style={StyleSheet.absoluteFillObject}
+                    />
                   )}
                   <View style={{ flex: 1 }}>
                     <Text style={styles.storyDropdownTextExpanded}>
@@ -571,7 +712,11 @@ function FeedCardItem({
           activeOpacity={0.85}
         >
           {Platform.OS !== 'web' && (
-            <BlurView intensity={20} tint="light" style={StyleSheet.absoluteFillObject} />
+            <BlurView
+              intensity={20}
+              tint="light"
+              style={StyleSheet.absoluteFillObject}
+            />
           )}
           <Animated.View
             style={[
@@ -617,9 +762,21 @@ function FeedCardItem({
           >
             {/* Orange Circle Icon ⭕ (16x16px) */}
             <Svg width={16} height={16} viewBox="0 0 24 24" fill="none">
-              <Circle cx={12} cy={12} r={9} stroke="#FF8E7A" strokeWidth={3} fill="none" />
+              <Circle
+                cx={12}
+                cy={12}
+                r={9}
+                stroke="#FF8E7A"
+                strokeWidth={3}
+                fill="none"
+              />
             </Svg>
-            <Text style={[styles.voteTextO, selectedVote === 'O' && styles.voteTextOSelected]}>
+            <Text
+              style={[
+                styles.voteTextO,
+                selectedVote === 'O' && styles.voteTextOSelected,
+              ]}
+            >
               {post.voteO}
             </Text>
           </TouchableOpacity>
@@ -642,7 +799,12 @@ function FeedCardItem({
                 strokeLinecap="round"
               />
             </Svg>
-            <Text style={[styles.voteTextX, selectedVote === 'X' && styles.voteTextXSelected]}>
+            <Text
+              style={[
+                styles.voteTextX,
+                selectedVote === 'X' && styles.voteTextXSelected,
+              ]}
+            >
               {post.voteX}
             </Text>
           </TouchableOpacity>
@@ -657,7 +819,11 @@ function FeedCardItem({
           {/* Fire Reaction 🔥 */}
           <View style={styles.reactionChip}>
             {Platform.OS !== 'web' && (
-              <BlurView intensity={25} tint="light" style={StyleSheet.absoluteFillObject} />
+              <BlurView
+                intensity={25}
+                tint="light"
+                style={StyleSheet.absoluteFillObject}
+              />
             )}
             <Text style={styles.chipEmoji}>🔥</Text>
             <Text style={styles.chipCount}>{post.fireCount}</Text>
@@ -666,7 +832,11 @@ function FeedCardItem({
           {/* Facepalm Reaction 🤦‍♀️ */}
           <View style={styles.reactionChip}>
             {Platform.OS !== 'web' && (
-              <BlurView intensity={25} tint="light" style={StyleSheet.absoluteFillObject} />
+              <BlurView
+                intensity={25}
+                tint="light"
+                style={StyleSheet.absoluteFillObject}
+              />
             )}
             <Text style={styles.chipEmoji}>🤦‍♀️</Text>
             <Text style={styles.chipCount}>{post.facepalmCount}</Text>
@@ -679,11 +849,29 @@ function FeedCardItem({
             activeOpacity={0.8}
           >
             {Platform.OS !== 'web' && (
-              <BlurView intensity={25} tint="light" style={StyleSheet.absoluteFillObject} />
+              <BlurView
+                intensity={25}
+                tint="light"
+                style={StyleSheet.absoluteFillObject}
+              />
             )}
             <Svg width={16} height={16} viewBox="0 0 24 24" fill="none">
-              <Rect x={3} y={4} width={18} height={13} rx={4.5} stroke="#475569" strokeWidth={2} />
-              <Path d="M7 17l-2.5 3v-3" stroke="#475569" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
+              <Rect
+                x={3}
+                y={4}
+                width={18}
+                height={13}
+                rx={4.5}
+                stroke="#475569"
+                strokeWidth={2}
+              />
+              <Path
+                d="M7 17l-2.5 3v-3"
+                stroke="#475569"
+                strokeWidth={2}
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
               <Circle cx={8} cy={10.5} r={1} fill="#475569" />
               <Circle cx={12} cy={10.5} r={1} fill="#475569" />
               <Circle cx={16} cy={10.5} r={1} fill="#475569" />
@@ -698,18 +886,38 @@ function FeedCardItem({
               if (post.hasReview) {
                 onOpenViewReview();
               } else {
-                if (Platform.OS === 'web') alert('작성자에게 후기 요청이 전달되었습니다!');
-                else Alert.alert('완료', '작성자에게 후기 요청이 전달되었습니다!');
+                if (Platform.OS === 'web')
+                  alert('작성자에게 후기 요청이 전달되었습니다!');
+                else
+                  Alert.alert('완료', '작성자에게 후기 요청이 전달되었습니다!');
               }
             }}
             activeOpacity={0.8}
           >
             {Platform.OS !== 'web' && (
-              <BlurView intensity={25} tint="light" style={StyleSheet.absoluteFillObject} />
+              <BlurView
+                intensity={25}
+                tint="light"
+                style={StyleSheet.absoluteFillObject}
+              />
             )}
             <Svg width={16} height={16} viewBox="0 0 24 24" fill="none">
-              <Rect x={3} y={5} width={18} height={14} rx={4} stroke="#334155" strokeWidth={2} />
-              <Path d="M4.5 7.5l7.5 5 7.5-5" stroke="#334155" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
+              <Rect
+                x={3}
+                y={5}
+                width={18}
+                height={14}
+                rx={4}
+                stroke="#334155"
+                strokeWidth={2}
+              />
+              <Path
+                d="M4.5 7.5l7.5 5 7.5-5"
+                stroke="#334155"
+                strokeWidth={2}
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
             </Svg>
             <Text style={styles.actionChipText}>
               {post.hasReview ? '후기 보기' : '후기 요청'}
@@ -717,9 +925,16 @@ function FeedCardItem({
           </TouchableOpacity>
 
           {/* Share Icon Only Chip ↪️ (Curved Right Arrow - 16x16px) */}
-          <TouchableOpacity style={styles.actionChipIconOnly} activeOpacity={0.8}>
+          <TouchableOpacity
+            style={styles.actionChipIconOnly}
+            activeOpacity={0.8}
+          >
             {Platform.OS !== 'web' && (
-              <BlurView intensity={25} tint="light" style={StyleSheet.absoluteFillObject} />
+              <BlurView
+                intensity={25}
+                tint="light"
+                style={StyleSheet.absoluteFillObject}
+              />
             )}
             <Svg width={16} height={16} viewBox="0 0 24 24" fill="none">
               <Path
@@ -738,11 +953,17 @@ function FeedCardItem({
 }
 
 export default function HomeScreen({ user, onLogout }: HomeScreenProps) {
-  const [activeTab, setActiveTab] = useState<'feed' | 'ranking' | 'create' | 'my'>('feed');
+  const [activeTab, setActiveTab] = useState<
+    'feed' | 'ranking' | 'create' | 'my'
+  >('feed');
   const [activeMenuType, setActiveMenuType] = useState<MyMenuType>(null);
-  const [activeCommentPostTitle, setActiveCommentPostTitle] = useState<string | null>(null);
+  const [activeCommentPostTitle, setActiveCommentPostTitle] = useState<
+    string | null
+  >(null);
   const [isReviewModalVisible, setIsReviewModalVisible] = useState(false);
-  const [viewportHeight, setViewportHeight] = useState(Dimensions.get('window').height);
+  const [viewportHeight, setViewportHeight] = useState(
+    Dimensions.get('window').height,
+  );
 
   useEffect(() => {
     const onChange = ({ window }: { window: any }) => {
@@ -758,7 +979,11 @@ export default function HomeScreen({ user, onLogout }: HomeScreenProps) {
 
   return (
     <LinearGradient
-      colors={(activeTab === 'my' || activeTab === 'create') ? ['#FFFFFF', '#FFFFFF'] : ['#FFFAFB', '#FFECDC']}
+      colors={
+        activeTab === 'my' || activeTab === 'create'
+          ? ['#FFFFFF', '#FFFFFF']
+          : ['#FFFAFB', '#FFECDC']
+      }
       style={styles.container}
     >
       <SafeAreaView style={styles.safeArea}>
@@ -797,7 +1022,10 @@ export default function HomeScreen({ user, onLogout }: HomeScreenProps) {
               </Svg>
             </TouchableOpacity>
           ) : (
-            <TouchableOpacity style={styles.notificationButton} activeOpacity={0.7}>
+            <TouchableOpacity
+              style={styles.notificationButton}
+              activeOpacity={0.7}
+            >
               <Svg width={24} height={24} viewBox="0 0 24 24" fill="none">
                 <Path
                   d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 01-3.46 0"
@@ -823,12 +1051,12 @@ export default function HomeScreen({ user, onLogout }: HomeScreenProps) {
             snapToAlignment="start"
             decelerationRate="fast"
           >
-            {SAMPLE_POSTS.map((post) => (
+            {SAMPLE_POSTS.map(post => (
               <FeedCardItem
                 key={post.id}
                 post={post}
                 pageHeight={feedPageHeight}
-                onOpenComments={(title) => setActiveCommentPostTitle(title)}
+                onOpenComments={title => setActiveCommentPostTitle(title)}
                 onOpenViewReview={() => setIsReviewModalVisible(true)}
               />
             ))}
@@ -838,7 +1066,7 @@ export default function HomeScreen({ user, onLogout }: HomeScreenProps) {
         {activeTab === 'my' && (
           <MyPageContent
             onLogout={onLogout}
-            onOpenMenu={(type) => setActiveMenuType(type)}
+            onOpenMenu={type => setActiveMenuType(type)}
             onOpenViewReview={() => setIsReviewModalVisible(true)}
           />
         )}
@@ -857,10 +1085,18 @@ export default function HomeScreen({ user, onLogout }: HomeScreenProps) {
         {/* 7. Floating Glassmorphism Bottom Navigation Bar (-45° Light, Refraction 80, Depth 20, Frost 4) */}
         <View style={styles.bottomNavOuterWrapper}>
           <View style={styles.bottomNavInnerCapsule}>
-            <BlurView intensity={35} tint="light" style={styles.glassBlurBackground} />
+            <BlurView
+              intensity={35}
+              tint="light"
+              style={styles.glassBlurBackground}
+            />
             {/* Specular Light Layer (-45°) */}
             <LinearGradient
-              colors={['rgba(255, 255, 255, 0.75)', 'rgba(255, 255, 255, 0.35)', 'rgba(255, 255, 255, 0.15)']}
+              colors={[
+                'rgba(255, 255, 255, 0.75)',
+                'rgba(255, 255, 255, 0.35)',
+                'rgba(255, 255, 255, 0.15)',
+              ]}
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 1 }}
               style={StyleSheet.absoluteFillObject}
@@ -924,10 +1160,38 @@ export default function HomeScreen({ user, onLogout }: HomeScreenProps) {
               >
                 {/* Image 2: Ranking Icon (4 Stacked Rounded Bars) */}
                 <Svg width={24} height={24} viewBox="0 0 24 24" fill="none">
-                  <Rect x={2} y={2} width={20} height={4.5} rx={2.25} fill={activeTab === 'ranking' ? '#FF8E7A' : '#BCBCBC'} />
-                  <Rect x={2} y={8} width={20} height={4.5} rx={2.25} fill={activeTab === 'ranking' ? '#FF8E7A' : '#BCBCBC'} />
-                  <Rect x={2} y={14} width={20} height={4.5} rx={2.25} fill={activeTab === 'ranking' ? '#FF8E7A' : '#BCBCBC'} />
-                  <Rect x={2} y={20} width={20} height={2.5} rx={1.25} fill={activeTab === 'ranking' ? '#FF8E7A' : '#BCBCBC'} />
+                  <Rect
+                    x={2}
+                    y={2}
+                    width={20}
+                    height={4.5}
+                    rx={2.25}
+                    fill={activeTab === 'ranking' ? '#FF8E7A' : '#BCBCBC'}
+                  />
+                  <Rect
+                    x={2}
+                    y={8}
+                    width={20}
+                    height={4.5}
+                    rx={2.25}
+                    fill={activeTab === 'ranking' ? '#FF8E7A' : '#BCBCBC'}
+                  />
+                  <Rect
+                    x={2}
+                    y={14}
+                    width={20}
+                    height={4.5}
+                    rx={2.25}
+                    fill={activeTab === 'ranking' ? '#FF8E7A' : '#BCBCBC'}
+                  />
+                  <Rect
+                    x={2}
+                    y={20}
+                    width={20}
+                    height={2.5}
+                    rx={1.25}
+                    fill={activeTab === 'ranking' ? '#FF8E7A' : '#BCBCBC'}
+                  />
                 </Svg>
                 <Text
                   style={[
@@ -950,11 +1214,46 @@ export default function HomeScreen({ user, onLogout }: HomeScreenProps) {
               >
                 {/* Image 1: Create Memo Icon (Top Nubs + Squircle Card + White Cutout Lines) */}
                 <Svg width={24} height={24} viewBox="0 0 24 24" fill="none">
-                  <Rect x={7} y={1} width={2.2} height={4} rx={1.1} fill={activeTab === 'create' ? '#FF8E7A' : '#BCBCBC'} />
-                  <Rect x={14.8} y={1} width={2.2} height={4} rx={1.1} fill={activeTab === 'create' ? '#FF8E7A' : '#BCBCBC'} />
-                  <Rect x={2} y={3.5} width={20} height={19.5} rx={5.5} fill={activeTab === 'create' ? '#FF8E7A' : '#BCBCBC'} />
-                  <Rect x={6} y={10.5} width={10} height={2.8} rx={1.4} fill={activeTab === 'create' ? '#FFF4EE' : '#FFFFFF'} />
-                  <Rect x={6} y={15.5} width={6.5} height={2.8} rx={1.4} fill={activeTab === 'create' ? '#FFF4EE' : '#FFFFFF'} />
+                  <Rect
+                    x={7}
+                    y={1}
+                    width={2.2}
+                    height={4}
+                    rx={1.1}
+                    fill={activeTab === 'create' ? '#FF8E7A' : '#BCBCBC'}
+                  />
+                  <Rect
+                    x={14.8}
+                    y={1}
+                    width={2.2}
+                    height={4}
+                    rx={1.1}
+                    fill={activeTab === 'create' ? '#FF8E7A' : '#BCBCBC'}
+                  />
+                  <Rect
+                    x={2}
+                    y={3.5}
+                    width={20}
+                    height={19.5}
+                    rx={5.5}
+                    fill={activeTab === 'create' ? '#FF8E7A' : '#BCBCBC'}
+                  />
+                  <Rect
+                    x={6}
+                    y={10.5}
+                    width={10}
+                    height={2.8}
+                    rx={1.4}
+                    fill={activeTab === 'create' ? '#FFF4EE' : '#FFFFFF'}
+                  />
+                  <Rect
+                    x={6}
+                    y={15.5}
+                    width={6.5}
+                    height={2.8}
+                    rx={1.4}
+                    fill={activeTab === 'create' ? '#FFF4EE' : '#FFFFFF'}
+                  />
                 </Svg>
                 <Text
                   style={[
@@ -977,8 +1276,19 @@ export default function HomeScreen({ user, onLogout }: HomeScreenProps) {
               >
                 {/* Image 3: My Profile Icon (Circle Head + Ellipse Body) */}
                 <Svg width={24} height={24} viewBox="0 0 24 24" fill="none">
-                  <Circle cx={12} cy={6.5} r={5} fill={activeTab === 'my' ? '#FF8E7A' : '#BCBCBC'} />
-                  <Ellipse cx={12} cy={18} rx={9.5} ry={5} fill={activeTab === 'my' ? '#FF8E7A' : '#BCBCBC'} />
+                  <Circle
+                    cx={12}
+                    cy={6.5}
+                    r={5}
+                    fill={activeTab === 'my' ? '#FF8E7A' : '#BCBCBC'}
+                  />
+                  <Ellipse
+                    cx={12}
+                    cy={18}
+                    rx={9.5}
+                    ry={5}
+                    fill={activeTab === 'my' ? '#FF8E7A' : '#BCBCBC'}
+                  />
                 </Svg>
                 <Text
                   style={[
@@ -1111,10 +1421,12 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     borderWidth: 0, // NO STROKE
     marginBottom: 16,
-    ...(Platform.OS === 'web' ? {
-      backdropFilter: 'blur(10px) saturate(180%)',
-      WebkitBackdropFilter: 'blur(10px) saturate(180%)',
-    } : {}),
+    ...(Platform.OS === 'web'
+      ? {
+          backdropFilter: 'blur(10px) saturate(180%)',
+          WebkitBackdropFilter: 'blur(10px) saturate(180%)',
+        }
+      : {}),
     shadowColor: '#000000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.04,
@@ -1142,10 +1454,12 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     overflow: 'hidden',
     borderWidth: 0, // NO STROKE
-    ...(Platform.OS === 'web' ? {
-      backdropFilter: 'blur(10px) saturate(180%)',
-      WebkitBackdropFilter: 'blur(10px) saturate(180%)',
-    } : {}),
+    ...(Platform.OS === 'web'
+      ? {
+          backdropFilter: 'blur(10px) saturate(180%)',
+          WebkitBackdropFilter: 'blur(10px) saturate(180%)',
+        }
+      : {}),
     shadowColor: '#000000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.04,
@@ -1179,10 +1493,12 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     borderWidth: 0, // NO STROKE
     justifyContent: 'space-between',
-    ...(Platform.OS === 'web' ? {
-      backdropFilter: 'blur(10px) saturate(180%)',
-      WebkitBackdropFilter: 'blur(10px) saturate(180%)',
-    } : {}),
+    ...(Platform.OS === 'web'
+      ? {
+          backdropFilter: 'blur(10px) saturate(180%)',
+          WebkitBackdropFilter: 'blur(10px) saturate(180%)',
+        }
+      : {}),
     shadowColor: '#000000',
     shadowOffset: { width: 0, height: 6 },
     shadowOpacity: 0.08,
@@ -1326,10 +1642,12 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     borderWidth: 1,
     borderColor: 'rgba(255, 200, 179, 0.35)', // 35% Opacity Peach Border (#FFC8B3)
-    ...(Platform.OS === 'web' ? {
-      backdropFilter: 'blur(10px) saturate(140%)',
-      WebkitBackdropFilter: 'blur(10px) saturate(140%)',
-    } : {}),
+    ...(Platform.OS === 'web'
+      ? {
+          backdropFilter: 'blur(10px) saturate(140%)',
+          WebkitBackdropFilter: 'blur(10px) saturate(140%)',
+        }
+      : {}),
     shadowColor: '#000000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.03,
@@ -1390,10 +1708,12 @@ const styles = StyleSheet.create({
     gap: 4,
     overflow: 'hidden',
     borderWidth: 0, // NO STROKE
-    ...(Platform.OS === 'web' ? {
-      backdropFilter: 'blur(12px) saturate(140%)',
-      WebkitBackdropFilter: 'blur(12px) saturate(140%)',
-    } : {}),
+    ...(Platform.OS === 'web'
+      ? {
+          backdropFilter: 'blur(12px) saturate(140%)',
+          WebkitBackdropFilter: 'blur(12px) saturate(140%)',
+        }
+      : {}),
     shadowColor: '#000000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.04,
@@ -1418,10 +1738,12 @@ const styles = StyleSheet.create({
     gap: 5,
     overflow: 'hidden',
     borderWidth: 0, // NO STROKE
-    ...(Platform.OS === 'web' ? {
-      backdropFilter: 'blur(12px) saturate(140%)',
-      WebkitBackdropFilter: 'blur(12px) saturate(140%)',
-    } : {}),
+    ...(Platform.OS === 'web'
+      ? {
+          backdropFilter: 'blur(12px) saturate(140%)',
+          WebkitBackdropFilter: 'blur(12px) saturate(140%)',
+        }
+      : {}),
     shadowColor: '#000000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.04,
@@ -1442,10 +1764,12 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     overflow: 'hidden',
     borderWidth: 0, // NO STROKE
-    ...(Platform.OS === 'web' ? {
-      backdropFilter: 'blur(12px) saturate(140%)',
-      WebkitBackdropFilter: 'blur(12px) saturate(140%)',
-    } : {}),
+    ...(Platform.OS === 'web'
+      ? {
+          backdropFilter: 'blur(12px) saturate(140%)',
+          WebkitBackdropFilter: 'blur(12px) saturate(140%)',
+        }
+      : {}),
     shadowColor: '#000000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.04,
@@ -1476,12 +1800,18 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     borderWidth: 1.5,
     borderColor: 'rgba(255, 255, 255, 0.85)',
-    backgroundColor: Platform.OS === 'web' ? 'rgba(255, 255, 255, 0.55)' : 'rgba(255, 255, 255, 0.7)',
-    ...(Platform.OS === 'web' ? {
-      backdropFilter: 'blur(12px) saturate(180%)',
-      WebkitBackdropFilter: 'blur(12px) saturate(180%)',
-      boxShadow: 'inset 1.5px 1.5px 3px 0px rgba(255, 255, 255, 0.9), inset -1.5px -1.5px 3px 0px rgba(0, 0, 0, 0.04), 0 -3px 10px 0px rgba(0, 0, 0, 0.05)',
-    } : {}),
+    backgroundColor:
+      Platform.OS === 'web'
+        ? 'rgba(255, 255, 255, 0.55)'
+        : 'rgba(255, 255, 255, 0.7)',
+    ...(Platform.OS === 'web'
+      ? {
+          backdropFilter: 'blur(12px) saturate(180%)',
+          WebkitBackdropFilter: 'blur(12px) saturate(180%)',
+          boxShadow:
+            'inset 1.5px 1.5px 3px 0px rgba(255, 255, 255, 0.9), inset -1.5px -1.5px 3px 0px rgba(0, 0, 0, 0.04), 0 -3px 10px 0px rgba(0, 0, 0, 0.05)',
+        }
+      : {}),
   },
   glassBlurBackground: {
     ...StyleSheet.absoluteFillObject,

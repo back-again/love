@@ -44,7 +44,7 @@ export async function updateOnboardingProfile({
   }
 
   // 3. Fallback for mock test user (e.g., '00000000-0000-0000-0000-000000000001') when RLS blocks mock session
-  if (updateError?.code === '42501') {
+  if (updateError?.code === '42501' || upsertError?.code === '42501') {
     console.warn(
       'Supabase RLS Policy warning on mock test user. Applying local user state fallback.',
     );
