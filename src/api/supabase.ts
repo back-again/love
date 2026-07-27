@@ -16,4 +16,3 @@ export const supabase = createClient(
   },
 );
 
-export const isConfigValid = Boolean(SUPABASE_URL && SUPABASE_ANON_KEY);

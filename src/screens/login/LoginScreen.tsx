@@ -9,14 +9,10 @@ import {
   Alert,
 } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
-import * as WebBrowser from 'expo-web-browser';
 import * as AppleAuthentication from 'expo-apple-authentication';
 import MaskedView from '@react-native-masked-view/masked-view';
 import { LinearGradient } from 'expo-linear-gradient';
 import GoogleLoginAction from '@/screens/login/_action/GoogleLogin.action';
-
-// WebBrowser is required to complete auth session in mobile webviews
-WebBrowser.maybeCompleteAuthSession();
 
 interface LoginScreenProps {
   onLoginSuccess: (user: any) => void;
@@ -27,7 +23,6 @@ export default function LoginScreen({ onLoginSuccess }: LoginScreenProps) {
   const [isAppleAuthAvailable, setIsAppleAuthAvailable] = useState(false);
 
   useEffect(() => {
-    // Check if Apple Authentication is available on this platform/device
     AppleAuthentication.isAvailableAsync().then(available => {
       setIsAppleAuthAvailable(available);
     });
@@ -35,7 +30,10 @@ export default function LoginScreen({ onLoginSuccess }: LoginScreenProps) {
 
   const handleAppleLogin = async () => {
     if (Platform.OS !== 'ios' || !isAppleAuthAvailable) {
-      Alert.alert('애플 로그인 안내', 'iOS 기기에서만 애플 로그인을 지원합니다.');
+      Alert.alert(
+        '애플 로그인 안내',
+        'iOS 기기에서만 애플 로그인을 지원합니다.',
+      );
       return;
     }
     try {
@@ -56,7 +54,10 @@ export default function LoginScreen({ onLoginSuccess }: LoginScreenProps) {
     } catch (e: any) {
       if (e.code !== 'ERR_REQUEST_CANCELED') {
         console.error('Apple Sign In Error:', e);
-        Alert.alert('애플 로그인 오류', e?.message || '애플 로그인 중 오류가 발생했습니다.');
+        Alert.alert(
+          '애플 로그인 오류',
+          e?.message || '애플 로그인 중 오류가 발생했습니다.',
+        );
       }
     } finally {
       setLoading(false);

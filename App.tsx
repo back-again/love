@@ -11,12 +11,14 @@ import OnboardingScreen from '@/components/OnboardingScreen';
 import HomeScreen from '@/components/HomeScreen';
 import { supabase } from '@/api/supabase';
 
+import { User } from '@/types/database.types';
+
 const queryClient = new QueryClient();
 
 export type RootStackParamList = {
   Login: undefined;
-  Onboarding: { user: any };
-  Home: { user: any };
+  Onboarding: { user: User };
+  Home: { user: User };
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -27,7 +29,7 @@ const STORAGE_KEYS = {
 };
 
 export default function App() {
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<User | null>(null);
   const [onboardingData, setOnboardingData] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -57,17 +59,36 @@ export default function App() {
 
     loadSavedSession();
 
-    const { data: authListener } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data: authListener } = supabase.auth.onAuthStateChange(async (_event, session) => {
       if (session?.user) {
         const u = session.user;
-        const userData = {
-          uid: u.id,
-          email: u.email,
-          displayName: u.user_metadata?.full_name || u.user_metadata?.name || '구글 사용자',
-          photoURL: u.user_metadata?.avatar_url || `https://api.dicebear.com/7.x/adventurer/svg?seed=${u.id}`,
-          lastLogin: new Date().toISOString(),
-        };
-        handleLoginSuccess(userData);
+        
+        // Fetch or insert strictly based on DB users table schema
+        let { data: dbUser } = await supabase
+          .from('users')
+          .select('*')
+          .eq('id', u.id)
+          .single();
+
+        if (!dbUser) {
+          const { data: newDbUser } = await supabase.from('users').upsert({
+            id: u.id,
+            email: u.email || '',
+            provider: 'google',
+          }).select().single();
+          dbUser = newDbUser;
+        }
+
+        if (dbUser) {
+          if (dbUser.gender && dbUser.birth_year) {
+            setOnboardingData({
+              gender: dbUser.gender,
+              birthYear: String(dbUser.birth_year),
+              notificationAllowed: dbUser.notification_allowed,
+            });
+          }
+          handleLoginSuccess(dbUser);
+        }
       }
     });
 
@@ -77,7 +98,7 @@ export default function App() {
   }, []);
 
   // Login handler
-  const handleLoginSuccess = async (userData: any) => {
+  const handleLoginSuccess = async (userData: User) => {
     try {
       await AsyncStorage.setItem(
         STORAGE_KEYS.USER_SESSION,
@@ -92,6 +113,22 @@ export default function App() {
   // Onboarding complete handler
   const handleOnboardingComplete = async (data: any) => {
     try {
+      if (user?.id) {
+        const { data: updatedDbUser } = await supabase.from('users').update({
+          gender: data.gender,
+          birth_year: data.birthYear ? parseInt(data.birthYear, 10) : null,
+          notification_allowed: data.notificationAllowed || false,
+        }).eq('id', user.id).select().single();
+
+        if (updatedDbUser) {
+          setUser(updatedDbUser);
+          await AsyncStorage.setItem(
+            STORAGE_KEYS.USER_SESSION,
+            JSON.stringify(updatedDbUser),
+          );
+        }
+      }
+
       await AsyncStorage.setItem(
         STORAGE_KEYS.ONBOARDING_DATA,
         JSON.stringify(data),

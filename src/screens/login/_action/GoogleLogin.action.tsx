@@ -2,20 +2,39 @@
 
 import React from 'react';
 import { StyleSheet, TouchableOpacity, Text } from 'react-native';
+import Constants, { ExecutionEnvironment } from 'expo-constants';
 import GoogleIcon from '@/screens/login/_comeponent/GoogleIcon';
 import { useGoogle } from '@/screens/login/_state/useGoogle';
+import { useExpoGoogle } from '@/screens/login/_state/useExpoGoogle';
 
 interface GoogleLoginActionProps {
   onSuccess?: (user: any) => void;
 }
 
-export default function GoogleLoginAction({ onSuccess }: GoogleLoginActionProps) {
-  const { signInWithGoogle, isPending } = useGoogle(onSuccess);
+const isExpoGo =
+  Constants.executionEnvironment === ExecutionEnvironment.StoreClient;
+
+export default function GoogleLoginAction({
+  onSuccess,
+}: GoogleLoginActionProps) {
+  const { signInWithGoogle, isPending: isNativePending } = useGoogle(onSuccess);
+  const { signInWithExpoGoogle, isPending: isExpoPending } =
+    useExpoGoogle(onSuccess);
+
+  const handlePress = () => {
+    if (isExpoGo) {
+      signInWithExpoGoogle();
+    } else {
+      signInWithGoogle();
+    }
+  };
+
+  const isPending = isExpoGo ? isExpoPending : isNativePending;
 
   return (
     <TouchableOpacity
       style={styles.googleButton}
-      onPress={() => signInWithGoogle()}
+      onPress={handlePress}
       disabled={isPending}
       activeOpacity={0.8}
     >
