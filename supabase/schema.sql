@@ -164,12 +164,90 @@ ALTER TABLE public.user_reports DISABLE ROW LEVEL SECURITY;
 ALTER TABLE public.inquiries_feedback DISABLE ROW LEVEL SECURITY;
 
 -- ========================================================
--- Seed Mock Test User for Expo Go Testing
+-- Seed Mock Test Users for Expo Go Testing
 -- ========================================================
 INSERT INTO auth.users (id, email)
-VALUES ('00000000-0000-0000-0000-000000000001', 'expo-test@datingnote.com')
+VALUES 
+  ('00000000-0000-0000-0000-000000000001', 'expo-test@datingnote.com'),
+  ('00000000-0000-0000-0000-000000000002', 'user2@datingnote.com'),
+  ('00000000-0000-0000-0000-000000000003', 'user3@datingnote.com')
 ON CONFLICT (id) DO NOTHING;
 
-INSERT INTO public.users (id, email, provider, created_at)
-VALUES ('00000000-0000-0000-0000-000000000001', 'expo-test@datingnote.com', 'google', NOW())
+INSERT INTO public.users (id, email, provider, gender, birth_year, notification_allowed, created_at)
+VALUES 
+  ('00000000-0000-0000-0000-000000000001', 'expo-test@datingnote.com', 'google', 'male', 1996, true, NOW()),
+  ('00000000-0000-0000-0000-000000000002', 'user2@datingnote.com', 'google', 'female', 1998, true, NOW()),
+  ('00000000-0000-0000-0000-000000000003', 'user3@datingnote.com', 'apple', 'male', 1995, false, NOW())
+ON CONFLICT (id) DO NOTHING;
+
+-- ========================================================
+-- Seed Sample Data for Posts, Votes, Comments & Reviews
+-- ========================================================
+
+-- 1. posts
+INSERT INTO public.posts (id, user_id, title, content, review_content, created_at)
+VALUES 
+  (
+    '11111111-1111-1111-1111-111111111111',
+    '00000000-0000-0000-0000-000000000001',
+    '생일선물 피엑스에서 사다준 남친 나만 짜쳐?',
+    '만난 지 1년 되었는데 이번 생일 선물로 군대 PX에서 파는 달팽이 크림이랑 닥터지 세트를 줬어요... 정성은 고마운데 조금 씁쓸한데 제가 이상한 걸까요?',
+    NULL,
+    NOW() - INTERVAL '2 days'
+  ),
+  (
+    '22222222-2222-2222-2222-222222222222',
+    '00000000-0000-0000-0000-000000000001',
+    '헤어진 전애인 인스타 스토리 매일 읽는 심리가 뭘까?',
+    '헤어진 지 3달 지났는데 매번 인스타 올릴 때마다 제일 먼저 스토리 확인하네요. 미련이 남아있는 걸까요 아님 그냥 습관일까요?',
+    '"결국 솔직하게 서운했던 부분 대화 나누고 서로 이해했어요! 다들 O 투표로 제 편을 들어주셔서 용기 얻고 대화할 수 있었습니다. 감사합니다!"',
+    NOW() - INTERVAL '5 days'
+  ),
+  (
+    '33333333-3333-3333-3333-333333333333',
+    '00000000-0000-0000-0000-000000000002',
+    '연락 끊긴 지 일주일째, 내가 먼저 연락해야 할까?',
+    '사소한 말다툼 끝에 서로 연락을 안 한 지 일주일이 지나가네요. 제가 먼저 사과하는 게 맞을까요?',
+    NULL,
+    NOW() - INTERVAL '1 day'
+  )
+ON CONFLICT (id) DO NOTHING;
+
+-- 2. votes
+INSERT INTO public.votes (post_id, user_id, choice, created_at)
+VALUES 
+  ('11111111-1111-1111-1111-111111111111', '00000000-0000-0000-0000-000000000001', 'O', NOW()),
+  ('11111111-1111-1111-1111-111111111111', '00000000-0000-0000-0000-000000000002', 'O', NOW()),
+  ('11111111-1111-1111-1111-111111111111', '00000000-0000-0000-0000-000000000003', 'X', NOW()),
+  ('22222222-2222-2222-2222-222222222222', '00000000-0000-0000-0000-000000000001', 'X', NOW()),
+  ('22222222-2222-2222-2222-222222222222', '00000000-0000-0000-0000-000000000002', 'X', NOW()),
+  ('33333333-3333-3333-3333-333333333333', '00000000-0000-0000-0000-000000000001', 'O', NOW())
+ON CONFLICT (post_id, user_id) DO NOTHING;
+
+-- 3. comments
+INSERT INTO public.comments (id, post_id, user_id, parent_id, content, created_at)
+VALUES 
+  ('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', '11111111-1111-1111-1111-111111111111', '00000000-0000-0000-0000-000000000002', NULL, '아무리 PX가 싸고 좋다지만 생일 선물인데 솔직히 서운할 만해요...', NOW()),
+  ('bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb', '11111111-1111-1111-1111-111111111111', '00000000-0000-0000-0000-000000000003', NULL, '남자친구 정성 생각해서 가볍게 이야기해보는 건 어떨까요?', NOW()),
+  ('cccccccc-cccc-cccc-cccc-cccccccccccc', '22222222-2222-2222-2222-222222222222', '00000000-0000-0000-0000-000000000002', NULL, '그냥 생각 없이 탐색 탭 넘기다 읽는 걸 수도 있어요!', NOW())
+ON CONFLICT (id) DO NOTHING;
+
+-- 4. comment_likes
+INSERT INTO public.comment_likes (comment_id, user_id, created_at)
+VALUES 
+  ('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', '00000000-0000-0000-0000-000000000001', NOW()),
+  ('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', '00000000-0000-0000-0000-000000000003', NOW())
+ON CONFLICT (comment_id, user_id) DO NOTHING;
+
+-- 5. review_requests
+INSERT INTO public.review_requests (post_id, user_id, created_at)
+VALUES 
+  ('11111111-1111-1111-1111-111111111111', '00000000-0000-0000-0000-000000000002', NOW()),
+  ('11111111-1111-1111-1111-111111111111', '00000000-0000-0000-0000-000000000003', NOW())
+ON CONFLICT (post_id, user_id) DO NOTHING;
+
+-- 6. inquiries_feedback
+INSERT INTO public.inquiries_feedback (id, user_id, type, content, created_at)
+VALUES 
+  (gen_random_uuid(), '00000000-0000-0000-0000-000000000001', 'FEEDBACK', '앱 UI가 너무 깔끔하고 좋네요! 더 많은 연애 고민 카테고리가 생기면 좋겠습니다.', NOW())
 ON CONFLICT (id) DO NOTHING;

@@ -111,6 +111,9 @@ export default function App() {
             ) : !hasOnboarded ? (
               <Stack.Screen name="Onboarding" component={OnboardingScreen} />
             ) : (
+              // <Stack.Screen name="Home">
+              //   {() => <HomeScreen user={user!} onLogout={() => {}} />}
+              // </Stack.Screen>
               <Stack.Screen name="Main">
                 {() => <MainAppLayout mainNavRef={navigationRef} />}
               </Stack.Screen>
