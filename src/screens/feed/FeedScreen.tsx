@@ -265,36 +265,61 @@ function FeedCardItem({
   }, [translateYAnim, opacityAnim, post.topComments.length]);
 
   return (
-    <LinearGradient colors={['#FFFAFB', '#FFECDC']} style={styles.container}>
-      <View style={[styles.cardPageWrapper, { height: pageHeight }]}>
-        <View style={styles.cardContainer}>
-          {/* 1. Main Title Question */}
-          <Text style={styles.questionTitle}>{post.title}</Text>
+    <View style={[styles.cardPageWrapper, { height: pageHeight }]}>
+      <View style={styles.cardContainer}>
+        {/* 1. Main Title Question */}
+        <Text style={styles.questionTitle}>{post.title}</Text>
 
-          {/* 2. Sub Story Dropdown Card */}
-          {post.images.length === 0 ? (
-            /* Case 1: No Images -> Permanently expanded down to image section location (minHeight: 270px) */
-            <View style={styles.storyNoImagesCard}>
-              {Platform.OS !== 'web' && (
-                <BlurView
-                  intensity={35}
-                  tint="light"
-                  style={StyleSheet.absoluteFillObject}
-                />
-              )}
-              <Text style={styles.storyDropdownTextExpanded}>
-                {post.fullStory}
-              </Text>
-            </View>
-          ) : (
-            /* Case 2: Has Images -> Collapsed by default, when expanded extends down to cover full image area (minHeight: 338px) */
-            <View style={styles.storyDropdownWrapper}>
-              {!isStoryExpanded ? (
-                /* Collapsed Summary Pill */
+        {/* 2. Sub Story Dropdown Card */}
+        {post.images.length === 0 ? (
+          /* Case 1: No Images -> Permanently expanded down to image section location (minHeight: 270px) */
+          <View style={styles.storyNoImagesCard}>
+            {Platform.OS !== 'web' && (
+              <BlurView
+                intensity={35}
+                tint="light"
+                style={StyleSheet.absoluteFillObject}
+              />
+            )}
+            <Text style={styles.storyDropdownTextExpanded}>
+              {post.fullStory}
+            </Text>
+          </View>
+        ) : (
+          /* Case 2: Has Images -> Collapsed by default, when expanded extends down to cover full image area (minHeight: 338px) */
+          <View style={styles.storyDropdownWrapper}>
+            {!isStoryExpanded ? (
+              /* Collapsed Summary Pill */
+              <TouchableOpacity
+                style={styles.storyDropdownCardCollapsed}
+                onPress={() => setIsStoryExpanded(true)}
+                activeOpacity={0.85}
+              >
+                {Platform.OS !== 'web' && (
+                  <BlurView
+                    intensity={35}
+                    tint="light"
+                    style={StyleSheet.absoluteFillObject}
+                  />
+                )}
+                <Text
+                  style={styles.storyDropdownTextCollapsed}
+                  numberOfLines={2}
+                >
+                  {post.storySummary}
+                </Text>
+                {/* Black Down Arrow Caret ▼ */}
+                <Svg width={14} height={10} viewBox="0 0 24 24">
+                  <Polygon points="4,6 20,6 12,18" fill="#0F172A" />
+                </Svg>
+              </TouchableOpacity>
+            ) : (
+              /* Expanded Overlay Card (Extends down to cover full 270px image area with 90% opacity & NO STROKE) */
+              <View style={styles.storyDropdownCardExpandedContainer}>
                 <TouchableOpacity
-                  style={styles.storyDropdownCardCollapsed}
-                  onPress={() => setIsStoryExpanded(true)}
-                  activeOpacity={0.85}
+                  style={styles.storyDropdownCardExpandedToImagePos}
+                  onPress={() => setIsStoryExpanded(false)}
+                  activeOpacity={0.95}
                 >
                   {Platform.OS !== 'web' && (
                     <BlurView
@@ -303,329 +328,299 @@ function FeedCardItem({
                       style={StyleSheet.absoluteFillObject}
                     />
                   )}
-                  <Text
-                    style={styles.storyDropdownTextCollapsed}
-                    numberOfLines={2}
-                  >
-                    {post.storySummary}
-                  </Text>
-                  {/* Black Down Arrow Caret ▼ */}
-                  <Svg width={14} height={10} viewBox="0 0 24 24">
-                    <Polygon points="4,6 20,6 12,18" fill="#0F172A" />
-                  </Svg>
+                  <View style={{ flex: 1 }}>
+                    <Text style={styles.storyDropdownTextExpanded}>
+                      {post.fullStory}
+                    </Text>
+                  </View>
+                  {/* Centered Bottom Up Arrow Caret ▲ */}
+                  <View style={styles.expandedCaretUpRow}>
+                    <Svg width={14} height={10} viewBox="0 0 24 24">
+                      <Polygon points="12,6 4,18 20,18" fill="#0F172A" />
+                    </Svg>
+                  </View>
                 </TouchableOpacity>
-              ) : (
-                /* Expanded Overlay Card (Extends down to cover full 270px image area with 90% opacity & NO STROKE) */
-                <View style={styles.storyDropdownCardExpandedContainer}>
-                  <TouchableOpacity
-                    style={styles.storyDropdownCardExpandedToImagePos}
-                    onPress={() => setIsStoryExpanded(false)}
-                    activeOpacity={0.95}
-                  >
-                    {Platform.OS !== 'web' && (
-                      <BlurView
-                        intensity={35}
-                        tint="light"
-                        style={StyleSheet.absoluteFillObject}
-                      />
-                    )}
-                    <View style={{ flex: 1 }}>
-                      <Text style={styles.storyDropdownTextExpanded}>
-                        {post.fullStory}
-                      </Text>
-                    </View>
-                    {/* Centered Bottom Up Arrow Caret ▲ */}
-                    <View style={styles.expandedCaretUpRow}>
-                      <Svg width={14} height={10} viewBox="0 0 24 24">
-                        <Polygon points="12,6 4,18 20,18" fill="#0F172A" />
-                      </Svg>
-                    </View>
-                  </TouchableOpacity>
-                </View>
-              )}
-            </View>
-          )}
+              </View>
+            )}
+          </View>
+        )}
 
-          {/* 3. Image Section (Dynamic Layouts for 1 Image, 2+ Images, or 0 Images) */}
-          {post.images.length === 1 && (
-            <View style={styles.singleImageWrapper}>
+        {/* 3. Image Section (Dynamic Layouts for 1 Image, 2+ Images, or 0 Images) */}
+        {post.images.length === 1 && (
+          <View style={styles.singleImageWrapper}>
+            <Image
+              source={{ uri: post.images[0] }}
+              style={styles.singleImage}
+              resizeMode="cover"
+            />
+          </View>
+        )}
+
+        {post.images.length >= 2 && (
+          <View style={styles.multiImageRow}>
+            <View style={styles.multiImageHalf}>
               <Image
                 source={{ uri: post.images[0] }}
-                style={styles.singleImage}
+                style={styles.multiImage}
                 resizeMode="cover"
               />
             </View>
-          )}
-
-          {post.images.length >= 2 && (
-            <View style={styles.multiImageRow}>
-              <View style={styles.multiImageHalf}>
-                <Image
-                  source={{ uri: post.images[0] }}
-                  style={styles.multiImage}
-                  resizeMode="cover"
-                />
-              </View>
-              <View style={styles.multiImageHalf}>
-                <Image
-                  source={{ uri: post.images[1] }}
-                  style={styles.multiImage}
-                  resizeMode="cover"
-                />
-              </View>
+            <View style={styles.multiImageHalf}>
+              <Image
+                source={{ uri: post.images[1] }}
+                style={styles.multiImage}
+                resizeMode="cover"
+              />
             </View>
+          </View>
+        )}
+
+        {/* (No Image Variant collapses image section automatically) */}
+
+        {/* 4. Top 3 Rolling Featured Comment Card (40% Opacity Soft Peach Tint + Blur) - 터치 시 댓글 바텀시트 모달 오픈! */}
+        <TouchableOpacity
+          style={styles.featuredCommentPill}
+          onPress={() => onOpenComments(post.title)}
+          activeOpacity={0.85}
+        >
+          {Platform.OS !== 'web' && (
+            <BlurView
+              intensity={20}
+              tint="light"
+              style={StyleSheet.absoluteFillObject}
+            />
           )}
+          <Animated.View
+            style={[
+              styles.commentAnimatedContainer,
+              {
+                transform: [{ translateY: translateYAnim }],
+                opacity: opacityAnim,
+              },
+            ]}
+          >
+            <View style={styles.commentLeftInfo}>
+              <Text style={styles.commentUser}>{currentComment.user}</Text>
+              <Text style={styles.commentContent} numberOfLines={1}>
+                {currentComment.text}
+              </Text>
+            </View>
+            <TouchableOpacity style={styles.likeButton} activeOpacity={0.7}>
+              {/* Thumbs Up Like Icon 👍 (16x16px) */}
+              <Svg width={16} height={16} viewBox="0 0 24 24" fill="none">
+                <Path
+                  d="M14 9V5a3 3 0 00-3-3l-4 9v11h11.28a2 2 0 002-1.7l1.38-9a2 2 0 00-2-2.3zM7 22H4a2 2 0 01-2-2v-7a2 2 0 012-2h3"
+                  stroke="#475569"
+                  strokeWidth={2}
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </Svg>
+              <Text style={styles.likeCount}>{currentComment.likes}</Text>
+            </TouchableOpacity>
+          </Animated.View>
+        </TouchableOpacity>
 
-          {/* (No Image Variant collapses image section automatically) */}
-
-          {/* 4. Top 3 Rolling Featured Comment Card (40% Opacity Soft Peach Tint + Blur) - 터치 시 댓글 바텀시트 모달 오픈! */}
+        {/* 5. O / X Vote Cards (Orange & Coral Red Tinted Borders & Colors) */}
+        <View style={styles.voteRow}>
+          {/* O Vote Button ("괜찮은데?") */}
           <TouchableOpacity
-            style={styles.featuredCommentPill}
-            onPress={() => onOpenComments(post.title)}
+            style={[
+              styles.voteCardO,
+              selectedVote === 'O' && styles.voteCardOSelected,
+            ]}
+            onPress={() => setSelectedVote(selectedVote === 'O' ? null : 'O')}
             activeOpacity={0.85}
           >
+            {/* Orange Circle Icon ⭕ (16x16px) */}
+            <Svg width={16} height={16} viewBox="0 0 24 24" fill="none">
+              <Circle
+                cx={12}
+                cy={12}
+                r={9}
+                stroke="#FF8E7A"
+                strokeWidth={3}
+                fill="none"
+              />
+            </Svg>
+            <Text
+              style={[
+                styles.voteTextO,
+                selectedVote === 'O' && styles.voteTextOSelected,
+              ]}
+            >
+              {post.voteO}
+            </Text>
+          </TouchableOpacity>
+
+          {/* X Vote Button ("난 싫어") */}
+          <TouchableOpacity
+            style={[
+              styles.voteCardX,
+              selectedVote === 'X' && styles.voteCardXSelected,
+            ]}
+            onPress={() => setSelectedVote(selectedVote === 'X' ? null : 'X')}
+            activeOpacity={0.85}
+          >
+            {/* Coral Red Cross Icon ❌ (16x16px) */}
+            <Svg width={16} height={16} viewBox="0 0 24 24" fill="none">
+              <Path
+                d="M18 6L6 18M6 6l12 12"
+                stroke="#FF858F"
+                strokeWidth={3}
+                strokeLinecap="round"
+              />
+            </Svg>
+            <Text
+              style={[
+                styles.voteTextX,
+                selectedVote === 'X' && styles.voteTextXSelected,
+              ]}
+            >
+              {post.voteX}
+            </Text>
+          </TouchableOpacity>
+        </View>
+
+        {/* 6. Reactions & Action Chips Bar (Height: 40px, 70% Opacity White + Blur) */}
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.reactionsRow}
+        >
+          {/* Fire Reaction 🔥 */}
+          <View style={styles.reactionChip}>
             {Platform.OS !== 'web' && (
               <BlurView
-                intensity={20}
+                intensity={25}
                 tint="light"
                 style={StyleSheet.absoluteFillObject}
               />
             )}
-            <Animated.View
-              style={[
-                styles.commentAnimatedContainer,
-                {
-                  transform: [{ translateY: translateYAnim }],
-                  opacity: opacityAnim,
-                },
-              ]}
-            >
-              <View style={styles.commentLeftInfo}>
-                <Text style={styles.commentUser}>{currentComment.user}</Text>
-                <Text style={styles.commentContent} numberOfLines={1}>
-                  {currentComment.text}
-                </Text>
-              </View>
-              <TouchableOpacity style={styles.likeButton} activeOpacity={0.7}>
-                {/* Thumbs Up Like Icon 👍 (16x16px) */}
-                <Svg width={16} height={16} viewBox="0 0 24 24" fill="none">
-                  <Path
-                    d="M14 9V5a3 3 0 00-3-3l-4 9v11h11.28a2 2 0 002-1.7l1.38-9a2 2 0 00-2-2.3zM7 22H4a2 2 0 01-2-2v-7a2 2 0 012-2h3"
-                    stroke="#475569"
-                    strokeWidth={2}
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </Svg>
-                <Text style={styles.likeCount}>{currentComment.likes}</Text>
-              </TouchableOpacity>
-            </Animated.View>
-          </TouchableOpacity>
-
-          {/* 5. O / X Vote Cards (Orange & Coral Red Tinted Borders & Colors) */}
-          <View style={styles.voteRow}>
-            {/* O Vote Button ("괜찮은데?") */}
-            <TouchableOpacity
-              style={[
-                styles.voteCardO,
-                selectedVote === 'O' && styles.voteCardOSelected,
-              ]}
-              onPress={() => setSelectedVote(selectedVote === 'O' ? null : 'O')}
-              activeOpacity={0.85}
-            >
-              {/* Orange Circle Icon ⭕ (16x16px) */}
-              <Svg width={16} height={16} viewBox="0 0 24 24" fill="none">
-                <Circle
-                  cx={12}
-                  cy={12}
-                  r={9}
-                  stroke="#FF8E7A"
-                  strokeWidth={3}
-                  fill="none"
-                />
-              </Svg>
-              <Text
-                style={[
-                  styles.voteTextO,
-                  selectedVote === 'O' && styles.voteTextOSelected,
-                ]}
-              >
-                {post.voteO}
-              </Text>
-            </TouchableOpacity>
-
-            {/* X Vote Button ("난 싫어") */}
-            <TouchableOpacity
-              style={[
-                styles.voteCardX,
-                selectedVote === 'X' && styles.voteCardXSelected,
-              ]}
-              onPress={() => setSelectedVote(selectedVote === 'X' ? null : 'X')}
-              activeOpacity={0.85}
-            >
-              {/* Coral Red Cross Icon ❌ (16x16px) */}
-              <Svg width={16} height={16} viewBox="0 0 24 24" fill="none">
-                <Path
-                  d="M18 6L6 18M6 6l12 12"
-                  stroke="#FF858F"
-                  strokeWidth={3}
-                  strokeLinecap="round"
-                />
-              </Svg>
-              <Text
-                style={[
-                  styles.voteTextX,
-                  selectedVote === 'X' && styles.voteTextXSelected,
-                ]}
-              >
-                {post.voteX}
-              </Text>
-            </TouchableOpacity>
+            <Text style={styles.chipEmoji}>🔥</Text>
+            <Text style={styles.chipCount}>{post.fireCount}</Text>
           </View>
 
-          {/* 6. Reactions & Action Chips Bar (Height: 40px, 70% Opacity White + Blur) */}
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.reactionsRow}
+          {/* Facepalm Reaction 🤦‍♀️ */}
+          <View style={styles.reactionChip}>
+            {Platform.OS !== 'web' && (
+              <BlurView
+                intensity={25}
+                tint="light"
+                style={StyleSheet.absoluteFillObject}
+              />
+            )}
+            <Text style={styles.chipEmoji}>🤦‍♀️</Text>
+            <Text style={styles.chipCount}>{post.facepalmCount}</Text>
+          </View>
+
+          {/* Comment Reaction 💬 (Bubble with 3 Dots - 16x16px) - 터치 시 댓글 바텀시트 오픈! */}
+          <TouchableOpacity
+            style={styles.reactionChip}
+            onPress={() => onOpenComments(post.title)}
+            activeOpacity={0.8}
           >
-            {/* Fire Reaction 🔥 */}
-            <View style={styles.reactionChip}>
-              {Platform.OS !== 'web' && (
-                <BlurView
-                  intensity={25}
-                  tint="light"
-                  style={StyleSheet.absoluteFillObject}
-                />
-              )}
-              <Text style={styles.chipEmoji}>🔥</Text>
-              <Text style={styles.chipCount}>{post.fireCount}</Text>
-            </View>
+            {Platform.OS !== 'web' && (
+              <BlurView
+                intensity={25}
+                tint="light"
+                style={StyleSheet.absoluteFillObject}
+              />
+            )}
+            <Svg width={16} height={16} viewBox="0 0 24 24" fill="none">
+              <Rect
+                x={3}
+                y={4}
+                width={18}
+                height={13}
+                rx={4.5}
+                stroke="#475569"
+                strokeWidth={2}
+              />
+              <Path
+                d="M7 17l-2.5 3v-3"
+                stroke="#475569"
+                strokeWidth={2}
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+              <Circle cx={8} cy={10.5} r={1} fill="#475569" />
+              <Circle cx={12} cy={10.5} r={1} fill="#475569" />
+              <Circle cx={16} cy={10.5} r={1} fill="#475569" />
+            </Svg>
+            <Text style={styles.chipCount}>{post.commentCount}</Text>
+          </TouchableOpacity>
 
-            {/* Facepalm Reaction 🤦‍♀️ */}
-            <View style={styles.reactionChip}>
-              {Platform.OS !== 'web' && (
-                <BlurView
-                  intensity={25}
-                  tint="light"
-                  style={StyleSheet.absoluteFillObject}
-                />
-              )}
-              <Text style={styles.chipEmoji}>🤦‍♀️</Text>
-              <Text style={styles.chipCount}>{post.facepalmCount}</Text>
-            </View>
+          {/* Review Status Action Chip ✉️ (후기 없는 경우: 후기 요청 / 후기 남긴 경우: 후기 보기) */}
+          <TouchableOpacity
+            style={styles.actionChip}
+            onPress={() => {
+              if (post.hasReview) {
+                onOpenViewReview();
+              } else {
+                if (Platform.OS === 'web')
+                  alert('작성자에게 후기 요청이 전달되었습니다!');
+                else
+                  Alert.alert('완료', '작성자에게 후기 요청이 전달되었습니다!');
+              }
+            }}
+            activeOpacity={0.8}
+          >
+            {Platform.OS !== 'web' && (
+              <BlurView
+                intensity={25}
+                tint="light"
+                style={StyleSheet.absoluteFillObject}
+              />
+            )}
+            <Svg width={16} height={16} viewBox="0 0 24 24" fill="none">
+              <Rect
+                x={3}
+                y={5}
+                width={18}
+                height={14}
+                rx={4}
+                stroke="#334155"
+                strokeWidth={2}
+              />
+              <Path
+                d="M4.5 7.5l7.5 5 7.5-5"
+                stroke="#334155"
+                strokeWidth={2}
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </Svg>
+            <Text style={styles.actionChipText}>
+              {post.hasReview ? '후기 보기' : '후기 요청'}
+            </Text>
+          </TouchableOpacity>
 
-            {/* Comment Reaction 💬 (Bubble with 3 Dots - 16x16px) - 터치 시 댓글 바텀시트 오픈! */}
-            <TouchableOpacity
-              style={styles.reactionChip}
-              onPress={() => onOpenComments(post.title)}
-              activeOpacity={0.8}
-            >
-              {Platform.OS !== 'web' && (
-                <BlurView
-                  intensity={25}
-                  tint="light"
-                  style={StyleSheet.absoluteFillObject}
-                />
-              )}
-              <Svg width={16} height={16} viewBox="0 0 24 24" fill="none">
-                <Rect
-                  x={3}
-                  y={4}
-                  width={18}
-                  height={13}
-                  rx={4.5}
-                  stroke="#475569"
-                  strokeWidth={2}
-                />
-                <Path
-                  d="M7 17l-2.5 3v-3"
-                  stroke="#475569"
-                  strokeWidth={2}
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-                <Circle cx={8} cy={10.5} r={1} fill="#475569" />
-                <Circle cx={12} cy={10.5} r={1} fill="#475569" />
-                <Circle cx={16} cy={10.5} r={1} fill="#475569" />
-              </Svg>
-              <Text style={styles.chipCount}>{post.commentCount}</Text>
-            </TouchableOpacity>
-
-            {/* Review Status Action Chip ✉️ (후기 없는 경우: 후기 요청 / 후기 남긴 경우: 후기 보기) */}
-            <TouchableOpacity
-              style={styles.actionChip}
-              onPress={() => {
-                if (post.hasReview) {
-                  onOpenViewReview();
-                } else {
-                  if (Platform.OS === 'web')
-                    alert('작성자에게 후기 요청이 전달되었습니다!');
-                  else
-                    Alert.alert(
-                      '완료',
-                      '작성자에게 후기 요청이 전달되었습니다!',
-                    );
-                }
-              }}
-              activeOpacity={0.8}
-            >
-              {Platform.OS !== 'web' && (
-                <BlurView
-                  intensity={25}
-                  tint="light"
-                  style={StyleSheet.absoluteFillObject}
-                />
-              )}
-              <Svg width={16} height={16} viewBox="0 0 24 24" fill="none">
-                <Rect
-                  x={3}
-                  y={5}
-                  width={18}
-                  height={14}
-                  rx={4}
-                  stroke="#334155"
-                  strokeWidth={2}
-                />
-                <Path
-                  d="M4.5 7.5l7.5 5 7.5-5"
-                  stroke="#334155"
-                  strokeWidth={2}
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </Svg>
-              <Text style={styles.actionChipText}>
-                {post.hasReview ? '후기 보기' : '후기 요청'}
-              </Text>
-            </TouchableOpacity>
-
-            {/* Share Icon Only Chip ↪️ (Curved Right Arrow - 16x16px) */}
-            <TouchableOpacity
-              style={styles.actionChipIconOnly}
-              activeOpacity={0.8}
-            >
-              {Platform.OS !== 'web' && (
-                <BlurView
-                  intensity={25}
-                  tint="light"
-                  style={StyleSheet.absoluteFillObject}
-                />
-              )}
-              <Svg width={16} height={16} viewBox="0 0 24 24" fill="none">
-                <Path
-                  d="M7 17c0-4.5 3-8 8.5-8H18M15 5l5 4-5 4"
-                  stroke="#334155"
-                  strokeWidth={2.2}
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </Svg>
-            </TouchableOpacity>
-          </ScrollView>
-        </View>
+          {/* Share Icon Only Chip ↪️ (Curved Right Arrow - 16x16px) */}
+          <TouchableOpacity
+            style={styles.actionChipIconOnly}
+            activeOpacity={0.8}
+          >
+            {Platform.OS !== 'web' && (
+              <BlurView
+                intensity={25}
+                tint="light"
+                style={StyleSheet.absoluteFillObject}
+              />
+            )}
+            <Svg width={16} height={16} viewBox="0 0 24 24" fill="none">
+              <Path
+                d="M7 17c0-4.5 3-8 8.5-8H18M15 5l5 4-5 4"
+                stroke="#334155"
+                strokeWidth={2.2}
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </Svg>
+          </TouchableOpacity>
+        </ScrollView>
       </View>
-    </LinearGradient>
+    </View>
   );
 }
 
@@ -651,12 +646,13 @@ export default function FeedScreen() {
     return () => subscription?.remove();
   }, []);
 
-  const feedPageHeight = Math.max(540, viewportHeight - 52 - 96);
+  // const feedPageHeight = Math.max(540, viewportHeight - 52 - 96);
+  const feedPageHeight = Math.max(540, viewportHeight);
 
   return (
     <ScrollView
       style={styles.scrollView}
-      contentContainerStyle={{ paddingBottom: 110 }}
+      contentContainerStyle={styles.snapScrollContent}
       showsVerticalScrollIndicator={false}
       pagingEnabled={true}
       snapToInterval={feedPageHeight}
@@ -683,60 +679,24 @@ const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
   },
-  header: {
-    height: 52,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 24,
-  },
-  headerLeftSpacer: {
-    width: 32,
-  },
-  logoImage: {
-    height: 28,
-    width: 88,
-  },
-  notificationButton: {
-    position: 'relative',
-    padding: 4,
-  },
-  unreadBadgeDot: {
-    position: 'absolute',
-    top: 3,
-    right: 3,
-    width: 7,
-    height: 7,
-    borderRadius: 3.5,
-    backgroundColor: '#FF858F',
-  },
 
-  // Main ScrollView & Card
   scrollView: {
     flex: 1,
     width: '100%',
-  },
-  scrollContent: {
-    paddingHorizontal: 24,
-    paddingTop: 12,
-    paddingBottom: 110, // Space for bottom floating nav bar
-    maxWidth: 450,
-    width: '100%',
-    alignSelf: 'center',
+    backgroundColor: 'transparent',
   },
   snapScrollContent: {
     paddingBottom: 110, // Space for bottom floating nav bar
     maxWidth: 450,
     width: '100%',
     alignSelf: 'center',
+    backgroundColor: 'transparent',
   },
   cardPageWrapper: {
     width: '100%',
     maxWidth: 450,
     alignSelf: 'center',
     paddingHorizontal: 24,
-    paddingTop: 20, // 상단바와의 마진 20px 지정
-    paddingBottom: 16,
     justifyContent: 'flex-start',
     overflow: 'hidden',
   },

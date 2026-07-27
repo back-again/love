@@ -3,6 +3,7 @@ import { StyleSheet, View, ActivityIndicator } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import {
   NavigationContainer,
+  DefaultTheme,
   useNavigationContainerRef,
 } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
@@ -21,6 +22,14 @@ import { useLoadApp } from '@/_state/useLoadApp';
 import FeedScreen from '@/screens/feed/FeedScreen';
 
 const queryClient = new QueryClient();
+
+const navTheme = {
+  ...DefaultTheme,
+  colors: {
+    ...DefaultTheme.colors,
+    background: 'transparent',
+  },
+};
 
 export type RootStackParamList = {
   Login: undefined;
@@ -59,6 +68,7 @@ function MainAppLayout({ mainNavRef }: { mainNavRef: any }) {
         screenOptions={{
           headerShown: false,
           animation: 'none',
+          contentStyle: { backgroundColor: 'transparent' },
         }}
         screenListeners={{
           state: e => {
@@ -96,12 +106,13 @@ export default function App() {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <QueryClientProvider client={queryClient}>
-        <NavigationContainer ref={navigationRef}>
+        <NavigationContainer ref={navigationRef} theme={navTheme}>
           <StatusBar style="dark" />
           <Stack.Navigator
             screenOptions={{
               headerShown: false,
               animation: 'slide_from_right',
+              contentStyle: { backgroundColor: 'transparent' },
             }}
           >
             {!user ? (
