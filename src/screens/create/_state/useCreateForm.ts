@@ -4,7 +4,6 @@ export interface CreateFormState {
   questionTitle: string;
   detailSituation: string;
   images: string[];
-  isSubmitting: boolean;
 }
 
 export interface CreateFormAction {
@@ -13,7 +12,6 @@ export interface CreateFormAction {
   setImages: (images: string[] | ((prev: string[]) => string[])) => void;
   addImage: (url: string) => void;
   removeImage: (index: number) => void;
-  setIsSubmitting: (submitting: boolean) => void;
   reset: () => void;
 }
 
@@ -21,7 +19,6 @@ const initialState: CreateFormState = {
   questionTitle: '',
   detailSituation: '',
   images: [],
-  isSubmitting: false,
 };
 
 export const useCreateForm = create<CreateFormState & CreateFormAction>((set) => ({
@@ -40,6 +37,5 @@ export const useCreateForm = create<CreateFormState & CreateFormAction>((set) =>
     set((state) => ({
       images: state.images.filter((_, i) => i !== index),
     })),
-  setIsSubmitting: (isSubmitting) => set({ isSubmitting }),
   reset: () => set(initialState),
 }));

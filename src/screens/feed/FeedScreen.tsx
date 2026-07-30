@@ -10,9 +10,7 @@ import {
   Platform,
   Animated,
   Alert,
-  TextInput,
 } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
 import { BlurView } from 'expo-blur';
 import Svg, { Path, Circle, Rect, Ellipse, Polygon } from 'react-native-svg';
 

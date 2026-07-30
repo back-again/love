@@ -8,20 +8,11 @@ import { useCreateForm } from '../_state/useCreateForm';
 import { createPost } from '../_lib/createPost.lib';
 
 export function CreateSubmitAction() {
-  const {
-    questionTitle,
-    detailSituation,
-    images,
-    isSubmitting,
-    setIsSubmitting,
-    reset,
-  } = useCreateForm(
+  const { questionTitle, detailSituation, images, reset } = useCreateForm(
     useShallow((state) => ({
       questionTitle: state.questionTitle,
       detailSituation: state.detailSituation,
       images: state.images,
-      isSubmitting: state.isSubmitting,
-      setIsSubmitting: state.setIsSubmitting,
       reset: state.reset,
     }))
   );
@@ -48,17 +39,15 @@ export function CreateSubmitAction() {
       } else {
         Alert.alert('오류', '등록 중 오류가 발생했습니다.');
       }
-      setIsSubmitting(false);
     },
   });
 
   const isFormValid =
     questionTitle.trim().length > 0 && detailSituation.trim().length > 0;
-  const isLoading = isSubmitting || createMutation.isPending;
+  const isLoading = createMutation.isPending;
 
   const handleSubmit = () => {
     if (!isFormValid || isLoading) return;
-    setIsSubmitting(true);
     createMutation.mutate();
   };
 
