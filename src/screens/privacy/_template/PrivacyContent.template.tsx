@@ -1,7 +1,7 @@
 import React from 'react';
 import { StyleSheet, View, Text } from 'react-native';
 
-export function PrivacyContentArea() {
+export function PrivacyContentTemplate() {
   return (
     <View style={styles.contentSection}>
       <Text style={styles.introText}>

@@ -14,7 +14,7 @@ import {
   KeyboardAvoidingView,
 } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
-import { LogoutAction } from '@/_action/Logout.action';
+import { LogoutAction } from '@/screens/setting/_action/Logout.action';
 
 export type MyMenuType = 'feedback' | 'inquiry' | 'terms' | 'privacy' | 'settings' | 'settings_hub' | 'write_review' | 'view_review' | null;
 

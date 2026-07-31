@@ -1,7 +1,7 @@
 import React from 'react';
 import { StyleSheet, View, Text } from 'react-native';
 
-export function TermsContentArea() {
+export function TermsContentTemplate() {
   return (
     <View style={styles.contentSection}>
       <Text style={styles.introText}>

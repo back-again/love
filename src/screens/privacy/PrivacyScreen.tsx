@@ -1,23 +1,20 @@
 import React from 'react';
 import { StyleSheet, View, Text } from 'react-native';
 import { BottomSheetModal } from '@/components/modal/BottomSheetModal';
-import { PrivacyContentArea } from './_area/PrivacyContent.area';
+import { PrivacyContentTemplate } from './_template/PrivacyContent.template';
 
 interface PrivacyScreenProps {
   visible: boolean;
   onClose: () => void;
 }
 
-export default function PrivacyScreen({
-  visible,
-  onClose,
-}: PrivacyScreenProps) {
+export default function PrivacyScreen({ visible, onClose }: PrivacyScreenProps) {
   return (
     <BottomSheetModal visible={visible} onClose={onClose} snapPoints={['85%']}>
       <View style={styles.headerRow}>
         <Text style={styles.sheetTitle}>오답연애 개인정보 처리방침</Text>
       </View>
-      <PrivacyContentArea />
+      <PrivacyContentTemplate />
     </BottomSheetModal>
   );
 }

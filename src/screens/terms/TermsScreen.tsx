@@ -1,7 +1,7 @@
 import React from 'react';
 import { StyleSheet, View, Text } from 'react-native';
 import { BottomSheetModal } from '@/components/modal/BottomSheetModal';
-import { TermsContentArea } from './_area/TermsContent.area';
+import { TermsContentTemplate } from './_template/TermsContent.template';
 
 interface TermsScreenProps {
   visible: boolean;
@@ -14,7 +14,7 @@ export default function TermsScreen({ visible, onClose }: TermsScreenProps) {
       <View style={styles.headerRow}>
         <Text style={styles.sheetTitle}>오답연애 서비스 이용약관</Text>
       </View>
-      <TermsContentArea />
+      <TermsContentTemplate />
     </BottomSheetModal>
   );
 }
