@@ -20,4 +20,11 @@ export interface Post {
   fireCount: number;
   facepalmCount: number;
   commentCount: number;
+  voteOCount?: number;
+  voteXCount?: number;
+  totalVoteCount?: number;
+  myVote?: 'O' | 'X' | null;
+  hasFired?: boolean;
+  hasFacepalmed?: boolean;
+  hasRequestedReview?: boolean;
 }

@@ -105,6 +105,16 @@ CREATE TABLE IF NOT EXISTS public.inquiries_feedback (
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
+-- 12. post_reactions
+CREATE TABLE IF NOT EXISTS public.post_reactions (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  post_id UUID NOT NULL REFERENCES public.posts(id) ON DELETE CASCADE,
+  user_id UUID NOT NULL REFERENCES public.users(id) ON DELETE CASCADE,
+  type VARCHAR(10) NOT NULL CHECK (type IN ('FIRE', 'FACEPALM')),
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  UNIQUE(post_id, user_id, type)
+);
+
 -- ========================================================
 -- SQL View 1: post_details_view
 -- ========================================================
@@ -118,6 +128,8 @@ SELECT
   p.created_at,
   COALESCE(v_o.count, 0) AS vote_o_count,
   COALESCE(v_x.count, 0) AS vote_x_count,
+  COALESCE(r_fire.count, 0) AS like_count,
+  COALESCE(r_facepalm.count, 0) AS rear_count,
   COALESCE(rr.count, 0) AS curious_count,
   (p.review_content IS NOT NULL AND p.review_content <> '') AS has_review
 FROM public.posts p
@@ -127,6 +139,12 @@ LEFT JOIN (
 LEFT JOIN (
   SELECT post_id, COUNT(*)::INT AS count FROM public.votes WHERE choice = 'X' GROUP BY post_id
 ) v_x ON p.id = v_x.post_id
+LEFT JOIN (
+  SELECT post_id, COUNT(*)::INT AS count FROM public.post_reactions WHERE type = 'FIRE' GROUP BY post_id
+) r_fire ON p.id = r_fire.post_id
+LEFT JOIN (
+  SELECT post_id, COUNT(*)::INT AS count FROM public.post_reactions WHERE type = 'FACEPALM' GROUP BY post_id
+) r_facepalm ON p.id = r_facepalm.post_id
 LEFT JOIN (
   SELECT post_id, COUNT(*)::INT AS count FROM public.review_requests GROUP BY post_id
 ) rr ON p.id = rr.post_id;
@@ -162,6 +180,7 @@ ALTER TABLE public.notifications DISABLE ROW LEVEL SECURITY;
 ALTER TABLE public.user_blocks DISABLE ROW LEVEL SECURITY;
 ALTER TABLE public.user_reports DISABLE ROW LEVEL SECURITY;
 ALTER TABLE public.inquiries_feedback DISABLE ROW LEVEL SECURITY;
+ALTER TABLE public.post_reactions DISABLE ROW LEVEL SECURITY;
 
 -- ========================================================
 -- Seed Mock Test Users for Expo Go Testing

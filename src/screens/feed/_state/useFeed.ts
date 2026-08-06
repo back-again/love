@@ -1,17 +1,82 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useCallback, useEffect } from 'react';
+import {
+  useSuspenseInfiniteQuery,
+  useQueryClient,
+} from '@tanstack/react-query';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Post } from '../_model/feed.model';
-import { fetchFeedPostsApi } from '../_lib/feedService';
+import { fetchFeedPostsApi, FetchFeedResponse } from '../_lib/feedService';
 
 const ASYNC_STORAGE_LAST_READ_KEY = '@odaplove_last_read_post_cursor';
+export const FEED_QUERY_KEY = ['feedPosts'] as const;
 
+/**
+ * Prefetch initial feed query helper
+ */
+export async function prefetchFeed(
+  queryClient: any,
+  cursorId: string | null = null,
+) {
+  await queryClient.prefetchQuery({
+    queryKey: [...FEED_QUERY_KEY, cursorId],
+    queryFn: () => fetchFeedPostsApi({ cursorId, pageSize: 5 }),
+  });
+}
+
+/**
+ * Feed hook using SuspenseQuery (useSuspenseInfiniteQuery) & Prefetch pattern
+ */
 export function useFeed() {
-  const [posts, setPosts] = useState<Post[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [isFetchingNextPage, setIsFetchingNextPage] = useState(false);
-  const [isFallbackMode, setIsFallbackMode] = useState(false);
+  const queryClient = useQueryClient();
 
-  const nextCursorRef = useRef<string | null>(null);
+  const { data, fetchNextPage, hasNextPage, isFetchingNextPage, refetch } =
+    useSuspenseInfiniteQuery<FetchFeedResponse>({
+      queryKey: FEED_QUERY_KEY,
+      queryFn: async ({ pageParam }) => {
+        const cursorId = (pageParam as string | null) ?? null;
+        return fetchFeedPostsApi({ cursorId, pageSize: 5 });
+      },
+      initialPageParam: null,
+      getNextPageParam: lastPage => lastPage.nextCursorId ?? undefined,
+      refetchInterval: 30000,
+    });
+
+  // Deduplicate and combine posts across fetched pages
+  const posts: Post[] = data
+    ? Array.from(
+        data.pages
+          .flatMap(page => page.posts)
+          .reduce((map, post) => {
+            if (!map.has(post.id)) {
+              map.set(post.id, post);
+            }
+            return map;
+          }, new Map<string, Post>())
+          .values(),
+      )
+    : [];
+
+  const lastPage = data?.pages[data.pages.length - 1];
+  const isFallbackMode = lastPage?.isFallbackLoop ?? false;
+  const nextCursorId = lastPage?.nextCursorId ?? null;
+
+  // Prefetch Pattern: Automatically prefetch next cursor data into cache
+  const prefetchNextPage = useCallback(() => {
+    if (nextCursorId) {
+      queryClient.prefetchQuery({
+        queryKey: [...FEED_QUERY_KEY, 'prefetch', nextCursorId],
+        queryFn: () =>
+          fetchFeedPostsApi({
+            cursorId: nextCursorId,
+            pageSize: 5,
+          }),
+      });
+    }
+  }, [nextCursorId, queryClient]);
+
+  useEffect(() => {
+    prefetchNextPage();
+  }, [prefetchNextPage]);
 
   // Save last read cursor to AsyncStorage
   const saveLastReadCursor = useCallback(async (cursorId: string) => {
@@ -22,90 +87,24 @@ export function useFeed() {
     }
   }, []);
 
-  // Fetch initial feed posts on mount
-  const initFeed = useCallback(async () => {
-    setIsLoading(true);
-    try {
-      let savedCursor: string | null = null;
-      try {
-        savedCursor = await AsyncStorage.getItem(ASYNC_STORAGE_LAST_READ_KEY);
-      } catch (e) {
-        console.warn('Failed to read cursor from AsyncStorage', e);
-      }
-
-      const res = await fetchFeedPostsApi({
-        cursorId: savedCursor,
-        pageSize: 5,
-      });
-
-      // If saved cursor returned empty, retry from start with null cursor
-      if (res.posts.length === 0 && savedCursor) {
-        const resetRes = await fetchFeedPostsApi({
-          cursorId: null,
-          pageSize: 5,
-        });
-        setPosts(resetRes.posts);
-        nextCursorRef.current = resetRes.nextCursorId;
-      } else {
-        setPosts(res.posts);
-        nextCursorRef.current = res.nextCursorId;
-      }
-
-      setIsFallbackMode(res.isFallbackLoop);
-    } catch (e) {
-      console.error('Error initializing feed:', e);
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    initFeed();
-  }, [initFeed]);
-
-  // Load next page of posts (Cursor pagination + Infinite Loop)
   const loadMore = useCallback(async () => {
-    if (isFetchingNextPage) return;
-
-    setIsFetchingNextPage(true);
-    try {
-      const res = await fetchFeedPostsApi({
-        cursorId: nextCursorRef.current,
-        pageSize: 5,
-      });
-
-      if (res.posts.length > 0) {
-        setPosts(prev => {
-          // Deduplicate using Map by post id
-          const map = new Map<string, Post>();
-          prev.forEach(p => map.set(p.id, p));
-          res.posts.forEach(p => map.set(p.id, p));
-          return Array.from(map.values());
-        });
-
-        nextCursorRef.current = res.nextCursorId;
-        if (res.isFallbackLoop) {
-          setIsFallbackMode(true);
-        }
-
-        if (res.nextCursorId) {
-          saveLastReadCursor(res.nextCursorId);
-        }
-      }
-    } catch (e) {
-      console.error('Error loading more feed posts:', e);
-    } finally {
-      setIsFetchingNextPage(false);
+    if (isFetchingNextPage || !hasNextPage) return;
+    const res = await fetchNextPage();
+    const newLastPage = res.data?.pages[res.data.pages.length - 1];
+    if (newLastPage?.nextCursorId) {
+      saveLastReadCursor(newLastPage.nextCursorId);
     }
-  }, [isFetchingNextPage, saveLastReadCursor]);
+  }, [isFetchingNextPage, hasNextPage, fetchNextPage, saveLastReadCursor]);
 
   return {
     posts,
-    isLoading,
+    isLoading: false,
     isFetchingNextPage,
     isFallbackMode,
+    hasNextPage,
     loadMore,
-    refresh: initFeed,
+    refresh: refetch,
     saveLastReadCursor,
+    prefetchNextPage,
   };
 }

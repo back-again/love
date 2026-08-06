@@ -21,6 +21,10 @@ export interface Post {
 export interface PostDetailView extends Post {
   vote_o_count: number;
   vote_x_count: number;
+  like_count: number;
+  rear_count: number;
+  fire_count?: number;
+  facepalm_count?: number;
   curious_count: number;
   has_review: boolean;
 }
@@ -37,6 +41,14 @@ export interface Vote {
   post_id: string;
   user_id: string;
   choice: 'O' | 'X';
+  created_at: string;
+}
+
+export interface PostReaction {
+  id: string;
+  post_id: string;
+  user_id: string;
+  type: 'FIRE' | 'FACEPALM';
   created_at: string;
 }
 

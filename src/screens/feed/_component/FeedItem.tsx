@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React from 'react';
 import {
   StyleSheet,
   View,
@@ -7,85 +7,82 @@ import {
   ScrollView,
   Image,
   Platform,
-  Animated,
   Alert,
 } from 'react-native';
 import { BlurView } from 'expo-blur';
-import Svg, { Path, Circle, Rect, Polygon } from 'react-native-svg';
 import { Post } from '../_model/feed.model';
+import {
+  useVoteState,
+  useStoryState,
+  useLikeState,
+  useRearState,
+  useReviewState,
+  useImageState,
+} from '../_state/useFeedState';
+import { FeedItemVoteCard } from './FeedItem.VoteCard';
+import { FeedItemReactionChip } from './FeedItem.ReactionChip';
+import { FeedItemCommentPill } from './FeedItem.CommentPill';
+import {
+  CaretDownSvg,
+  CaretUpSvg,
+  CommentSvg,
+  ReviewSvg,
+  ShareSvg,
+} from '../_svg';
 
 interface FeedItemProps {
   post: Post;
   pageHeight: number;
+  onOpenImageModal?: (index: number) => void;
   onOpenComments: (title: string) => void;
   onOpenViewReview: () => void;
 }
 
+const DEFAULT_FALLBACK_IMAGE =
+  'https://images.unsplash.com/photo-1579546929518-9e396f3cc809?w=800&q=80';
+
 export function FeedItem({
   post,
   pageHeight,
+  onOpenImageModal,
   onOpenComments,
   onOpenViewReview,
 }: FeedItemProps) {
-  const [selectedVote, setSelectedVote] = useState<'O' | 'X' | null>(null);
-  const [isStoryExpanded, setIsStoryExpanded] = useState(false);
-  const [commentIndex, setCommentIndex] = useState(0);
+  // 1. 투표 State
+  const {
+    selectedVote,
+    voteOCount,
+    voteXCount,
+    hasVoted,
+    totalVoteCount,
+    handleVote,
+  } = useVoteState(post);
 
-  const translateYAnim = useRef(new Animated.Value(0)).current;
-  const opacityAnim = useRef(new Animated.Value(1)).current;
+  // 2. 스토리 확장 State
+  const { isStoryExpanded, setIsStoryExpanded } = useStoryState();
 
-  const currentComment =
-    post.topComments && post.topComments.length > 0
-      ? post.topComments[commentIndex] || post.topComments[0]
-      : { id: 'default', user: '익명', text: '의견을 남겨주세요!', likes: 0 };
+  // 3. 좋아요 State & Action
+  const { hasFired, fireCount, handleFireReaction } = useLikeState(post);
 
-  // 3-second rolling comment timer
-  useEffect(() => {
-    if (!post.topComments || post.topComments.length <= 1) return;
+  // 4. 뒷골 State & Action
+  const { hasFacepalmed, facepalmCount, handleFacepalmReaction } =
+    useRearState(post);
 
-    const timer = setInterval(() => {
-      Animated.parallel([
-        Animated.timing(translateYAnim, {
-          toValue: -12,
-          duration: 300,
-          useNativeDriver: true,
-        }),
-        Animated.timing(opacityAnim, {
-          toValue: 0,
-          duration: 300,
-          useNativeDriver: true,
-        }),
-      ]).start(() => {
-        setCommentIndex(prev => (prev + 1) % post.topComments.length);
-        translateYAnim.setValue(12);
+  // 5. 후기 State & Action
+  const { hasRequestedReview, handleReviewAction } = useReviewState(
+    post,
+    onOpenViewReview,
+  );
 
-        Animated.parallel([
-          Animated.timing(translateYAnim, {
-            toValue: 0,
-            duration: 300,
-            useNativeDriver: true,
-          }),
-          Animated.timing(opacityAnim, {
-            toValue: 1,
-            duration: 300,
-            useNativeDriver: true,
-          }),
-        ]).start();
-      });
-    }, 3000);
-
-    return () => clearInterval(timer);
-  }, [translateYAnim, opacityAnim, post.topComments]);
+  // 6. 이미지 State & Action
+  const { imageErrorMap, handleImageError } = useImageState();
 
   return (
     <View style={[styles.cardPageWrapper, { height: pageHeight }]}>
       <View style={styles.cardContainer}>
-        {/* 1. Main Title Question */}
         <Text style={styles.questionTitle}>{post.title}</Text>
 
-        {/* 2. Sub Story Dropdown Card */}
         {post.images.length === 0 ? (
-          /* Case 1: No Images -> Permanently expanded */
           <View style={styles.storyNoImagesCard}>
             {Platform.OS !== 'web' && (
               <BlurView
@@ -99,7 +96,6 @@ export function FeedItem({
             </Text>
           </View>
         ) : (
-          /* Case 2: Has Images -> Collapsed / Expanded toggle */
           <View style={styles.storyDropdownWrapper}>
             {!isStoryExpanded ? (
               <TouchableOpacity
@@ -120,9 +116,7 @@ export function FeedItem({
                 >
                   {post.storySummary}
                 </Text>
-                <Svg width={14} height={10} viewBox="0 0 24 24">
-                  <Polygon points="4,6 20,6 12,18" fill="#0F172A" />
-                </Svg>
+                <CaretDownSvg />
               </TouchableOpacity>
             ) : (
               <View style={styles.storyDropdownCardExpandedContainer}>
@@ -144,9 +138,7 @@ export function FeedItem({
                     </Text>
                   </View>
                   <View style={styles.expandedCaretUpRow}>
-                    <Svg width={14} height={10} viewBox="0 0 24 24">
-                      <Polygon points="12,6 4,18 20,18" fill="#0F172A" />
-                    </Svg>
+                    <CaretUpSvg />
                   </View>
                 </TouchableOpacity>
               </View>
@@ -155,133 +147,80 @@ export function FeedItem({
         )}
 
         {/* 3. Image Section */}
-        {post.images.length === 1 && (
-          <View style={styles.singleImageWrapper}>
-            <Image
-              source={{ uri: post.images[0] }}
-              style={styles.singleImage}
-              resizeMode="cover"
-            />
-          </View>
-        )}
+        {post.images.length > 0 && (
+          <View
+            style={
+              post.images.length === 1
+                ? styles.singleImageWrapper
+                : styles.multiImageRow
+            }
+          >
+            {post.images.slice(0, 3).map((imgUri, index) => {
+              const isThirdAndMore = index === 2 && post.images.length > 3;
+              const cardStyle =
+                post.images.length === 1
+                  ? styles.singleImageWrapper
+                  : post.images.length === 2
+                    ? styles.multiImageHalf
+                    : styles.multiImageThird;
 
-        {post.images.length >= 2 && (
-          <View style={styles.multiImageRow}>
-            <View style={styles.multiImageHalf}>
-              <Image
-                source={{ uri: post.images[0] }}
-                style={styles.multiImage}
-                resizeMode="cover"
-              />
-            </View>
-            <View style={styles.multiImageHalf}>
-              <Image
-                source={{ uri: post.images[1] }}
-                style={styles.multiImage}
-                resizeMode="cover"
-              />
-            </View>
+              const hasError = imageErrorMap[index];
+              const sourceUri =
+                hasError || !imgUri ? DEFAULT_FALLBACK_IMAGE : imgUri;
+
+              return (
+                <TouchableOpacity
+                  key={index}
+                  style={cardStyle}
+                  onPress={() => onOpenImageModal?.(index)}
+                  activeOpacity={0.9}
+                >
+                  <Image
+                    source={{ uri: sourceUri }}
+                    style={styles.multiImage}
+                    resizeMode="cover"
+                    onError={() => handleImageError(index)}
+                  />
+                  {isThirdAndMore && (
+                    <View style={styles.imageOverlay}>
+                      <Text style={styles.imageOverlayText}>
+                        +{post.images.length - 3}
+                      </Text>
+                    </View>
+                  )}
+                </TouchableOpacity>
+              );
+            })}
           </View>
         )}
 
         {/* 4. Top 3 Rolling Featured Comment Card */}
-        <TouchableOpacity
-          style={styles.featuredCommentPill}
-          onPress={() => onOpenComments(post.title)}
-          activeOpacity={0.85}
-        >
-          {Platform.OS !== 'web' && (
-            <BlurView
-              intensity={20}
-              tint="light"
-              style={StyleSheet.absoluteFillObject}
-            />
-          )}
-          <Animated.View
-            style={[
-              styles.commentAnimatedContainer,
-              {
-                transform: [{ translateY: translateYAnim }],
-                opacity: opacityAnim,
-              },
-            ]}
-          >
-            <View style={styles.commentLeftInfo}>
-              <Text style={styles.commentUser}>{currentComment.user}</Text>
-              <Text style={styles.commentContent} numberOfLines={1}>
-                {currentComment.text}
-              </Text>
-            </View>
-            <TouchableOpacity style={styles.likeButton} activeOpacity={0.7}>
-              <Svg width={16} height={16} viewBox="0 0 24 24" fill="none">
-                <Path
-                  d="M14 9V5a3 3 0 00-3-3l-4 9v11h11.28a2 2 0 002-1.7l1.38-9a2 2 0 00-2-2.3zM7 22H4a2 2 0 01-2-2v-7a2 2 0 012-2h3"
-                  stroke="#475569"
-                  strokeWidth={2}
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </Svg>
-              <Text style={styles.likeCount}>{currentComment.likes}</Text>
-            </TouchableOpacity>
-          </Animated.View>
-        </TouchableOpacity>
+        <FeedItemCommentPill
+          comments={post.topComments}
+          postTitle={post.title}
+          onPress={onOpenComments}
+        />
 
         {/* 5. O / X Vote Cards */}
         <View style={styles.voteRow}>
-          <TouchableOpacity
-            style={[
-              styles.voteCardO,
-              selectedVote === 'O' && styles.voteCardOSelected,
-            ]}
-            onPress={() => setSelectedVote(selectedVote === 'O' ? null : 'O')}
-            activeOpacity={0.85}
-          >
-            <Svg width={16} height={16} viewBox="0 0 24 24" fill="none">
-              <Circle
-                cx={12}
-                cy={12}
-                r={9}
-                stroke="#FF8E7A"
-                strokeWidth={3}
-                fill="none"
-              />
-            </Svg>
-            <Text
-              style={[
-                styles.voteTextO,
-                selectedVote === 'O' && styles.voteTextOSelected,
-              ]}
-            >
-              {post.voteO}
-            </Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={[
-              styles.voteCardX,
-              selectedVote === 'X' && styles.voteCardXSelected,
-            ]}
-            onPress={() => setSelectedVote(selectedVote === 'X' ? null : 'X')}
-            activeOpacity={0.85}
-          >
-            <Svg width={16} height={16} viewBox="0 0 24 24" fill="none">
-              <Path
-                d="M18 6L6 18M6 6l12 12"
-                stroke="#FF858F"
-                strokeWidth={3}
-                strokeLinecap="round"
-              />
-            </Svg>
-            <Text
-              style={[
-                styles.voteTextX,
-                selectedVote === 'X' && styles.voteTextXSelected,
-              ]}
-            >
-              {post.voteX}
-            </Text>
-          </TouchableOpacity>
+          <FeedItemVoteCard
+            type="O"
+            text={post.voteO}
+            isSelected={selectedVote === 'O'}
+            onPress={() => handleVote('O')}
+            count={voteOCount}
+            totalCount={totalVoteCount}
+            hasVoted={hasVoted}
+          />
+          <FeedItemVoteCard
+            type="X"
+            text={post.voteX}
+            isSelected={selectedVote === 'X'}
+            onPress={() => handleVote('X')}
+            count={voteXCount}
+            totalCount={totalVoteCount}
+            hasVoted={hasVoted}
+          />
         </View>
 
         {/* 6. Reactions & Action Chips Bar */}
@@ -290,78 +229,32 @@ export function FeedItem({
           showsHorizontalScrollIndicator={false}
           contentContainerStyle={styles.reactionsRow}
         >
-          <View style={styles.reactionChip}>
-            {Platform.OS !== 'web' && (
-              <BlurView
-                intensity={25}
-                tint="light"
-                style={StyleSheet.absoluteFillObject}
-              />
-            )}
-            <Text style={styles.chipEmoji}>🔥</Text>
-            <Text style={styles.chipCount}>{post.fireCount}</Text>
-          </View>
+          <FeedItemReactionChip
+            emoji="🔥"
+            count={fireCount}
+            isActive={hasFired}
+            onPress={handleFireReaction}
+          />
 
-          <View style={styles.reactionChip}>
-            {Platform.OS !== 'web' && (
-              <BlurView
-                intensity={25}
-                tint="light"
-                style={StyleSheet.absoluteFillObject}
-              />
-            )}
-            <Text style={styles.chipEmoji}>🤦‍♀️</Text>
-            <Text style={styles.chipCount}>{post.facepalmCount}</Text>
-          </View>
+          <FeedItemReactionChip
+            emoji="🤦‍♀️"
+            count={facepalmCount}
+            isActive={hasFacepalmed}
+            onPress={handleFacepalmReaction}
+          />
 
-          <TouchableOpacity
-            style={styles.reactionChip}
+          <FeedItemReactionChip
+            icon={<CommentSvg />}
+            count={post.commentCount}
             onPress={() => onOpenComments(post.title)}
-            activeOpacity={0.8}
-          >
-            {Platform.OS !== 'web' && (
-              <BlurView
-                intensity={25}
-                tint="light"
-                style={StyleSheet.absoluteFillObject}
-              />
-            )}
-            <Svg width={16} height={16} viewBox="0 0 24 24" fill="none">
-              <Rect
-                x={3}
-                y={4}
-                width={18}
-                height={13}
-                rx={4.5}
-                stroke="#475569"
-                strokeWidth={2}
-              />
-              <Path
-                d="M7 17l-2.5 3v-3"
-                stroke="#475569"
-                strokeWidth={2}
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-              <Circle cx={8} cy={10.5} r={1} fill="#475569" />
-              <Circle cx={12} cy={10.5} r={1} fill="#475569" />
-              <Circle cx={16} cy={10.5} r={1} fill="#475569" />
-            </Svg>
-            <Text style={styles.chipCount}>{post.commentCount}</Text>
-          </TouchableOpacity>
+          />
 
           <TouchableOpacity
-            style={styles.actionChip}
-            onPress={() => {
-              if (post.hasReview) {
-                onOpenViewReview();
-              } else {
-                if (Platform.OS === 'web')
-                  alert('작성자에게 후기 요청이 전달되었습니다!');
-                else
-                  Alert.alert('완료', '작성자에게 후기 요청이 전달되었습니다!');
-              }
-            }}
+            style={[
+              styles.actionChip,
+              (post.hasReview || hasRequestedReview) && styles.activeActionChip,
+            ]}
+            onPress={handleReviewAction}
             activeOpacity={0.8}
           >
             {Platform.OS !== 'web' && (
@@ -371,25 +264,14 @@ export function FeedItem({
                 style={StyleSheet.absoluteFillObject}
               />
             )}
-            <Svg width={16} height={16} viewBox="0 0 24 24" fill="none">
-              <Rect
-                x={3}
-                y={5}
-                width={18}
-                height={14}
-                rx={4}
-                stroke="#334155"
-                strokeWidth={2}
-              />
-              <Path
-                d="M4.5 7.5l7.5 5 7.5-5"
-                stroke="#334155"
-                strokeWidth={2}
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </Svg>
-            <Text style={styles.actionChipText}>
+            <ReviewSvg />
+            <Text
+              style={[
+                styles.actionChipText,
+                (post.hasReview || hasRequestedReview) &&
+                  styles.activeActionChipText,
+              ]}
+            >
               {post.hasReview ? '후기 보기' : '후기 요청'}
             </Text>
           </TouchableOpacity>
@@ -405,15 +287,7 @@ export function FeedItem({
                 style={StyleSheet.absoluteFillObject}
               />
             )}
-            <Svg width={16} height={16} viewBox="0 0 24 24" fill="none">
-              <Path
-                d="M7 17c0-4.5 3-8 8.5-8H18M15 5l5 4-5 4"
-                stroke="#334155"
-                strokeWidth={2.2}
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </Svg>
+            <ShareSvg />
           </TouchableOpacity>
         </ScrollView>
       </View>
@@ -557,10 +431,6 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     marginBottom: 16,
   },
-  singleImage: {
-    width: '100%',
-    height: '100%',
-  },
   multiImageRow: {
     flexDirection: 'row',
     gap: 12,
@@ -574,68 +444,27 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     overflow: 'hidden',
   },
+  multiImageThird: {
+    flex: 1,
+    height: '100%',
+    borderRadius: 20,
+    overflow: 'hidden',
+    position: 'relative',
+  },
+  imageOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(0, 0, 0, 0.45)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  imageOverlayText: {
+    color: '#FFFFFF',
+    fontSize: 18,
+    fontWeight: '800',
+  },
   multiImage: {
     width: '100%',
     height: '100%',
-  },
-  featuredCommentPill: {
-    width: '100%',
-    height: 38,
-    borderRadius: 19,
-    backgroundColor: 'rgba(255, 244, 238, 0.4)',
-    paddingHorizontal: 16,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: 12,
-    overflow: 'hidden',
-    borderWidth: 1,
-    borderColor: 'rgba(255, 200, 179, 0.35)',
-    ...(Platform.OS === 'web'
-      ? {
-          backdropFilter: 'blur(10px) saturate(140%)',
-          WebkitBackdropFilter: 'blur(10px) saturate(140%)',
-        }
-      : {}),
-    shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.03,
-    shadowRadius: 6,
-    elevation: 1,
-  },
-  commentAnimatedContainer: {
-    width: '100%',
-    height: '100%',
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  commentLeftInfo: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    marginRight: 10,
-  },
-  commentUser: {
-    fontSize: 14.5,
-    fontWeight: '800',
-    color: '#1E293B',
-  },
-  commentContent: {
-    flex: 1,
-    fontSize: 14,
-    color: '#475569',
-  },
-  likeButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 5,
-  },
-  likeCount: {
-    fontSize: 13.5,
-    fontWeight: '500',
-    color: '#475569',
   },
   voteRow: {
     flexDirection: 'row',
@@ -643,111 +472,12 @@ const styles = StyleSheet.create({
     width: '100%',
     marginBottom: 14,
   },
-  voteCardO: {
-    flex: 1,
-    flexBasis: 0,
-    flexGrow: 1,
-    height: 64,
-    borderRadius: 18,
-    backgroundColor: '#FFFFFF',
-    borderWidth: 1.3,
-    borderColor: '#FFC8B3',
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 10,
-    shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.04,
-    shadowRadius: 4,
-    elevation: 1,
-  },
-  voteCardOSelected: {
-    backgroundColor: '#FFF7F5',
-    borderColor: '#FF8E7A',
-    borderWidth: 2,
-  },
-  voteTextO: {
-    fontSize: 14,
-    fontWeight: '500',
-    color: '#0F172A',
-    letterSpacing: -0.3,
-  },
-  voteTextOSelected: {
-    color: '#FF8E7A',
-    fontWeight: '700',
-  },
-  voteCardX: {
-    flex: 1,
-    flexBasis: 0,
-    flexGrow: 1,
-    height: 64,
-    borderRadius: 18,
-    backgroundColor: '#FFFFFF',
-    borderWidth: 1.3,
-    borderColor: '#FFB4BB',
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 10,
-    shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.04,
-    shadowRadius: 4,
-    elevation: 1,
-  },
-  voteCardXSelected: {
-    backgroundColor: '#FFF0F1',
-    borderColor: '#FF858F',
-    borderWidth: 2,
-  },
-  voteTextX: {
-    fontSize: 14,
-    fontWeight: '500',
-    color: '#0F172A',
-    letterSpacing: -0.3,
-  },
-  voteTextXSelected: {
-    color: '#FF858F',
-    fontWeight: '700',
-  },
   reactionsRow: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
     paddingVertical: 2,
     width: '100%',
-  },
-  reactionChip: {
-    width: 57,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: 'rgba(255, 255, 255, 0.7)',
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 4,
-    overflow: 'hidden',
-    borderWidth: 0,
-    ...(Platform.OS === 'web'
-      ? {
-          backdropFilter: 'blur(12px) saturate(140%)',
-          WebkitBackdropFilter: 'blur(12px) saturate(140%)',
-        }
-      : {}),
-    shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.04,
-    shadowRadius: 6,
-    elevation: 2,
-  },
-  chipEmoji: {
-    fontSize: 14,
-  },
-  chipCount: {
-    fontSize: 13.5,
-    fontWeight: '500',
-    color: '#475569',
   },
   actionChip: {
     height: 40,
@@ -758,7 +488,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 5,
     overflow: 'hidden',
-    borderWidth: 0,
+    borderWidth: 1,
+    borderColor: 'transparent',
     ...(Platform.OS === 'web'
       ? {
           backdropFilter: 'blur(12px) saturate(140%)',
@@ -771,10 +502,18 @@ const styles = StyleSheet.create({
     shadowRadius: 6,
     elevation: 2,
   },
+  activeActionChip: {
+    backgroundColor: 'rgba(255, 238, 235, 0.95)',
+    borderColor: '#FF5A5F',
+  },
   actionChipText: {
     fontSize: 13.5,
     fontWeight: '700',
-    color: '#1E293B',
+    color: '#FF5A5F',
+  },
+  activeActionChipText: {
+    color: '#FF5A5F',
+    fontWeight: '800',
   },
   actionChipIconOnly: {
     width: 40,
