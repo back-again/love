@@ -26,18 +26,18 @@ export function FeedItemVoteCard({
   const isO = type === 'O';
   const percentage = totalCount > 0 ? Math.round((count / totalCount) * 100) : 0;
 
+  const isUnselected = hasVoted && !isSelected;
+
   return (
     <TouchableOpacity
       style={[
         isO ? styles.voteCardO : styles.voteCardX,
         isSelected && (isO ? styles.voteCardOSelected : styles.voteCardXSelected),
-        hasVoted && styles.voteCardDisabled,
       ]}
       onPress={onPress}
-      disabled={hasVoted}
-      activeOpacity={hasVoted ? 1 : 0.85}
+      activeOpacity={0.85}
     >
-      {isO ? <VoteOSvg /> : <VoteXSvg />}
+      {isO ? <VoteOSvg color="#AA6CFF" /> : <VoteXSvg color="#FF5E85" />}
       <View style={styles.textContainer}>
         <Text
           style={[
@@ -67,7 +67,7 @@ const styles = StyleSheet.create({
     borderRadius: 18,
     backgroundColor: '#FFFFFF',
     borderWidth: 1.3,
-    borderColor: '#FFC8B3',
+    borderColor: '#E3CCFF', // 또렷하고 화사한 라벤더 보라 스트로크
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
@@ -79,8 +79,8 @@ const styles = StyleSheet.create({
     elevation: 1,
   },
   voteCardOSelected: {
-    backgroundColor: '#FFF7F5',
-    borderColor: '#FF8E7A',
+    backgroundColor: '#F6EEFF',
+    borderColor: '#AA6CFF',
     borderWidth: 2,
   },
   voteTextO: {
@@ -90,7 +90,7 @@ const styles = StyleSheet.create({
     letterSpacing: -0.3,
   },
   voteTextOSelected: {
-    color: '#FF8E7A',
+    color: '#AA6CFF',
     fontWeight: '700',
   },
   voteCardX: {
@@ -101,7 +101,7 @@ const styles = StyleSheet.create({
     borderRadius: 18,
     backgroundColor: '#FFFFFF',
     borderWidth: 1.3,
-    borderColor: '#FFB4BB',
+    borderColor: '#FFC4D2', // 또렷하고 화사한 로즈 핑크 스트로크
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
@@ -113,8 +113,8 @@ const styles = StyleSheet.create({
     elevation: 1,
   },
   voteCardXSelected: {
-    backgroundColor: '#FFF0F1',
-    borderColor: '#FF858F',
+    backgroundColor: '#FFEBF0',
+    borderColor: '#FF5E85',
     borderWidth: 2,
   },
   voteTextX: {
@@ -124,7 +124,7 @@ const styles = StyleSheet.create({
     letterSpacing: -0.3,
   },
   voteTextXSelected: {
-    color: '#FF858F',
+    color: '#FF5E85',
     fontWeight: '700',
   },
   textContainer: {
@@ -140,5 +140,13 @@ const styles = StyleSheet.create({
   },
   voteCardDisabled: {
     opacity: 0.95,
+  },
+  voteCardUnselectedDim: {
+    opacity: 0.45,
+    backgroundColor: '#FAFAFA',
+    borderColor: '#E2E8F0',
+  },
+  voteTextUnselected: {
+    color: '#94A3B8',
   },
 });

@@ -11,7 +11,7 @@ interface NavItemProps {
 }
 
 export function NavItem({ type, label, isActive, onPress }: NavItemProps) {
-  const activeColor = '#FF8E7A';
+  const activeColor = '#FF4D7B';
   const inactiveColor = '#BCBCBC';
   const iconColor = isActive ? activeColor : inactiveColor;
 
@@ -49,7 +49,7 @@ export function NavItem({ type, label, isActive, onPress }: NavItemProps) {
             width={10}
             height={2.8}
             rx={1.4}
-            fill={isActive ? '#FFF4EE' : '#FFFFFF'}
+            fill={isActive ? '#FFEBF0' : '#FFFFFF'}
           />
           <Rect
             x={6}
@@ -57,7 +57,7 @@ export function NavItem({ type, label, isActive, onPress }: NavItemProps) {
             width={6.5}
             height={2.8}
             rx={1.4}
-            fill={isActive ? '#FFF4EE' : '#FFFFFF'}
+            fill={isActive ? '#FFEBF0' : '#FFFFFF'}
           />
         </Svg>
       )}
@@ -87,7 +87,7 @@ const styles = StyleSheet.create({
   navItemActiveCapsule: {
     height: 60,
     borderRadius: 30,
-    backgroundColor: '#FFF4EE',
+    backgroundColor: '#FFEBF0',
   },
   navText: {
     fontSize: 13,
@@ -96,7 +96,7 @@ const styles = StyleSheet.create({
     letterSpacing: -0.3,
   },
   navTextActive: {
-    color: '#FF8E7A',
+    color: '#FF4D7B',
     fontWeight: '700',
   },
 });

@@ -17,14 +17,20 @@ export function useVoteState(post: Post) {
   const totalVoteCount = voteOCount + voteXCount;
 
   const handleVote = (choice: 'O' | 'X') => {
-    if (hasVoted) return;
-    setSelectedVote(choice);
-    if (choice === 'O') {
-      setVoteOCount(prev => prev + 1);
+    if (selectedVote === choice) {
+      setSelectedVote(null);
+      if (choice === 'O') setVoteOCount(prev => Math.max(0, prev - 1));
+      else setVoteXCount(prev => Math.max(0, prev - 1));
     } else {
-      setVoteXCount(prev => prev + 1);
+      if (selectedVote === 'O') setVoteOCount(prev => Math.max(0, prev - 1));
+      if (selectedVote === 'X') setVoteXCount(prev => Math.max(0, prev - 1));
+
+      setSelectedVote(choice);
+      if (choice === 'O') setVoteOCount(prev => prev + 1);
+      else setVoteXCount(prev => prev + 1);
+
+      submitVoteApi(post.id, choice);
     }
-    submitVoteApi(post.id, choice);
   };
 
   return {

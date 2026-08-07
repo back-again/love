@@ -175,8 +175,8 @@ export async function getFeedPostsLib({
         ? `${item.id}-loop-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`
         : item.id;
 
-      const voteOCount = item.vote_o_count || 0;
-      const voteXCount = item.vote_x_count || 0;
+      const voteOCount = item.vote_o_count ?? 40;
+      const voteXCount = item.vote_x_count ?? 60;
       const fireCount = item.like_count ?? item.fire_count ?? 0;
       const facepalmCount = item.rear_count ?? item.facepalm_count ?? 0;
       const totalVoteCount = voteOCount + voteXCount;
@@ -185,6 +185,9 @@ export async function getFeedPostsLib({
 
       const hasFired = postReactions.has('FIRE');
       const hasFacepalmed = postReactions.has('FACEPALM');
+
+      const percentO = totalVoteCount > 0 ? Math.round((voteOCount / totalVoteCount) * 100) : 40;
+      const percentX = 100 - percentO;
 
       return {
         id: uniqueId,
@@ -198,6 +201,8 @@ export async function getFeedPostsLib({
         images,
         voteO: '괜찮은데?',
         voteX: '난 싫어',
+        percentO,
+        percentX,
         topComments,
         reviewStatus: item.has_review ? '후기 보기' : '후기 요청',
         hasReview: Boolean(item.has_review),

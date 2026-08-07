@@ -11,7 +11,7 @@ interface SvgProps {
 export function VoteXSvg({
   width = 16,
   height = 16,
-  color = '#FF858F',
+  color = '#FF5E85',
   strokeWidth = 3,
 }: SvgProps) {
   return (

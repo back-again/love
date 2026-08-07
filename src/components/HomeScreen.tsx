@@ -1,4 +1,6 @@
-import React, { useState, useEffect, useRef } from 'react';
+
+
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import {
   StyleSheet,
   View,
@@ -12,12 +14,16 @@ import {
   Alert,
   TextInput,
 } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { LinearGradient } from 'expo-linear-gradient';
 import { BlurView } from 'expo-blur';
 import Svg, { Path, Circle, Rect, Ellipse, Polygon } from 'react-native-svg';
 import MyMenuBottomSheet, { MyMenuType } from './MyMenuBottomSheet';
-import CommentBottomSheet from './CommentBottomSheet';
+import CommentBottomSheet, { VoteInfo } from './CommentBottomSheet';
 import ReviewBottomSheet from './ReviewBottomSheet';
+import { PostDetailModal } from './PostDetailModal';
+import { supabase } from '../api/supabase';
+import { createPost } from '../screens/create/_lib/createPost.lib';
 
 import { Dimensions } from 'react-native';
 
@@ -26,7 +32,7 @@ interface HomeScreenProps {
   onLogout: () => void;
 }
 
-// Sample feed posts list with Top 3 Rolling Comments
+// Sample feed posts list with Top 3 Rolling Comments & Vote Ratio Stats
 const SAMPLE_POSTS = [
   {
     id: 'post-1',
@@ -41,6 +47,9 @@ const SAMPLE_POSTS = [
     ],
     voteO: '괜찮은데?',
     voteX: '난 싫어',
+    percentO: 60,
+    percentX: 40,
+    totalVotes: 324,
     topComments: [
       { id: 'c1', user: '익명1', text: '그딴 ㅃ을 만나고있네 ㅋ', likes: 153 },
       {
@@ -69,13 +78,16 @@ const SAMPLE_POSTS = [
     storySummary:
       '아니 내가 생일 2주전부터 얘기했는데 글쎄 내 생일에 PX에서 달팽이크림 선크림 들고 나타남 ㅋ 카톡 캡처 첨부함...',
     fullStory:
-      '아니 내가 생일 2주전부터 얘기했는데 글쎄 내 생일에 PX에서 달팽이크림이랑 선크림을 사가지고 줬더라고 ㅋㅋㅋ 카톡 캡처랑 사다준 선크림 첨부함.',
+      '아니 내가 생일 2주전부터 얘기했는데 글쎄 내 생일에 PX에서 달팽이크림이랑 선크림을 사가지고 줬더라고 ㅋㅋㅋ 진짜 당황스러워서 선물 받고도 기분이 묘하고 속상함 ㅠㅠ 남친은 "이거 엄청 유명하고 비싼 크림이야!" 하면서 당당하게 주던데 솔직히 생일선물로 PX는 좀 성의 없어 보이는 거 맞아? 너네라면 남친한테 솔직하게 서운하다고 말할 거 같아 아니면 그냥 고맙다고 쓸 거 같아?',
     images: [
       'https://images.unsplash.com/photo-1577563908411-5077b6dc7624?w=400&auto=format&fit=crop&q=80',
       'https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=400&auto=format&fit=crop&q=80',
     ],
     voteO: '괜찮은데?',
     voteX: '난 싫어',
+    percentO: 45,
+    percentX: 55,
+    totalVotes: 512,
     topComments: [
       {
         id: 'c1',
@@ -113,6 +125,9 @@ const SAMPLE_POSTS = [
     images: [],
     voteO: '괜찮은데?',
     voteX: '난 싫어',
+    percentO: 28,
+    percentX: 72,
+    totalVotes: 189,
     topComments: [
       {
         id: 'c1',
@@ -151,6 +166,9 @@ const SAMPLE_POSTS = [
     ],
     voteO: '이해해줘',
     voteX: '헤어져라',
+    percentO: 15,
+    percentX: 85,
+    totalVotes: 742,
     topComments: [
       {
         id: 'c1',
@@ -190,6 +208,9 @@ const SAMPLE_POSTS = [
     ],
     voteO: '서운할만함',
     voteX: '과한 욕심',
+    percentO: 64,
+    percentX: 36,
+    totalVotes: 430,
     topComments: [
       {
         id: 'c1',
@@ -388,7 +409,7 @@ function MyPageContent({
 // ----------------------------------------------------
 // 작성 화면 (Create Screen Component)
 // ----------------------------------------------------
-function CreatePageContent({ onComplete }: { onComplete: () => void }) {
+function CreatePageContent({ onComplete }: { onComplete: (newPost?: any) => void }) {
   const [questionTitle, setQuestionTitle] = useState('');
   const [detailSituation, setDetailSituation] = useState('');
   const [images, setImages] = useState<string[]>([]);
@@ -405,7 +426,6 @@ function CreatePageContent({ onComplete }: { onComplete: () => void }) {
       'https://picsum.photos/400/300?random=102',
       'https://picsum.photos/400/300?random=103',
     ];
-    // 방금 추가한 사진이 '+' 버튼 바로 우측(맨 앞)에 위치하고 먼저 추가한 사진이 오른쪽으로 밀려남
     setImages(prev => [sampleImgs[prev.length % sampleImgs.length], ...prev]);
   };
 
@@ -418,10 +438,28 @@ function CreatePageContent({ onComplete }: { onComplete: () => void }) {
 
   const handleSubmit = () => {
     if (!isFormValid) return;
+
+    const newPost = {
+      id: `post-${Date.now()}`,
+      title: questionTitle.trim(),
+      storySummary: detailSituation.trim(),
+      fullStory: detailSituation.trim(),
+      images: images,
+      voteO: '괜찮은데?',
+      voteX: '난 싫어',
+      percentO: 50,
+      percentX: 50,
+      totalVotes: 0,
+      topComments: [],
+      reviewStatus: '후기 요청',
+      hasReview: false,
+    };
+
     if (Platform.OS === 'web')
       alert('오답노트에 사연이 성공적으로 등록되었습니다!');
     else Alert.alert('완료', '오답노트에 사연이 성공적으로 등록되었습니다!');
-    onComplete();
+
+    onComplete(newPost);
   };
 
   return (
@@ -544,426 +582,160 @@ function FeedCardItem({
 }: {
   post: any;
   pageHeight: number;
-  onOpenComments: (title: string) => void;
+  onOpenComments: (title: string, voteInfo?: VoteInfo) => void;
   onOpenViewReview: () => void;
 }) {
   const [selectedVote, setSelectedVote] = useState<'O' | 'X' | null>(null);
-  const [isStoryExpanded, setIsStoryExpanded] = useState(false);
-  const [commentIndex, setCommentIndex] = useState(0);
 
-  const translateYAnim = useRef(new Animated.Value(0)).current;
-  const opacityAnim = useRef(new Animated.Value(1)).current;
+  const handleOpenCommentsFromPill = () => {
+    onOpenComments(post.title, {
+      selectedVote: selectedVote,
+      voteOText: post.voteO,
+      voteXText: post.voteX,
+      percentO: post.percentO || 50,
+      percentX: post.percentX || 50,
+      totalVotes: post.totalVotes || 300,
+    });
+  };
 
-  const currentComment = post.topComments[commentIndex] || post.topComments[0];
-
-  // 3-second rolling comment timer
-  useEffect(() => {
-    const timer = setInterval(() => {
-      Animated.parallel([
-        Animated.timing(translateYAnim, {
-          toValue: -12,
-          duration: 300,
-          useNativeDriver: true,
-        }),
-        Animated.timing(opacityAnim, {
-          toValue: 0,
-          duration: 300,
-          useNativeDriver: true,
-        }),
-      ]).start(() => {
-        setCommentIndex(prev => (prev + 1) % post.topComments.length);
-        translateYAnim.setValue(12);
-
-        Animated.parallel([
-          Animated.timing(translateYAnim, {
-            toValue: 0,
-            duration: 300,
-            useNativeDriver: true,
-          }),
-          Animated.timing(opacityAnim, {
-            toValue: 1,
-            duration: 300,
-            useNativeDriver: true,
-          }),
-        ]).start();
-      });
-    }, 3000);
-
-    return () => clearInterval(timer);
-  }, [translateYAnim, opacityAnim, post.topComments.length]);
+  const fullText = post.fullStory || post.storySummary || '';
 
   return (
-    <View style={[styles.cardPageWrapper, { height: pageHeight }]}>
+    <TouchableOpacity
+      style={styles.cardPageWrapper}
+      onPress={handleOpenCommentsFromPill}
+      activeOpacity={0.92}
+    >
       <View style={styles.cardContainer}>
-        {/* 1. Main Title Question */}
-        <Text style={styles.questionTitle}>{post.title}</Text>
-
-        {/* 2. Sub Story Dropdown Card */}
-        {post.images.length === 0 ? (
-          /* Case 1: No Images -> Permanently expanded down to image section location (minHeight: 270px) */
-          <View style={styles.storyNoImagesCard}>
-            {Platform.OS !== 'web' && (
-              <BlurView
-                intensity={35}
-                tint="light"
-                style={StyleSheet.absoluteFillObject}
-              />
-            )}
-            <Text style={styles.storyDropdownTextExpanded}>
-              {post.fullStory}
-            </Text>
+        {/* Top Meta Row: Badge Pill + Category & Time */}
+        <View style={styles.topMetaRow}>
+          <View style={styles.hotBadgePill}>
+            <Text style={styles.hotBadgeText}>HOT</Text>
           </View>
-        ) : (
-          /* Case 2: Has Images -> Collapsed by default, when expanded extends down to cover full image area (minHeight: 338px) */
-          <View style={styles.storyDropdownWrapper}>
-            {!isStoryExpanded ? (
-              /* Collapsed Summary Pill */
-              <TouchableOpacity
-                style={styles.storyDropdownCardCollapsed}
-                onPress={() => setIsStoryExpanded(true)}
-                activeOpacity={0.85}
-              >
-                {Platform.OS !== 'web' && (
-                  <BlurView
-                    intensity={35}
-                    tint="light"
-                    style={StyleSheet.absoluteFillObject}
-                  />
-                )}
-                <Text
-                  style={styles.storyDropdownTextCollapsed}
-                  numberOfLines={2}
-                >
-                  {post.storySummary}
-                </Text>
-                {/* Black Down Arrow Caret ▼ */}
-                <Svg width={14} height={10} viewBox="0 0 24 24">
-                  <Polygon points="4,6 20,6 12,18" fill="#0F172A" />
-                </Svg>
-              </TouchableOpacity>
-            ) : (
-              /* Expanded Overlay Card (Extends down to cover full 270px image area with 90% opacity & NO STROKE) */
-              <View style={styles.storyDropdownCardExpandedContainer}>
-                <TouchableOpacity
-                  style={styles.storyDropdownCardExpandedToImagePos}
-                  onPress={() => setIsStoryExpanded(false)}
-                  activeOpacity={0.95}
-                >
-                  {Platform.OS !== 'web' && (
-                    <BlurView
-                      intensity={35}
-                      tint="light"
-                      style={StyleSheet.absoluteFillObject}
-                    />
-                  )}
-                  <View style={{ flex: 1 }}>
-                    <Text style={styles.storyDropdownTextExpanded}>
-                      {post.fullStory}
-                    </Text>
-                  </View>
-                  {/* Centered Bottom Up Arrow Caret ▲ */}
-                  <View style={styles.expandedCaretUpRow}>
-                    <Svg width={14} height={10} viewBox="0 0 24 24">
-                      <Polygon points="12,6 4,18 20,18" fill="#0F172A" />
-                    </Svg>
-                  </View>
-                </TouchableOpacity>
-              </View>
-            )}
-          </View>
-        )}
-
-        {/* 3. Image Section (Dynamic Layouts for 1 Image, 2+ Images, or 0 Images) */}
-        {post.images.length === 1 && (
-          <View style={styles.singleImageWrapper}>
-            <Image
-              source={{ uri: post.images[0] }}
-              style={styles.singleImage}
-              resizeMode="cover"
-            />
-          </View>
-        )}
-
-        {post.images.length >= 2 && (
-          <View style={styles.multiImageRow}>
-            <View style={styles.multiImageHalf}>
-              <Image
-                source={{ uri: post.images[0] }}
-                style={styles.multiImage}
-                resizeMode="cover"
-              />
-            </View>
-            <View style={styles.multiImageHalf}>
-              <Image
-                source={{ uri: post.images[1] }}
-                style={styles.multiImage}
-                resizeMode="cover"
-              />
-            </View>
-          </View>
-        )}
-
-        {/* (No Image Variant collapses image section automatically) */}
-
-        {/* 4. Top 3 Rolling Featured Comment Card (40% Opacity Soft Peach Tint + Blur) - 터치 시 댓글 바텀시트 모달 오픈! */}
-        <TouchableOpacity
-          style={styles.featuredCommentPill}
-          onPress={() => onOpenComments(post.title)}
-          activeOpacity={0.85}
-        >
-          {Platform.OS !== 'web' && (
-            <BlurView
-              intensity={20}
-              tint="light"
-              style={StyleSheet.absoluteFillObject}
-            />
-          )}
-          <Animated.View
-            style={[
-              styles.commentAnimatedContainer,
-              {
-                transform: [{ translateY: translateYAnim }],
-                opacity: opacityAnim,
-              },
-            ]}
-          >
-            <View style={styles.commentLeftInfo}>
-              <Text style={styles.commentUser}>{currentComment.user}</Text>
-              <Text style={styles.commentContent} numberOfLines={1}>
-                {currentComment.text}
-              </Text>
-            </View>
-            <TouchableOpacity style={styles.likeButton} activeOpacity={0.7}>
-              {/* Thumbs Up Like Icon 👍 (16x16px) */}
-              <Svg width={16} height={16} viewBox="0 0 24 24" fill="none">
-                <Path
-                  d="M14 9V5a3 3 0 00-3-3l-4 9v11h11.28a2 2 0 002-1.7l1.38-9a2 2 0 00-2-2.3zM7 22H4a2 2 0 01-2-2v-7a2 2 0 012-2h3"
-                  stroke="#475569"
-                  strokeWidth={2}
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </Svg>
-              <Text style={styles.likeCount}>{currentComment.likes}</Text>
-            </TouchableOpacity>
-          </Animated.View>
-        </TouchableOpacity>
-
-        {/* 5. O / X Vote Cards (Orange & Coral Red Tinted Borders & Colors) */}
-        <View style={styles.voteRow}>
-          {/* O Vote Button ("괜찮은데?") */}
-          <TouchableOpacity
-            style={[
-              styles.voteCardO,
-              selectedVote === 'O' && styles.voteCardOSelected,
-            ]}
-            onPress={() => setSelectedVote(selectedVote === 'O' ? null : 'O')}
-            activeOpacity={0.85}
-          >
-            {/* Orange Circle Icon ⭕ (16x16px) */}
-            <Svg width={16} height={16} viewBox="0 0 24 24" fill="none">
-              <Circle
-                cx={12}
-                cy={12}
-                r={9}
-                stroke="#FF8E7A"
-                strokeWidth={3}
-                fill="none"
-              />
-            </Svg>
-            <Text
-              style={[
-                styles.voteTextO,
-                selectedVote === 'O' && styles.voteTextOSelected,
-              ]}
-            >
-              {post.voteO}
-            </Text>
-          </TouchableOpacity>
-
-          {/* X Vote Button ("난 싫어") */}
-          <TouchableOpacity
-            style={[
-              styles.voteCardX,
-              selectedVote === 'X' && styles.voteCardXSelected,
-            ]}
-            onPress={() => setSelectedVote(selectedVote === 'X' ? null : 'X')}
-            activeOpacity={0.85}
-          >
-            {/* Coral Red Cross Icon ❌ (16x16px) */}
-            <Svg width={16} height={16} viewBox="0 0 24 24" fill="none">
-              <Path
-                d="M18 6L6 18M6 6l12 12"
-                stroke="#FF858F"
-                strokeWidth={3}
-                strokeLinecap="round"
-              />
-            </Svg>
-            <Text
-              style={[
-                styles.voteTextX,
-                selectedVote === 'X' && styles.voteTextXSelected,
-              ]}
-            >
-              {post.voteX}
-            </Text>
-          </TouchableOpacity>
+          <Text style={styles.categoryTimeText}>연애 · 5분 전</Text>
         </View>
 
-        {/* 6. Reactions & Action Chips Bar (Height: 40px, 70% Opacity White + Blur) */}
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.reactionsRow}
-        >
-          {/* Fire Reaction 🔥 */}
-          <View style={styles.reactionChip}>
-            {Platform.OS !== 'web' && (
-              <BlurView
-                intensity={25}
-                tint="light"
-                style={StyleSheet.absoluteFillObject}
+        {/* Title Question */}
+        <Text style={styles.questionTitle}>{post.title}</Text>
+
+        {/* Story Text Preview if any */}
+        {fullText ? (
+          <Text style={styles.storyPreviewText} numberOfLines={2}>
+            {fullText}
+          </Text>
+        ) : null}
+
+        {/* Attached Images Preview if any */}
+        {post.images && post.images.length > 0 && (
+          <View style={styles.imageListRow}>
+            {post.images.slice(0, 3).map((imgUri: string, index: number) => (
+              <Image
+                key={index}
+                source={{ uri: imgUri }}
+                style={styles.cardImageThumb}
+                resizeMode="cover"
               />
-            )}
-            <Text style={styles.chipEmoji}>🔥</Text>
-            <Text style={styles.chipCount}>{post.fireCount}</Text>
+            ))}
           </View>
+        )}
 
-          {/* Facepalm Reaction 🤦‍♀️ */}
-          <View style={styles.reactionChip}>
-            {Platform.OS !== 'web' && (
-              <BlurView
-                intensity={25}
-                tint="light"
-                style={StyleSheet.absoluteFillObject}
-              />
-            )}
-            <Text style={styles.chipEmoji}>🤦‍♀️</Text>
-            <Text style={styles.chipCount}>{post.facepalmCount}</Text>
-          </View>
-
-          {/* Comment Reaction 💬 (Bubble with 3 Dots - 16x16px) - 터치 시 댓글 바텀시트 오픈! */}
-          <TouchableOpacity
-            style={styles.reactionChip}
-            onPress={() => onOpenComments(post.title)}
-            activeOpacity={0.8}
-          >
-            {Platform.OS !== 'web' && (
-              <BlurView
-                intensity={25}
-                tint="light"
-                style={StyleSheet.absoluteFillObject}
-              />
-            )}
+        {/* Bottom Stats Row: Vote Count & Comment Count */}
+        <View style={styles.bottomStatsRow}>
+          <View style={styles.statLeftCol}>
             <Svg width={16} height={16} viewBox="0 0 24 24" fill="none">
-              <Rect
-                x={3}
-                y={4}
-                width={18}
-                height={13}
-                rx={4.5}
-                stroke="#475569"
-                strokeWidth={2}
-              />
-              <Path
-                d="M7 17l-2.5 3v-3"
-                stroke="#475569"
-                strokeWidth={2}
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-              <Circle cx={8} cy={10.5} r={1} fill="#475569" />
-              <Circle cx={12} cy={10.5} r={1} fill="#475569" />
-              <Circle cx={16} cy={10.5} r={1} fill="#475569" />
+              <Rect x={2} y={12} width={5} height={10} rx={2} fill="#94A3B8" />
+              <Rect x={9.5} y={6} width={5} height={16} rx={2} fill="#94A3B8" />
+              <Rect x={17} y={2} width={5} height={20} rx={2} fill="#94A3B8" />
             </Svg>
-            <Text style={styles.chipCount}>{post.commentCount}</Text>
-          </TouchableOpacity>
-
-          {/* Review Status Action Chip ✉️ (후기 없는 경우: 후기 요청 / 후기 남긴 경우: 후기 보기) */}
-          <TouchableOpacity
-            style={styles.actionChip}
-            onPress={() => {
-              if (post.hasReview) {
-                onOpenViewReview();
-              } else {
-                if (Platform.OS === 'web')
-                  alert('작성자에게 후기 요청이 전달되었습니다!');
-                else
-                  Alert.alert('완료', '작성자에게 후기 요청이 전달되었습니다!');
-              }
-            }}
-            activeOpacity={0.8}
-          >
-            {Platform.OS !== 'web' && (
-              <BlurView
-                intensity={25}
-                tint="light"
-                style={StyleSheet.absoluteFillObject}
-              />
-            )}
-            <Svg width={16} height={16} viewBox="0 0 24 24" fill="none">
-              <Rect
-                x={3}
-                y={5}
-                width={18}
-                height={14}
-                rx={4}
-                stroke="#334155"
-                strokeWidth={2}
-              />
-              <Path
-                d="M4.5 7.5l7.5 5 7.5-5"
-                stroke="#334155"
-                strokeWidth={2}
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </Svg>
-            <Text style={styles.actionChipText}>
-              {post.hasReview ? '후기 보기' : '후기 요청'}
+            <Text style={styles.statLeftText}>
+              {(post.totalVotes || 643).toLocaleString()}명 투표 중
             </Text>
-          </TouchableOpacity>
+          </View>
 
-          {/* Share Icon Only Chip ↪️ (Curved Right Arrow - 16x16px) */}
-          <TouchableOpacity
-            style={styles.actionChipIconOnly}
-            activeOpacity={0.8}
-          >
-            {Platform.OS !== 'web' && (
-              <BlurView
-                intensity={25}
-                tint="light"
-                style={StyleSheet.absoluteFillObject}
-              />
-            )}
+          <View style={styles.statRightCol}>
             <Svg width={16} height={16} viewBox="0 0 24 24" fill="none">
               <Path
-                d="M7 17c0-4.5 3-8 8.5-8H18M15 5l5 4-5 4"
-                stroke="#334155"
-                strokeWidth={2.2}
+                d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"
+                stroke="#94A3B8"
+                strokeWidth={2}
                 strokeLinecap="round"
                 strokeLinejoin="round"
               />
             </Svg>
-          </TouchableOpacity>
-        </ScrollView>
+            <Text style={styles.statRightText}>
+              {post.topComments ? post.topComments.length : 128}
+            </Text>
+          </View>
+        </View>
       </View>
-    </View>
+    </TouchableOpacity>
   );
 }
 
+const FEED_STORAGE_KEY = '@xoxo_user_feed_posts_v1';
+
 export default function HomeScreen({ user, onLogout }: HomeScreenProps) {
+  const [postsList, setPostsList] = useState(SAMPLE_POSTS);
   const [activeTab, setActiveTab] = useState<
     'feed' | 'ranking' | 'create' | 'my'
   >('feed');
   const [activeMenuType, setActiveMenuType] = useState<MyMenuType>(null);
+  const [activeDetailPost, setActiveDetailPost] = useState<any | null>(null);
   const [activeCommentPostTitle, setActiveCommentPostTitle] = useState<
     string | null
   >(null);
+  const [activeVoteInfo, setActiveVoteInfo] = useState<VoteInfo | undefined>(
+    undefined,
+  );
   const [isReviewModalVisible, setIsReviewModalVisible] = useState(false);
   const [viewportHeight, setViewportHeight] = useState(
     Dimensions.get('window').height,
   );
+
+  // DB & AsyncStorage 영구 데이터 초기 로드
+  useEffect(() => {
+    const initPersistentPosts = async () => {
+      try {
+        const storedJson = await AsyncStorage.getItem(FEED_STORAGE_KEY);
+        if (storedJson) {
+          const parsed = JSON.parse(storedJson);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            setPostsList(parsed);
+          }
+        }
+      } catch (err) {
+        console.warn('AsyncStorage load error:', err);
+      }
+    };
+    initPersistentPosts();
+  }, []);
+
+  // 새 사연 생성 시 로컬 DB(AsyncStorage) 및 Supabase Cloud DB 이중 영구 저장
+  const handleAddNewPost = async (newPostData?: any) => {
+    if (newPostData) {
+      const updatedList = [newPostData, ...postsList];
+      setPostsList(updatedList);
+
+      // 1. AsyncStorage 기기 영구 저장 (재부팅/앱 종료 시에도유지)
+      try {
+        await AsyncStorage.setItem(FEED_STORAGE_KEY, JSON.stringify(updatedList));
+      } catch (e) {
+        console.warn('AsyncStorage save error:', e);
+      }
+
+      // 2. Supabase Cloud DB 영구 서버 연동 저장
+      try {
+        await createPost({
+          title: newPostData.title,
+          content: newPostData.fullStory,
+          images: newPostData.images,
+        });
+      } catch (dbError) {
+        console.warn('Supabase DB sync notice (local DB saved):', dbError);
+      }
+    }
+    setActiveTab('feed');
+  };
 
   useEffect(() => {
     const onChange = ({ window }: { window: any }) => {
@@ -982,7 +754,7 @@ export default function HomeScreen({ user, onLogout }: HomeScreenProps) {
       colors={
         activeTab === 'my' || activeTab === 'create'
           ? ['#FFFFFF', '#FFFFFF']
-          : ['#FFFAFB', '#FFECDC']
+          : ['#FFF5F7', '#FFEBEF']
       }
       style={styles.container}
     >
@@ -1042,25 +814,68 @@ export default function HomeScreen({ user, onLogout }: HomeScreenProps) {
 
         {/* Tab Content Rendering */}
         {activeTab === 'feed' && (
-          <ScrollView
-            style={styles.scrollView}
-            contentContainerStyle={{ paddingBottom: 110 }}
-            showsVerticalScrollIndicator={false}
-            pagingEnabled={true}
-            snapToInterval={feedPageHeight}
-            snapToAlignment="start"
-            decelerationRate="fast"
-          >
-            {SAMPLE_POSTS.map(post => (
-              <FeedCardItem
-                key={post.id}
-                post={post}
-                pageHeight={feedPageHeight}
-                onOpenComments={title => setActiveCommentPostTitle(title)}
-                onOpenViewReview={() => setIsReviewModalVisible(true)}
-              />
-            ))}
-          </ScrollView>
+          <View style={{ flex: 1, width: '100%' }}>
+            {/* Top Category Chips Horizontal Scroll Bar */}
+            <View style={{ width: '100%', paddingVertical: 10, paddingHorizontal: 16 }}>
+              <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={{ flexDirection: 'row', gap: 8, alignItems: 'center', paddingRight: 16 }}
+              >
+                {['전체', '인기🔥', '연애/썸💕', '이별/재회💔', '일상/고민💬'].map((category, idx) => {
+                  const isSelected = idx === 0;
+                  return (
+                    <TouchableOpacity
+                      key={category}
+                      style={{
+                        paddingHorizontal: 16,
+                        paddingVertical: 8,
+                        borderRadius: 20,
+                        backgroundColor: isSelected ? '#FF4D7B' : '#FFFFFF',
+                        borderWidth: 1,
+                        borderColor: isSelected ? '#FF4D7B' : '#E2E8F0',
+                        shadowColor: isSelected ? '#FF4D7B' : 'transparent',
+                        shadowOffset: { width: 0, height: 2 },
+                        shadowOpacity: 0.2,
+                        shadowRadius: 4,
+                        elevation: isSelected ? 2 : 0,
+                      }}
+                      activeOpacity={0.85}
+                    >
+                      <Text
+                        style={{
+                          fontSize: 14,
+                          fontWeight: isSelected ? '700' : '600',
+                          color: isSelected ? '#FFFFFF' : '#64748B',
+                        }}
+                      >
+                        {category}
+                      </Text>
+                    </TouchableOpacity>
+                  );
+                })}
+              </ScrollView>
+            </View>
+
+            <ScrollView
+              style={styles.scrollView}
+              contentContainerStyle={{ paddingHorizontal: 20, paddingTop: 6, paddingBottom: 110 }}
+              showsVerticalScrollIndicator={false}
+              pagingEnabled={false}
+            >
+              {postsList.map(post => (
+                <FeedCardItem
+                  key={post.id}
+                  post={post}
+                  pageHeight={feedPageHeight}
+                  onOpenComments={() => {
+                    setActiveDetailPost(post);
+                  }}
+                  onOpenViewReview={() => setIsReviewModalVisible(true)}
+                />
+              ))}
+            </ScrollView>
+          </View>
         )}
 
         {activeTab === 'my' && (
@@ -1072,7 +887,7 @@ export default function HomeScreen({ user, onLogout }: HomeScreenProps) {
         )}
 
         {activeTab === 'create' && (
-          <CreatePageContent onComplete={() => setActiveTab('feed')} />
+          <CreatePageContent onComplete={handleAddNewPost} />
         )}
 
         {activeTab === 'ranking' && (
@@ -1120,7 +935,7 @@ export default function HomeScreen({ user, onLogout }: HomeScreenProps) {
                     width={16}
                     height={2.5}
                     rx={1.25}
-                    fill={activeTab === 'feed' ? '#FF8E7A' : '#BCBCBC'}
+                    fill={activeTab === 'feed' ? '#FF4D7B' : '#BCBCBC'}
                   />
                   <Rect
                     x={2}
@@ -1128,7 +943,7 @@ export default function HomeScreen({ user, onLogout }: HomeScreenProps) {
                     width={20}
                     height={13}
                     rx={4.5}
-                    fill={activeTab === 'feed' ? '#FF8E7A' : '#BCBCBC'}
+                    fill={activeTab === 'feed' ? '#FF4D7B' : '#BCBCBC'}
                   />
                   <Rect
                     x={4}
@@ -1136,7 +951,7 @@ export default function HomeScreen({ user, onLogout }: HomeScreenProps) {
                     width={16}
                     height={2.5}
                     rx={1.25}
-                    fill={activeTab === 'feed' ? '#FF8E7A' : '#BCBCBC'}
+                    fill={activeTab === 'feed' ? '#FF4D7B' : '#BCBCBC'}
                   />
                 </Svg>
                 <Text
@@ -1166,7 +981,7 @@ export default function HomeScreen({ user, onLogout }: HomeScreenProps) {
                     width={20}
                     height={4.5}
                     rx={2.25}
-                    fill={activeTab === 'ranking' ? '#FF8E7A' : '#BCBCBC'}
+                    fill={activeTab === 'ranking' ? '#FF4D7B' : '#BCBCBC'}
                   />
                   <Rect
                     x={2}
@@ -1174,7 +989,7 @@ export default function HomeScreen({ user, onLogout }: HomeScreenProps) {
                     width={20}
                     height={4.5}
                     rx={2.25}
-                    fill={activeTab === 'ranking' ? '#FF8E7A' : '#BCBCBC'}
+                    fill={activeTab === 'ranking' ? '#FF4D7B' : '#BCBCBC'}
                   />
                   <Rect
                     x={2}
@@ -1182,7 +997,7 @@ export default function HomeScreen({ user, onLogout }: HomeScreenProps) {
                     width={20}
                     height={4.5}
                     rx={2.25}
-                    fill={activeTab === 'ranking' ? '#FF8E7A' : '#BCBCBC'}
+                    fill={activeTab === 'ranking' ? '#FF4D7B' : '#BCBCBC'}
                   />
                   <Rect
                     x={2}
@@ -1190,7 +1005,7 @@ export default function HomeScreen({ user, onLogout }: HomeScreenProps) {
                     width={20}
                     height={2.5}
                     rx={1.25}
-                    fill={activeTab === 'ranking' ? '#FF8E7A' : '#BCBCBC'}
+                    fill={activeTab === 'ranking' ? '#FF4D7B' : '#BCBCBC'}
                   />
                 </Svg>
                 <Text
@@ -1220,7 +1035,7 @@ export default function HomeScreen({ user, onLogout }: HomeScreenProps) {
                     width={2.2}
                     height={4}
                     rx={1.1}
-                    fill={activeTab === 'create' ? '#FF8E7A' : '#BCBCBC'}
+                    fill={activeTab === 'create' ? '#FF4D7B' : '#BCBCBC'}
                   />
                   <Rect
                     x={14.8}
@@ -1228,7 +1043,7 @@ export default function HomeScreen({ user, onLogout }: HomeScreenProps) {
                     width={2.2}
                     height={4}
                     rx={1.1}
-                    fill={activeTab === 'create' ? '#FF8E7A' : '#BCBCBC'}
+                    fill={activeTab === 'create' ? '#FF4D7B' : '#BCBCBC'}
                   />
                   <Rect
                     x={2}
@@ -1236,7 +1051,7 @@ export default function HomeScreen({ user, onLogout }: HomeScreenProps) {
                     width={20}
                     height={19.5}
                     rx={5.5}
-                    fill={activeTab === 'create' ? '#FF8E7A' : '#BCBCBC'}
+                    fill={activeTab === 'create' ? '#FF4D7B' : '#BCBCBC'}
                   />
                   <Rect
                     x={6}
@@ -1244,7 +1059,7 @@ export default function HomeScreen({ user, onLogout }: HomeScreenProps) {
                     width={10}
                     height={2.8}
                     rx={1.4}
-                    fill={activeTab === 'create' ? '#FFF4EE' : '#FFFFFF'}
+                    fill={activeTab === 'create' ? '#FFEBF0' : '#FFFFFF'}
                   />
                   <Rect
                     x={6}
@@ -1252,7 +1067,7 @@ export default function HomeScreen({ user, onLogout }: HomeScreenProps) {
                     width={6.5}
                     height={2.8}
                     rx={1.4}
-                    fill={activeTab === 'create' ? '#FFF4EE' : '#FFFFFF'}
+                    fill={activeTab === 'create' ? '#FFEBF0' : '#FFFFFF'}
                   />
                 </Svg>
                 <Text
@@ -1280,14 +1095,14 @@ export default function HomeScreen({ user, onLogout }: HomeScreenProps) {
                     cx={12}
                     cy={6.5}
                     r={5}
-                    fill={activeTab === 'my' ? '#FF8E7A' : '#BCBCBC'}
+                    fill={activeTab === 'my' ? '#FF4D7B' : '#BCBCBC'}
                   />
                   <Ellipse
                     cx={12}
                     cy={18}
                     rx={9.5}
                     ry={5}
-                    fill={activeTab === 'my' ? '#FF8E7A' : '#BCBCBC'}
+                    fill={activeTab === 'my' ? '#FF4D7B' : '#BCBCBC'}
                   />
                 </Svg>
                 <Text
@@ -1312,14 +1127,28 @@ export default function HomeScreen({ user, onLogout }: HomeScreenProps) {
         onLogout={onLogout}
       />
 
-      {/* Top-level Comment Bottom Sheet Modal for Feed */}
+      {/* 댓글 및 투표 비율 바텀시트 */}
       <CommentBottomSheet
         visible={activeCommentPostTitle !== null}
         postTitle={activeCommentPostTitle || ''}
-        onClose={() => setActiveCommentPostTitle(null)}
+        voteInfo={activeVoteInfo}
+        onClose={() => {
+          setActiveCommentPostTitle(null);
+          setActiveVoteInfo(undefined);
+        }}
       />
 
       {/* Top-level Dedicated Review Content Bottom Sheet Modal */}
+      <PostDetailModal
+        visible={!!activeDetailPost}
+        post={activeDetailPost}
+        onClose={() => setActiveDetailPost(null)}
+        onOpenVoteResults={(title, voteInfo) => {
+          setActiveCommentPostTitle(title);
+          setActiveVoteInfo(voteInfo);
+        }}
+      />
+
       <ReviewBottomSheet
         visible={isReviewModalVisible}
         onClose={() => setIsReviewModalVisible(false)}
@@ -1386,27 +1215,100 @@ const styles = StyleSheet.create({
     width: '100%',
     maxWidth: 450,
     alignSelf: 'center',
-    paddingHorizontal: 24,
-    paddingTop: 20, // 상단바와의 마진 20px 지정
-    paddingBottom: 16,
-    justifyContent: 'flex-start',
-    overflow: 'hidden',
+    marginBottom: 16,
+    borderRadius: 20,
+    backgroundColor: '#FFFFFF',
+    paddingHorizontal: 20,
+    paddingTop: 18,
+    paddingBottom: 18,
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.04,
+    shadowRadius: 8,
+    elevation: 2,
   },
   cardContainer: {
     width: '100%',
-    alignItems: 'center',
+    alignItems: 'flex-start',
   },
-
-  // Question Title
-  questionTitle: {
-    fontSize: 22,
+  topMetaRow: {
+    width: '100%',
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginBottom: 10,
+  },
+  hotBadgePill: {
+    backgroundColor: '#FF4D7B',
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 10,
+  },
+  hotBadgeText: {
+    fontSize: 11,
     fontWeight: '800',
+    color: '#FFFFFF',
+    letterSpacing: -0.2,
+  },
+  categoryTimeText: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: '#94A3B8',
+  },
+  questionTitle: {
+    fontSize: 18,
+    fontWeight: '700',
     color: '#0F172A',
-    textAlign: 'center',
-    lineHeight: 30,
-    letterSpacing: -0.5,
-    marginBottom: 16,
-    marginTop: 0, // 상단바 패딩 10px과 결합하여 정확히 10px 상단 마진 유지
+    textAlign: 'left',
+    lineHeight: 25,
+    letterSpacing: -0.4,
+    marginBottom: 8,
+  },
+  storyPreviewText: {
+    fontSize: 14,
+    color: '#64748B',
+    lineHeight: 20,
+    marginBottom: 14,
+  },
+  imageListRow: {
+    flexDirection: 'row',
+    gap: 6,
+    marginBottom: 14,
+  },
+  cardImageThumb: {
+    width: 64,
+    height: 64,
+    borderRadius: 10,
+  },
+  bottomStatsRow: {
+    width: '100%',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginTop: 6,
+    paddingTop: 12,
+    borderTopWidth: 1,
+    borderTopColor: '#F1F5F9',
+  },
+  statLeftCol: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  statLeftText: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: '#64748B',
+  },
+  statRightCol: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+  },
+  statRightText: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: '#64748B',
   },
 
   // Story Dropdown Card Styles
@@ -1423,9 +1325,9 @@ const styles = StyleSheet.create({
     marginBottom: 16,
     ...(Platform.OS === 'web'
       ? {
-          backdropFilter: 'blur(10px) saturate(180%)',
-          WebkitBackdropFilter: 'blur(10px) saturate(180%)',
-        }
+        backdropFilter: 'blur(10px) saturate(180%)',
+        WebkitBackdropFilter: 'blur(10px) saturate(180%)',
+      }
       : {}),
     shadowColor: '#000000',
     shadowOffset: { width: 0, height: 2 },
@@ -1440,25 +1342,24 @@ const styles = StyleSheet.create({
     position: 'relative',
     zIndex: 100,
     marginBottom: 16,
-    height: 70,
+    minHeight: 130,
   },
   storyDropdownCardCollapsed: {
     width: '100%',
-    height: 70,
+    minHeight: 130,
     borderRadius: 18,
     backgroundColor: 'rgba(255, 255, 255, 0.9)', // 90% Opacity White
     paddingHorizontal: 20,
-    paddingVertical: 13,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    paddingTop: 16,
+    paddingBottom: 10,
+    flexDirection: 'column',
     overflow: 'hidden',
     borderWidth: 0, // NO STROKE
     ...(Platform.OS === 'web'
       ? {
-          backdropFilter: 'blur(10px) saturate(180%)',
-          WebkitBackdropFilter: 'blur(10px) saturate(180%)',
-        }
+        backdropFilter: 'blur(10px) saturate(180%)',
+        WebkitBackdropFilter: 'blur(10px) saturate(180%)',
+      }
       : {}),
     shadowColor: '#000000',
     shadowOffset: { width: 0, height: 2 },
@@ -1467,13 +1368,20 @@ const styles = StyleSheet.create({
     elevation: 2,
   },
   storyDropdownTextCollapsed: {
-    flex: 1,
+    width: '100%',
     fontSize: 18,
     color: '#0F172A',
-    marginRight: 10,
     letterSpacing: -0.3,
     fontWeight: '500',
     lineHeight: 25,
+    marginBottom: 6,
+  },
+  caretBottomRow: {
+    width: '100%',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingTop: 4,
+    paddingBottom: 2,
   },
   storyDropdownCardExpandedContainer: {
     position: 'absolute',
@@ -1495,9 +1403,9 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     ...(Platform.OS === 'web'
       ? {
-          backdropFilter: 'blur(10px) saturate(180%)',
-          WebkitBackdropFilter: 'blur(10px) saturate(180%)',
-        }
+        backdropFilter: 'blur(10px) saturate(180%)',
+        WebkitBackdropFilter: 'blur(10px) saturate(180%)',
+      }
       : {}),
     shadowColor: '#000000',
     shadowOffset: { width: 0, height: 6 },
@@ -1566,8 +1474,8 @@ const styles = StyleSheet.create({
     height: 64,
     borderRadius: 18,
     backgroundColor: '#FFFFFF',
-    borderWidth: 1.3, // 1.3px 두께
-    borderColor: '#FFC8B3', // 또렷하고 선명한 피치 주황 스트로크
+    borderWidth: 1.3,
+    borderColor: '#E3CCFF', // 또렷하고 화사한 라벤더 보라 스트로크
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
@@ -1579,18 +1487,18 @@ const styles = StyleSheet.create({
     elevation: 1,
   },
   voteCardOSelected: {
-    backgroundColor: '#FFF7F5',
-    borderColor: '#FF8E7A',
+    backgroundColor: '#F6EEFF',
+    borderColor: '#AA6CFF',
     borderWidth: 2,
   },
   voteTextO: {
     fontSize: 14,
-    fontWeight: '500', // 볼드 처리 제거 (노멀 500)
+    fontWeight: '500',
     color: '#0F172A',
     letterSpacing: -0.3,
   },
   voteTextOSelected: {
-    color: '#FF8E7A',
+    color: '#AA6CFF',
     fontWeight: '700',
   },
   voteCardX: {
@@ -1600,8 +1508,8 @@ const styles = StyleSheet.create({
     height: 64,
     borderRadius: 18,
     backgroundColor: '#FFFFFF',
-    borderWidth: 1.3, // 1.3px 두께
-    borderColor: '#FFB4BB', // 또렷하고 선명한 코랄 핑크 스트로크
+    borderWidth: 1.3,
+    borderColor: '#FFC4D2', // 또렷하고 화사한 로즈 핑크 스트로크
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
@@ -1613,18 +1521,18 @@ const styles = StyleSheet.create({
     elevation: 1,
   },
   voteCardXSelected: {
-    backgroundColor: '#FFF0F1',
-    borderColor: '#FF858F',
+    backgroundColor: '#FFEBF0',
+    borderColor: '#FF5E85',
     borderWidth: 2,
   },
   voteTextX: {
     fontSize: 14,
-    fontWeight: '500', // 볼드 처리 제거 (노멀 500)
+    fontWeight: '500',
     color: '#0F172A',
     letterSpacing: -0.3,
   },
   voteTextXSelected: {
-    color: '#FF858F',
+    color: '#FF5E85',
     fontWeight: '700',
   },
 
@@ -1644,9 +1552,9 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(255, 200, 179, 0.35)', // 35% Opacity Peach Border (#FFC8B3)
     ...(Platform.OS === 'web'
       ? {
-          backdropFilter: 'blur(10px) saturate(140%)',
-          WebkitBackdropFilter: 'blur(10px) saturate(140%)',
-        }
+        backdropFilter: 'blur(10px) saturate(140%)',
+        WebkitBackdropFilter: 'blur(10px) saturate(140%)',
+      }
       : {}),
     shadowColor: '#000000',
     shadowOffset: { width: 0, height: 2 },
@@ -1710,9 +1618,9 @@ const styles = StyleSheet.create({
     borderWidth: 0, // NO STROKE
     ...(Platform.OS === 'web'
       ? {
-          backdropFilter: 'blur(12px) saturate(140%)',
-          WebkitBackdropFilter: 'blur(12px) saturate(140%)',
-        }
+        backdropFilter: 'blur(12px) saturate(140%)',
+        WebkitBackdropFilter: 'blur(12px) saturate(140%)',
+      }
       : {}),
     shadowColor: '#000000',
     shadowOffset: { width: 0, height: 2 },
@@ -1740,9 +1648,9 @@ const styles = StyleSheet.create({
     borderWidth: 0, // NO STROKE
     ...(Platform.OS === 'web'
       ? {
-          backdropFilter: 'blur(12px) saturate(140%)',
-          WebkitBackdropFilter: 'blur(12px) saturate(140%)',
-        }
+        backdropFilter: 'blur(12px) saturate(140%)',
+        WebkitBackdropFilter: 'blur(12px) saturate(140%)',
+      }
       : {}),
     shadowColor: '#000000',
     shadowOffset: { width: 0, height: 2 },
@@ -1766,9 +1674,9 @@ const styles = StyleSheet.create({
     borderWidth: 0, // NO STROKE
     ...(Platform.OS === 'web'
       ? {
-          backdropFilter: 'blur(12px) saturate(140%)',
-          WebkitBackdropFilter: 'blur(12px) saturate(140%)',
-        }
+        backdropFilter: 'blur(12px) saturate(140%)',
+        WebkitBackdropFilter: 'blur(12px) saturate(140%)',
+      }
       : {}),
     shadowColor: '#000000',
     shadowOffset: { width: 0, height: 2 },
@@ -1806,11 +1714,11 @@ const styles = StyleSheet.create({
         : 'rgba(255, 255, 255, 0.7)',
     ...(Platform.OS === 'web'
       ? {
-          backdropFilter: 'blur(12px) saturate(180%)',
-          WebkitBackdropFilter: 'blur(12px) saturate(180%)',
-          boxShadow:
-            'inset 1.5px 1.5px 3px 0px rgba(255, 255, 255, 0.9), inset -1.5px -1.5px 3px 0px rgba(0, 0, 0, 0.04), 0 -3px 10px 0px rgba(0, 0, 0, 0.05)',
-        }
+        backdropFilter: 'blur(12px) saturate(180%)',
+        WebkitBackdropFilter: 'blur(12px) saturate(180%)',
+        boxShadow:
+          'inset 1.5px 1.5px 3px 0px rgba(255, 255, 255, 0.9), inset -1.5px -1.5px 3px 0px rgba(0, 0, 0, 0.04), 0 -3px 10px 0px rgba(0, 0, 0, 0.05)',
+      }
       : {}),
   },
   glassBlurBackground: {
@@ -1833,7 +1741,7 @@ const styles = StyleSheet.create({
   navItemActiveCapsule: {
     height: 60,
     borderRadius: 30,
-    backgroundColor: '#FFF4EE',
+    backgroundColor: '#FFEBF0',
   },
   navText: {
     fontSize: 13,
@@ -1842,7 +1750,7 @@ const styles = StyleSheet.create({
     letterSpacing: -0.3,
   },
   navTextActive: {
-    color: '#FF8E7A',
+    color: '#FF4D7B',
     fontWeight: '700',
   },
   // My Page Component Styles

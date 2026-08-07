@@ -91,9 +91,19 @@ function MainAppLayout({ mainNavRef }: { mainNavRef: any }) {
   );
 }
 
+const MOCK_USER: User = {
+  id: 'test-user-1',
+  email: 'test@example.com',
+  gender: 'female',
+  birth_year: '1998',
+  created_at: new Date().toISOString(),
+};
+
 export default function App() {
-  const { user, hasOnboarded, isLoading, handleLoginSuccess } = useLoadApp();
+  const { user, hasOnboarded, isLoading, handleLoginSuccess, handleLogout } = useLoadApp();
   const navigationRef = useNavigationContainerRef();
+
+  const currentUser = user || MOCK_USER;
 
   if (isLoading) {
     return (
@@ -116,15 +126,18 @@ export default function App() {
             }}
           >
             {!user ? (
-              <Stack.Screen name="Login">
-                {() => <LoginScreen onLoginSuccess={handleLoginSuccess} />}
-              </Stack.Screen>
+              <Stack.Screen name="Login" component={LoginScreen} />
             ) : !hasOnboarded ? (
-              <Stack.Screen name="Onboarding" component={OnboardingScreen} />
+              <Stack.Screen name="Onboarding">
+                {props => (
+                  <OnboardingScreen
+                    {...props}
+                    user={currentUser}
+                    onComplete={handleLoginSuccess}
+                  />
+                )}
+              </Stack.Screen>
             ) : (
-              // <Stack.Screen name="Home">
-              //   {() => <HomeScreen user={user!} onLogout={() => {}} />}
-              // </Stack.Screen>
               <Stack.Screen name="Main">
                 {() => <MainAppLayout mainNavRef={navigationRef} />}
               </Stack.Screen>

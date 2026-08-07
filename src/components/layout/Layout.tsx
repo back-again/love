@@ -42,7 +42,7 @@ export function Layout({
       colors={
         activeTab === 'my' || activeTab === 'create'
           ? ['#FFFFFF', '#FFFFFF']
-          : ['#FFFAFB', '#FFECDC']
+          : ['#FFF5F7', '#FFEBEF']
       }
       style={[
         styles.container,

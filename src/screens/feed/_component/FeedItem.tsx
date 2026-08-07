@@ -1,40 +1,30 @@
-import React from 'react';
+import React, { useState, useCallback } from 'react';
 import {
   StyleSheet,
   View,
   Text,
   TouchableOpacity,
-  ScrollView,
   Image,
   Platform,
-  Alert,
 } from 'react-native';
 import { BlurView } from 'expo-blur';
+import Svg, { Rect, Path } from 'react-native-svg';
 import { Post } from '../_model/feed.model';
 import {
   useVoteState,
   useStoryState,
-  useLikeState,
-  useRearState,
-  useReviewState,
   useImageState,
 } from '../_state/useFeedState';
 import { FeedItemVoteCard } from './FeedItem.VoteCard';
-import { FeedItemReactionChip } from './FeedItem.ReactionChip';
-import { FeedItemCommentPill } from './FeedItem.CommentPill';
-import {
-  CaretDownSvg,
-  CaretUpSvg,
-  CommentSvg,
-  ReviewSvg,
-  ShareSvg,
-} from '../_svg';
+import { CaretDownSvg, CaretUpSvg } from '../_svg';
+
+import { VoteInfo } from '@/components/CommentBottomSheet';
 
 interface FeedItemProps {
   post: Post;
   pageHeight: number;
   onOpenImageModal?: (index: number) => void;
-  onOpenComments: (title: string) => void;
+  onOpenComments: (title: string, voteInfo?: VoteInfo) => void;
   onOpenViewReview: () => void;
 }
 
@@ -48,7 +38,16 @@ export function FeedItem({
   onOpenComments,
   onOpenViewReview,
 }: FeedItemProps) {
-  // 1. 투표 State
+  const [hasMoreStory, setHasMoreStory] = useState(false);
+
+  const handleTextLayout = useCallback((e: any) => {
+    if (e?.nativeEvent?.lines) {
+      if (e.nativeEvent.lines.length > 4) {
+        setHasMoreStory(prev => (prev ? prev : true));
+      }
+    }
+  }, []);
+
   const {
     selectedVote,
     voteOCount,
@@ -58,240 +57,90 @@ export function FeedItem({
     handleVote,
   } = useVoteState(post);
 
-  // 2. 스토리 확장 State
   const { isStoryExpanded, setIsStoryExpanded } = useStoryState();
-
-  // 3. 좋아요 State & Action
-  const { hasFired, fireCount, handleFireReaction } = useLikeState(post);
-
-  // 4. 뒷골 State & Action
-  const { hasFacepalmed, facepalmCount, handleFacepalmReaction } =
-    useRearState(post);
-
-  // 5. 후기 State & Action
-  const { hasRequestedReview, handleReviewAction } = useReviewState(
-    post,
-    onOpenViewReview,
-  );
-
-  // 6. 이미지 State & Action
   const { imageErrorMap, handleImageError } = useImageState();
 
+  const fullText = post.fullStory || post.storySummary || '';
+
+  const handleOpenBottomSheet = () => {
+    onOpenComments(post.title, {
+      selectedVote: selectedVote,
+      voteOText: post.voteO,
+      voteXText: post.voteX,
+      percentO: post.percentO || 50,
+      percentX: post.percentX || 50,
+      totalVotes: totalVoteCount || 300,
+      hasReview: post.hasReview,
+    });
+  };
+
   return (
-    <View style={[styles.cardPageWrapper, { height: pageHeight }]}>
+    <TouchableOpacity
+      style={styles.cardPageWrapper}
+      onPress={handleOpenBottomSheet}
+      activeOpacity={0.92}
+    >
       <View style={styles.cardContainer}>
-        <Text style={styles.questionTitle}>{post.title}</Text>
-
-        {post.images.length === 0 ? (
-          <View style={styles.storyNoImagesCard}>
-            {Platform.OS !== 'web' && (
-              <BlurView
-                intensity={35}
-                tint="light"
-                style={StyleSheet.absoluteFillObject}
-              />
-            )}
-            <Text style={styles.storyDropdownTextExpanded}>
-              {post.fullStory}
-            </Text>
+        {/* Top Meta Row: Badge Pill + Category & Time */}
+        <View style={styles.topMetaRow}>
+          <View style={styles.hotBadgePill}>
+            <Text style={styles.hotBadgeText}>HOT</Text>
           </View>
-        ) : (
-          <View style={styles.storyDropdownWrapper}>
-            {!isStoryExpanded ? (
-              <TouchableOpacity
-                style={styles.storyDropdownCardCollapsed}
-                onPress={() => setIsStoryExpanded(true)}
-                activeOpacity={0.85}
-              >
-                {Platform.OS !== 'web' && (
-                  <BlurView
-                    intensity={35}
-                    tint="light"
-                    style={StyleSheet.absoluteFillObject}
-                  />
-                )}
-                <Text
-                  style={styles.storyDropdownTextCollapsed}
-                  numberOfLines={2}
-                >
-                  {post.storySummary}
-                </Text>
-                <CaretDownSvg />
-              </TouchableOpacity>
-            ) : (
-              <View style={styles.storyDropdownCardExpandedContainer}>
-                <TouchableOpacity
-                  style={styles.storyDropdownCardExpandedToImagePos}
-                  onPress={() => setIsStoryExpanded(false)}
-                  activeOpacity={0.95}
-                >
-                  {Platform.OS !== 'web' && (
-                    <BlurView
-                      intensity={35}
-                      tint="light"
-                      style={StyleSheet.absoluteFillObject}
-                    />
-                  )}
-                  <View style={{ flex: 1 }}>
-                    <Text style={styles.storyDropdownTextExpanded}>
-                      {post.fullStory}
-                    </Text>
-                  </View>
-                  <View style={styles.expandedCaretUpRow}>
-                    <CaretUpSvg />
-                  </View>
-                </TouchableOpacity>
-              </View>
-            )}
-          </View>
-        )}
-
-        {/* 3. Image Section */}
-        {post.images.length > 0 && (
-          <View
-            style={
-              post.images.length === 1
-                ? styles.singleImageWrapper
-                : styles.multiImageRow
-            }
-          >
-            {post.images.slice(0, 3).map((imgUri, index) => {
-              const isThirdAndMore = index === 2 && post.images.length > 3;
-              const cardStyle =
-                post.images.length === 1
-                  ? styles.singleImageWrapper
-                  : post.images.length === 2
-                    ? styles.multiImageHalf
-                    : styles.multiImageThird;
-
-              const hasError = imageErrorMap[index];
-              const sourceUri =
-                hasError || !imgUri ? DEFAULT_FALLBACK_IMAGE : imgUri;
-
-              return (
-                <TouchableOpacity
-                  key={index}
-                  style={cardStyle}
-                  onPress={() => onOpenImageModal?.(index)}
-                  activeOpacity={0.9}
-                >
-                  <Image
-                    source={{ uri: sourceUri }}
-                    style={styles.multiImage}
-                    resizeMode="cover"
-                    onError={() => handleImageError(index)}
-                  />
-                  {isThirdAndMore && (
-                    <View style={styles.imageOverlay}>
-                      <Text style={styles.imageOverlayText}>
-                        +{post.images.length - 3}
-                      </Text>
-                    </View>
-                  )}
-                </TouchableOpacity>
-              );
-            })}
-          </View>
-        )}
-
-        {/* 4. Top 3 Rolling Featured Comment Card */}
-        <FeedItemCommentPill
-          comments={post.topComments}
-          postTitle={post.title}
-          onPress={onOpenComments}
-        />
-
-        {/* 5. O / X Vote Cards */}
-        <View style={styles.voteRow}>
-          <FeedItemVoteCard
-            type="O"
-            text={post.voteO}
-            isSelected={selectedVote === 'O'}
-            onPress={() => handleVote('O')}
-            count={voteOCount}
-            totalCount={totalVoteCount}
-            hasVoted={hasVoted}
-          />
-          <FeedItemVoteCard
-            type="X"
-            text={post.voteX}
-            isSelected={selectedVote === 'X'}
-            onPress={() => handleVote('X')}
-            count={voteXCount}
-            totalCount={totalVoteCount}
-            hasVoted={hasVoted}
-          />
+          <Text style={styles.categoryTimeText}>연애 · 5분 전</Text>
         </View>
 
-        {/* 6. Reactions & Action Chips Bar */}
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.reactionsRow}
-        >
-          <FeedItemReactionChip
-            emoji="🔥"
-            count={fireCount}
-            isActive={hasFired}
-            onPress={handleFireReaction}
-          />
+        {/* Title Question */}
+        <Text style={styles.questionTitle}>{post.title}</Text>
 
-          <FeedItemReactionChip
-            emoji="🤦‍♀️"
-            count={facepalmCount}
-            isActive={hasFacepalmed}
-            onPress={handleFacepalmReaction}
-          />
+        {/* Story Text Preview if any */}
+        {fullText ? (
+          <Text style={styles.storyPreviewText} numberOfLines={2}>
+            {fullText}
+          </Text>
+        ) : null}
 
-          <FeedItemReactionChip
-            icon={<CommentSvg />}
-            count={post.commentCount}
-            onPress={() => onOpenComments(post.title)}
-          />
-
-          <TouchableOpacity
-            style={[
-              styles.actionChip,
-              (post.hasReview || hasRequestedReview) && styles.activeActionChip,
-            ]}
-            onPress={handleReviewAction}
-            activeOpacity={0.8}
-          >
-            {Platform.OS !== 'web' && (
-              <BlurView
-                intensity={25}
-                tint="light"
-                style={StyleSheet.absoluteFillObject}
+        {/* Attached Images Preview if any */}
+        {post.images.length > 0 && (
+          <View style={styles.imageListRow}>
+            {post.images.slice(0, 3).map((imgUri, index) => (
+              <Image
+                key={index}
+                source={{ uri: imgUri || DEFAULT_FALLBACK_IMAGE }}
+                style={styles.cardImageThumb}
+                resizeMode="cover"
               />
-            )}
-            <ReviewSvg />
-            <Text
-              style={[
-                styles.actionChipText,
-                (post.hasReview || hasRequestedReview) &&
-                  styles.activeActionChipText,
-              ]}
-            >
-              {post.hasReview ? '후기 보기' : '후기 요청'}
+            ))}
+          </View>
+        )}
+
+        {/* Bottom Stats Row: Vote Count & Comment Count */}
+        <View style={styles.bottomStatsRow}>
+          <View style={styles.statLeftCol}>
+            <Svg width={16} height={16} viewBox="0 0 24 24" fill="none">
+              <Rect x={2} y={12} width={5} height={10} rx={2} fill="#94A3B8" />
+              <Rect x={9.5} y={6} width={5} height={16} rx={2} fill="#94A3B8" />
+              <Rect x={17} y={2} width={5} height={20} rx={2} fill="#94A3B8" />
+            </Svg>
+            <Text style={styles.statLeftText}>
+              {(totalVoteCount || 643).toLocaleString()}명 투표 중
             </Text>
-          </TouchableOpacity>
+          </View>
 
-          <TouchableOpacity
-            style={styles.actionChipIconOnly}
-            activeOpacity={0.8}
-          >
-            {Platform.OS !== 'web' && (
-              <BlurView
-                intensity={25}
-                tint="light"
-                style={StyleSheet.absoluteFillObject}
+          <View style={styles.statRightCol}>
+            <Svg width={16} height={16} viewBox="0 0 24 24" fill="none">
+              <Path
+                d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"
+                stroke="#94A3B8"
+                strokeWidth={2}
+                strokeLinecap="round"
+                strokeLinejoin="round"
               />
-            )}
-            <ShareSvg />
-          </TouchableOpacity>
-        </ScrollView>
+            </Svg>
+            <Text style={styles.statRightText}>{post.commentCount || 128}</Text>
+          </View>
+        </View>
       </View>
-    </View>
+    </TouchableOpacity>
   );
 }
 
@@ -300,63 +149,126 @@ const styles = StyleSheet.create({
     width: '100%',
     maxWidth: 450,
     alignSelf: 'center',
-    paddingHorizontal: 24,
-    justifyContent: 'flex-start',
-    overflow: 'hidden',
-  },
-  cardContainer: {
-    width: '100%',
-    alignItems: 'center',
-  },
-  questionTitle: {
-    fontSize: 22,
-    fontWeight: '800',
-    color: '#0F172A',
-    textAlign: 'center',
-    lineHeight: 30,
-    letterSpacing: -0.5,
     marginBottom: 16,
-    marginTop: 0,
-  },
-  storyNoImagesCard: {
-    width: '100%',
-    minHeight: 356,
     borderRadius: 20,
-    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+    backgroundColor: '#FFFFFF',
     paddingHorizontal: 20,
-    paddingVertical: 20,
-    overflow: 'hidden',
-    borderWidth: 0,
-    marginBottom: 16,
-    ...(Platform.OS === 'web'
-      ? {
-          backdropFilter: 'blur(10px) saturate(180%)',
-          WebkitBackdropFilter: 'blur(10px) saturate(180%)',
-        }
-      : {}),
+    paddingTop: 18,
+    paddingBottom: 18,
     shadowColor: '#000000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.04,
     shadowRadius: 8,
     elevation: 2,
   },
+  cardContainer: {
+    width: '100%',
+    alignItems: 'flex-start',
+  },
+  topMetaRow: {
+    width: '100%',
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginBottom: 10,
+  },
+  hotBadgePill: {
+    backgroundColor: '#FF4D7B',
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 10,
+  },
+  hotBadgeText: {
+    fontSize: 11,
+    fontWeight: '800',
+    color: '#FFFFFF',
+    letterSpacing: -0.2,
+  },
+  categoryTimeText: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: '#94A3B8',
+  },
+  questionTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#0F172A',
+    textAlign: 'left',
+    lineHeight: 25,
+    letterSpacing: -0.4,
+    marginBottom: 8,
+  },
+  storyPreviewText: {
+    fontSize: 14,
+    color: '#64748B',
+    lineHeight: 20,
+    marginBottom: 14,
+  },
+  imageListRow: {
+    flexDirection: 'row',
+    gap: 6,
+    marginBottom: 14,
+  },
+  cardImageThumb: {
+    width: 64,
+    height: 64,
+    borderRadius: 10,
+  },
+  bottomStatsRow: {
+    width: '100%',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginTop: 6,
+    paddingTop: 12,
+    borderTopWidth: 1,
+    borderTopColor: '#F1F5F9',
+  },
+  statLeftCol: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  statLeftText: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: '#64748B',
+  },
+  statRightCol: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+  },
+  statRightText: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: '#64748B',
+  },
+  storyNoImagesCard: {
+    width: '100%',
+    borderRadius: 16,
+    backgroundColor: '#F8FAFC',
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    overflow: 'hidden',
+    borderWidth: 0,
+    marginBottom: 14,
+  },
   storyDropdownWrapper: {
     width: '100%',
     position: 'relative',
     zIndex: 100,
-    marginBottom: 16,
-    height: 70,
+    marginBottom: 14,
   },
   storyDropdownCardCollapsed: {
     width: '100%',
-    height: 70,
+    minHeight: 130,
     borderRadius: 18,
     backgroundColor: 'rgba(255, 255, 255, 0.9)',
     paddingHorizontal: 20,
-    paddingVertical: 13,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    paddingTop: 16,
+    paddingBottom: 10,
+    flexDirection: 'column',
     overflow: 'hidden',
     borderWidth: 0,
     ...(Platform.OS === 'web'
@@ -372,13 +284,20 @@ const styles = StyleSheet.create({
     elevation: 2,
   },
   storyDropdownTextCollapsed: {
-    flex: 1,
+    width: '100%',
     fontSize: 18,
     color: '#0F172A',
-    marginRight: 10,
     letterSpacing: -0.3,
     fontWeight: '500',
     lineHeight: 25,
+    marginBottom: 6,
+  },
+  caretBottomRow: {
+    width: '100%',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingTop: 4,
+    paddingBottom: 2,
   },
   storyDropdownCardExpandedContainer: {
     position: 'absolute',
