@@ -29,6 +29,7 @@ interface LayoutProps {
   activeTab: MainTabType;
   onTabChange: (tab: MainTabType) => void;
   onSettingsPress?: () => void;
+  hideBottomNav?: boolean;
   children: ReactNode;
 }
 
@@ -36,6 +37,7 @@ export function Layout({
   activeTab,
   onTabChange,
   onSettingsPress,
+  hideBottomNav = false,
   children,
 }: LayoutProps) {
   const insets = useSafeAreaInsets();
@@ -51,93 +53,99 @@ export function Layout({
       <StatusBar style="dark" />
 
       {/* Top White Status Bar & Header Container */}
-      <View style={[styles.topWhiteArea, { paddingTop: insets.top }]}>
-        <View style={styles.header}>
-          <View style={styles.headerLeftSpacer} />
-          <Image
-            source={require('../../assets/xoxo_logo.png')}
-            style={styles.logoImage}
-            resizeMode="contain"
-          />
+      {activeTab !== 'chat' ? (
+        <View style={[styles.topWhiteArea, { paddingTop: insets.top }]}>
+          <View style={styles.header}>
+            <View style={styles.headerLeftSpacer} />
+            <Image
+              source={require('../../assets/xoxo_logo.png')}
+              style={styles.logoImage}
+              resizeMode="contain"
+            />
 
-        {activeTab === 'create' ? (
-          <TouchableOpacity
-            style={styles.notificationButton}
-            onPress={() => onTabChange('feed')}
-            activeOpacity={0.7}
-          >
-            <Svg width={24} height={24} viewBox="0 0 24 24" fill="none">
-              <Path
-                d="M18 6L6 18M6 6l12 12"
-                stroke="#8F8F8F"
-                strokeWidth={2.2}
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </Svg>
-          </TouchableOpacity>
-        ) : activeTab === 'my' ? (
-          <OpenSettingBottomSheetAction onSettingsPress={onSettingsPress} />
-        ) : (
-          <TouchableOpacity
-            style={styles.notificationButton}
-            activeOpacity={0.7}
-          >
-            <Svg width={24} height={24} viewBox="0 0 24 24" fill="none">
-              <Path
-                d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 01-3.46 0"
-                stroke="#0F172A"
-                strokeWidth={2.2}
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </Svg>
-            <View style={styles.unreadBadgeDot} />
-          </TouchableOpacity>
-        )}
-      </View>
-    </View>
+            {activeTab === 'create' ? (
+              <TouchableOpacity
+                style={styles.notificationButton}
+                onPress={() => onTabChange('feed')}
+                activeOpacity={0.7}
+              >
+                <Svg width={24} height={24} viewBox="0 0 24 24" fill="none">
+                  <Path
+                    d="M18 6L6 18M6 6l12 12"
+                    stroke="#8F8F8F"
+                    strokeWidth={2.2}
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </Svg>
+              </TouchableOpacity>
+            ) : activeTab === 'my' ? (
+              <OpenSettingBottomSheetAction onSettingsPress={onSettingsPress} />
+            ) : (
+              <TouchableOpacity
+                style={styles.notificationButton}
+                activeOpacity={0.7}
+              >
+                <Svg width={24} height={24} viewBox="0 0 24 24" fill="none">
+                  <Path
+                    d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 01-3.46 0"
+                    stroke="#0F172A"
+                    strokeWidth={2.2}
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </Svg>
+                <View style={styles.unreadBadgeDot} />
+              </TouchableOpacity>
+            )}
+          </View>
+        </View>
+      ) : (
+        <View style={{ paddingTop: insets.top, backgroundColor: '#FFFFFF' }} />
+      )}
 
       {/* Main Content Area */}
       <View style={styles.contentArea}>{children}</View>
 
       {/* Floating Glassmorphism Bottom Navigation Bar */}
-      <View
-        style={[
-          styles.bottomNavOuterWrapper,
-          { bottom: Math.max(22, insets.bottom + 8) },
-        ]}
-      >
-        <View style={styles.bottomNavInnerCapsule}>
-          <BlurView
-            intensity={35}
-            tint="light"
-            style={styles.glassBlurBackground}
-          />
-          <LinearGradient
-            colors={[
-              'rgba(255, 255, 255, 0.75)',
-              'rgba(255, 255, 255, 0.35)',
-              'rgba(255, 255, 255, 0.15)',
-            ]}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-            style={StyleSheet.absoluteFillObject}
-          />
+      {!hideBottomNav && (
+        <View
+          style={[
+            styles.bottomNavOuterWrapper,
+            { bottom: Math.max(22, insets.bottom + 8) },
+          ]}
+        >
+          <View style={styles.bottomNavInnerCapsule}>
+            <BlurView
+              intensity={35}
+              tint="light"
+              style={styles.glassBlurBackground}
+            />
+            <LinearGradient
+              colors={[
+                'rgba(255, 255, 255, 0.75)',
+                'rgba(255, 255, 255, 0.35)',
+                'rgba(255, 255, 255, 0.15)',
+              ]}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={StyleSheet.absoluteFillObject}
+            />
 
-          <View style={styles.bottomNavContainer}>
-            {NAV_TABS.map(tab => (
-              <NavItem
-                key={tab.type}
-                type={tab.type}
-                label={tab.label}
-                isActive={activeTab === tab.type}
-                onPress={() => onTabChange(tab.type)}
-              />
-            ))}
+            <View style={styles.bottomNavContainer}>
+              {NAV_TABS.map(tab => (
+                <NavItem
+                  key={tab.type}
+                  type={tab.type}
+                  label={tab.label}
+                  isActive={activeTab === tab.type}
+                  onPress={() => onTabChange(tab.type)}
+                />
+              ))}
+            </View>
           </View>
         </View>
-      </View>
+      )}
     </View>
   );
 }
@@ -145,7 +153,7 @@ export function Layout({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FEFEFE',
+    backgroundColor: '#FAFAFA',
   },
   topWhiteArea: {
     width: '100%',

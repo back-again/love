@@ -48,6 +48,7 @@ const MainStack = createNativeStackNavigator<RootStackParamList>();
 
 function MainAppLayout({ mainNavRef }: { mainNavRef: any }) {
   const [activeTab, setActiveTab] = useState<MainTabType>('create');
+  const [isChatActive, setIsChatActive] = useState<boolean>(false);
 
   const handleTabChange = (tab: MainTabType) => {
     setActiveTab(tab);
@@ -66,7 +67,11 @@ function MainAppLayout({ mainNavRef }: { mainNavRef: any }) {
   };
 
   return (
-    <Layout activeTab={activeTab} onTabChange={handleTabChange}>
+    <Layout
+      activeTab={activeTab}
+      onTabChange={handleTabChange}
+      hideBottomNav={activeTab === 'chat' && isChatActive}
+    >
       <MainStack.Navigator
         screenOptions={{
           headerShown: false,
@@ -88,7 +93,15 @@ function MainAppLayout({ mainNavRef }: { mainNavRef: any }) {
         }}
       >
         <MainStack.Screen name="Feed" component={FeedScreen} />
-        <MainStack.Screen name="Chat" component={ChatScreen} />
+        <MainStack.Screen name="Chat">
+          {(props) => (
+            <ChatScreen
+              {...props}
+              onGoToCreate={() => handleTabChange('create')}
+              onActiveChatStateChange={setIsChatActive}
+            />
+          )}
+        </MainStack.Screen>
         <MainStack.Screen name="Create" component={CreateScreen} />
         <MainStack.Screen name="My" component={MyScreen} />
       </MainStack.Navigator>
