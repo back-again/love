@@ -1,4 +1,4 @@
-import React, { ReactNode } from 'react';
+import React, { ReactNode, useEffect } from 'react';
 import {
   StyleSheet,
   View,
@@ -14,6 +14,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import { NavItem } from './_component/NavItem';
 import { OpenSettingBottomSheetAction } from '@/screens/setting/_action/OpenSettingBottomSheet.action';
+import { useCreateForm } from '@/screens/create/_state/useCreateForm';
 
 export type MainTabType = 'feed' | 'chat' | 'create' | 'my';
 
@@ -38,6 +39,12 @@ export function Layout({
   children,
 }: LayoutProps) {
   const insets = useSafeAreaInsets();
+
+  useEffect(() => {
+    if (activeTab !== 'create') {
+      useCreateForm.getState().reset();
+    }
+  }, [activeTab]);
 
   return (
     <View style={styles.container}>

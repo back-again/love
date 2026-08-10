@@ -49,7 +49,7 @@ export function AnimatedTextInputField({
 
   const animatedBorderColor = focusAnim.interpolate({
     inputRange: [0, 1],
-    outputRange: ['#EBEBEB', '#FFC8B3'],
+    outputRange: ['#EBEBEB', '#FFB5C5'],
   });
 
   return (
@@ -65,7 +65,7 @@ export function AnimatedTextInputField({
           },
           Platform.OS === 'web' && isFocused
             ? ({
-                boxShadow: '0 0 0 3px rgba(255, 200, 179, 0.45)',
+                boxShadow: '0 0 0 3px rgba(255, 181, 197, 0.25)',
               } as any)
             : {},
           style,

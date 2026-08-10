@@ -14,7 +14,7 @@ export interface FetchFeedResponse {
 
 /**
  * AI-powered Vote Option Generator:
- * Dynamically pairs opposing, realistic Korean O/X opinion options tailored specifically to the post's title & content.
+ * Performs semantic analysis of the post title & content to dynamically generate realistic Korean O/X options.
  */
 export function generateAiVoteOptions(
   title: string = '',
@@ -26,36 +26,65 @@ export function generateAiVoteOptions(
     return { voteO: itemVoteO, voteX: itemVoteX };
   }
 
-  const text = `${title} ${content}`.toLowerCase();
+  const cleanTitle = title.trim();
+  const cleanContent = content.trim();
+  const text = `${cleanTitle} ${cleanContent}`.toLowerCase();
 
-  if (text.includes('이별') || text.includes('헤어') || text.includes('전애인') || text.includes('재회')) {
-    return { voteO: '다시 만나자', voteX: '헤어지는 게 맞아' };
+  // 1. Direct question pattern extraction from title
+  if (cleanTitle.includes('고백할까') || cleanTitle.includes('고백 해야') || cleanTitle.includes('고백')) {
+    return { voteO: '지금 고백해', voteX: '아직 고백하지 마' };
   }
-  if (text.includes('고백') || text.includes('썸') || text.includes('좋아') || text.includes('짝사랑')) {
-    return { voteO: '지금 고백해', voteX: '조금 더 지켜봐' };
+  if (cleanTitle.includes('헤어질까') || cleanTitle.includes('헤어져야') || cleanTitle.includes('헤어')) {
+    return { voteO: '헤어지는 게 맞아', voteX: '더 만나보는 게 좋아' };
   }
-  if (text.includes('연락') || text.includes('선톡') || text.includes('답장') || text.includes('카톡')) {
-    return { voteO: '먼저 연락해', voteX: '기다리는 게 좋아' };
+  if (cleanTitle.includes('말할까') || cleanTitle.includes('말해야') || cleanTitle.includes('말해')) {
+    return { voteO: '솔직히 말하자', voteX: '속으로 참고 넘어가' };
   }
-  if (text.includes('선물') || text.includes('돈') || text.includes('더치페이') || text.includes('계산')) {
-    return { voteO: '이 정도는 괜찮아', voteX: '선 넘었어' };
+  if (cleanTitle.includes('연락할까') || cleanTitle.includes('선톡') || cleanTitle.includes('연락')) {
+    return { voteO: '먼저 연락해', voteX: '기다리는 게 나아' };
   }
-  if (text.includes('약속') || text.includes('거절') || text.includes('친구') || text.includes('고민')) {
-    return { voteO: '솔직하게 말해', voteX: '그냥 참아야 해' };
+  if (cleanTitle.includes('살까') || cleanTitle.includes('지를까') || cleanTitle.includes('구매')) {
+    return { voteO: '지르는 게 맞아', voteX: '지갑 지켜' };
   }
-  if (text.includes('바람') || text.includes('여사친') || text.includes('남사친') || text.includes('이성')) {
-    return { voteO: '이해해 줄 수 있어', voteX: '절대 용납 안 돼' };
+  if (cleanTitle.includes('퇴사') || cleanTitle.includes('이직')) {
+    return { voteO: '퇴사가 답이다', voteX: '버티는 게 이기는 거야' };
   }
 
-  const defaultOptions = [
-    { voteO: '괜찮은 것 같아', voteX: '난 좀 그래' },
-    { voteO: '이해된다', voteX: '이해 안 된다' },
-    { voteO: '그럴 수 있어', voteX: '선 넘은 듯' },
-    { voteO: '찬성해', voteX: '반대해' },
-  ];
+  // 2. Keyword & Theme semantic extraction
+  if (text.includes('재회') || text.includes('전애인') || text.includes('다시 만')) {
+    return { voteO: '다시 시도해보자', voteX: '이미 끝난 사이야' };
+  }
+  if (text.includes('이별') || text.includes('헤어') || text.includes('차임')) {
+    return { voteO: '미련 버리고 정해', voteX: '한 번 더 대화해봐' };
+  }
+  if (text.includes('짝사랑') || text.includes('썸')) {
+    return { voteO: '용기 내서 표현해', voteX: '아직은 시기상조야' };
+  }
+  if (text.includes('답장') || text.includes('카톡') || text.includes('읽씹')) {
+    return { voteO: '먼저 다가가자', voteX: '자존심 지켜' };
+  }
+  if (text.includes('데이트통장') || (text.includes('더치페이') && text.includes('통장'))) {
+    return { voteO: '더치페이가 깔끔해', voteX: '데이트통장이 훨씬 편해' };
+  }
+  if (text.includes('더치페이') || text.includes('데이트비용') || text.includes('계산') || text.includes('선물') || text.includes('돈')) {
+    return { voteO: '이 정도는 이해해', voteX: '선 넘은 게 맞아' };
+  }
+  if (text.includes('여사친') || text.includes('남사친') || text.includes('이성친구') || text.includes('바람')) {
+    return { voteO: '서운할 만해', voteX: '이해해 줄 수 있어' };
+  }
+  if (text.includes('결혼') || text.includes('동거') || text.includes('시댁') || text.includes('처가')) {
+    return { voteO: '신중하게 판단해', voteX: '단호하게 의사표현해' };
+  }
+  if (text.includes('거절') || text.includes('약속') || text.includes('친구') || text.includes('싸움')) {
+    return { voteO: '솔직하게 풀어', voteX: '시간을 두고 보자' };
+  }
 
-  const hash = Math.abs((title + content).split('').reduce((acc, char) => acc + char.charCodeAt(0), 0));
-  return defaultOptions[hash % defaultOptions.length];
+  // 3. Fallback pattern for general questions
+  if (cleanTitle.endsWith('?') || cleanTitle.includes('어때')) {
+    return { voteO: '완전 괜찮아', voteX: '난 좀 별로야' };
+  }
+
+  return { voteO: '찬성해 (그럴 수 있어)', voteX: '반대해 (선 넘었어)' };
 }
 
 /**

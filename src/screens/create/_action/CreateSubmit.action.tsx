@@ -8,13 +8,14 @@ import { inspectPostQualityWithAi } from '../_lib/aiModeration.lib';
 import { AiInspectionModal } from '@/components/modal/AiInspectionModal';
 
 export function CreateSubmitAction() {
-  const { questionTitle, detailSituation, images, voteO, voteX, reset } = useCreateForm(
+  const { questionTitle, detailSituation, images, voteO, voteX, isVoteEnabled, reset } = useCreateForm(
     useShallow((state) => ({
       questionTitle: state.questionTitle,
       detailSituation: state.detailSituation,
       images: state.images,
       voteO: state.voteO,
       voteX: state.voteX,
+      isVoteEnabled: state.isVoteEnabled,
       reset: state.reset,
     }))
   );
@@ -33,8 +34,8 @@ export function CreateSubmitAction() {
         title: questionTitle.trim(),
         content: detailSituation.trim(),
         images,
-        voteO: voteO.trim(),
-        voteX: voteX.trim(),
+        voteO: isVoteEnabled ? voteO.trim() : '',
+        voteX: isVoteEnabled ? voteX.trim() : '',
       }),
     onSuccess: () => {
       if (Platform.OS === 'web') {

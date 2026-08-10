@@ -27,6 +27,7 @@ import { supabase } from '../api/supabase';
 import { createPost } from '../screens/create/_lib/createPost.lib';
 
 import { Dimensions } from 'react-native';
+import { useCreateForm } from '../screens/create/_state/useCreateForm';
 
 interface HomeScreenProps {
   user: any;
@@ -48,14 +49,10 @@ const SAMPLE_POSTS: any[] = [
     percentX: 33,
     totalVotes: 12,
     topComments: [
-      { id: 'c1', user: '익명1', text: '침착맨이 최고지 ㅋㅋㅋ', likes: 153 },
-      { id: 'c2', user: '익명2', text: '저는 숏박스 좋아해요!', likes: 98 },
+      { id: 'c1', nickname: '익명1', text: '침착맨이 최고지 ㅋㅋㅋ' },
     ],
-    reviewStatus: '후기 보기',
-    hasReview: true,
-    fireCount: 24,
-    facepalmCount: 24,
-    commentCount: 12,
+    timeAgo: '10분 전',
+    category: '솔로',
   },
   {
     id: 'post-2',
@@ -657,6 +654,13 @@ export default function HomeScreen({ user, onLogout }: HomeScreenProps) {
     };
     initPersistentPosts();
   }, []);
+
+  // 작성 화면(create 탭) 이탈 시 작성 폼 데이터 완벽 초기화
+  useEffect(() => {
+    if (activeTab !== 'create') {
+      useCreateForm.getState().reset();
+    }
+  }, [activeTab]);
 
   // 새 사연 생성 시 로컬 DB(AsyncStorage) 및 Supabase Cloud DB 이중 영구 저장
   const handleAddNewPost = async (newPostData?: any) => {
