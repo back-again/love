@@ -12,7 +12,6 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 import LoginScreen from '@/screens/login/LoginScreen';
 import OnboardingScreen from '@/screens/onboarding/OnboardingScreen';
-import HomeScreen from '@/components/HomeScreen';
 import MyScreen from '@/screens/my/MyScreen';
 import CreateScreen from '@/screens/create/CreateScreen';
 import { Layout, MainTabType } from '@/components/layout/Layout';
@@ -91,19 +90,9 @@ function MainAppLayout({ mainNavRef }: { mainNavRef: any }) {
   );
 }
 
-const MOCK_USER: User = {
-  id: 'test-user-1',
-  email: 'test@example.com',
-  gender: 'female',
-  birth_year: '1998',
-  created_at: new Date().toISOString(),
-};
-
 export default function App() {
-  const { user, hasOnboarded, isLoading, handleLoginSuccess, handleLogout } = useLoadApp();
+  const { user, hasOnboarded, isLoading, handleLoginSuccess } = useLoadApp();
   const navigationRef = useNavigationContainerRef();
-
-  const currentUser = user || MOCK_USER;
 
   if (isLoading) {
     return (
@@ -128,22 +117,11 @@ export default function App() {
             {!user ? (
               <Stack.Screen name="Login">
                 {props => (
-                  <LoginScreen
-                    {...props}
-                    onLoginSuccess={handleLoginSuccess}
-                  />
+                  <LoginScreen {...props} onLoginSuccess={handleLoginSuccess} />
                 )}
               </Stack.Screen>
             ) : !hasOnboarded ? (
-              <Stack.Screen name="Onboarding">
-                {props => (
-                  <OnboardingScreen
-                    {...props}
-                    user={currentUser}
-                    onComplete={handleLoginSuccess}
-                  />
-                )}
-              </Stack.Screen>
+              <Stack.Screen name="Onboarding" component={OnboardingScreen} />
             ) : (
               <Stack.Screen name="Main">
                 {() => <MainAppLayout mainNavRef={navigationRef} />}

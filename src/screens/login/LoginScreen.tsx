@@ -1,18 +1,12 @@
 import React from 'react';
-import {
-  StyleSheet,
-  View,
-  Text,
-  Image,
-  Platform,
-} from 'react-native';
+import { StyleSheet, View, Text, Image, Platform } from 'react-native';
 import MaskedView from '@react-native-masked-view/masked-view';
 import { LinearGradient } from 'expo-linear-gradient';
 import GoogleLoginAction from '@/screens/login/_action/GoogleLogin.action';
 import { AppleLoginAction } from '@/screens/login/_action/AppleLogin.action';
 
 interface LoginScreenProps {
-  onLoginSuccess: (user: any) => void;
+  onLoginSuccess?: (user: any) => void;
 }
 
 export default function LoginScreen({ onLoginSuccess }: LoginScreenProps) {
