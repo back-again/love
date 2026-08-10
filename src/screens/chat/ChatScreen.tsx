@@ -326,7 +326,7 @@ export default function ChatScreen({
           <View style={styles.sectionHeaderRow}>
             <Text style={styles.sectionTitle}>고민별 심층 대화</Text>
             <Text style={styles.sectionSubTitle}>
-              내 연애성향을 발견하고 맞춤 솔루션을 얻을 수 있어요.
+              대화를 통해 내 연애성향을 발견하고 맞춤 솔루션을 얻을 수 있어요.
             </Text>
           </View>
 

@@ -1,5 +1,6 @@
 import React from 'react';
 import { StyleSheet, View, Text, TouchableOpacity } from 'react-native';
+import Svg, { Circle } from 'react-native-svg';
 
 export interface WrittenPost {
   id: string;
@@ -18,21 +19,38 @@ interface WrittenPostCardProps {
   post: WrittenPost;
   onOpenViewReview?: (post: WrittenPost) => void;
   onOpenWriteReview?: (post: WrittenPost) => void;
+  onOpenOptions?: (post: WrittenPost) => void;
 }
 
 export function WrittenPostCard({
   post,
   onOpenViewReview,
   onOpenWriteReview,
+  onOpenOptions,
 }: WrittenPostCardProps) {
   const isODominant = post.voteO >= post.voteX;
   const isXDominant = post.voteX > post.voteO;
 
   return (
     <View style={styles.myPostCard}>
-      <Text style={styles.myPostTitle} numberOfLines={2}>
-        {post.title}
-      </Text>
+      {/* Title & Three Dots More Options Menu */}
+      <View style={styles.myPostTitleRow}>
+        <Text style={styles.myPostTitle} numberOfLines={2}>
+          {post.title}
+        </Text>
+        <TouchableOpacity
+          style={styles.moreOptionsBtn}
+          onPress={() => onOpenOptions && onOpenOptions(post)}
+          hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+          activeOpacity={0.6}
+        >
+          <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
+            <Circle cx={5} cy={12} r={2} fill="#8F8F8F" />
+            <Circle cx={12} cy={12} r={2} fill="#8F8F8F" />
+            <Circle cx={19} cy={12} r={2} fill="#8F8F8F" />
+          </Svg>
+        </TouchableOpacity>
+      </View>
 
       {/* O/X Vote Mini Gauge Progress Bar */}
       <View style={styles.myPostVoteBarWrapper}>
@@ -120,13 +138,24 @@ const styles = StyleSheet.create({
     padding: 18,
     marginBottom: 14,
   },
+  myPostTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    justifyContent: 'space-between',
+    marginBottom: 10,
+    gap: 8,
+  },
   myPostTitle: {
+    flex: 1,
     fontSize: 16,
     fontWeight: '700',
     color: '#0F172A',
-    marginBottom: 12,
     lineHeight: 22,
     letterSpacing: -0.3,
+  },
+  moreOptionsBtn: {
+    padding: 2,
+    marginTop: 2,
   },
   myPostVoteBarWrapper: {
     width: '100%',
