@@ -34,125 +34,72 @@ interface HomeScreenProps {
 }
 
 // Sample feed posts list with Top 3 Rolling Comments & Vote Ratio Stats
-const SAMPLE_POSTS = [
+const SAMPLE_POSTS: any[] = [
   {
     id: 'post-1',
-    variantName: '사진 1개',
-    title: '아니 너네는 남친이\n피엑스에서 선물사주면 어떰?',
-    storySummary:
-      '아니 내가 생일 2주전부터 얘기했는데 글쎄 내 생일에 PX에서 달팽이크림이랑 선크림을 사가지고 줬더라고 ㅋㅋㅋ 진짜 당황스러웠음...',
-    fullStory:
-      '아니 내가 생일 2주전부터 얘기했는데 글쎄 내 생일에 PX에서 달팽이크림이랑 선크림을 사가지고 줬더라고 ㅋㅋㅋ 진짜 당황스러워서 선물 받고도 기분이 묘한데 너네라면 어떨 거 같아?',
-    images: [
-      'https://images.unsplash.com/photo-1577563908411-5077b6dc7624?w=800&auto=format&fit=crop&q=80',
-    ],
-    voteO: '괜찮은데?',
-    voteX: '난 싫어',
-    percentO: 60,
-    percentX: 40,
-    totalVotes: 324,
+    variantName: '사진 안넣음',
+    title: '최애 유튜버',
+    storySummary: '익명의 화해님이 하나 골라달래요. 여러분 최애 유튜버 있으신가요?',
+    fullStory: '익명의 화해님이 하나 골라달래요. 여러분 최애 유튜버 있으신가요?',
+    images: [],
+    voteO: '있다',
+    voteX: '없다',
+    percentO: 67,
+    percentX: 33,
+    totalVotes: 12,
     topComments: [
-      { id: 'c1', user: '익명1', text: '그딴 ㅃ을 만나고있네 ㅋ', likes: 153 },
-      {
-        id: 'c2',
-        user: '익명2',
-        text: 'PX 달팽이크림 은근 비싸고 좋은데 서운할 순 있음 ㅠ',
-        likes: 98,
-      },
-      {
-        id: 'c3',
-        user: '익명3',
-        text: '생일선물로 PX는 솔직히 좀 성의 없어 보인다...',
-        likes: 64,
-      },
+      { id: 'c1', user: '익명1', text: '침착맨이 최고지 ㅋㅋㅋ', likes: 153 },
+      { id: 'c2', user: '익명2', text: '저는 숏박스 좋아해요!', likes: 98 },
     ],
     reviewStatus: '후기 보기',
     hasReview: true,
     fireCount: 24,
     facepalmCount: 24,
-    commentCount: 24,
+    commentCount: 12,
   },
   {
     id: 'post-2',
-    variantName: '사진 2개 이상',
-    title: '아니 너네는 남친이\n피엑스에서 선물사주면 어떰?',
-    storySummary:
-      '아니 내가 생일 2주전부터 얘기했는데 글쎄 내 생일에 PX에서 달팽이크림 선크림 들고 나타남 ㅋ 카톡 캡처 첨부함...',
-    fullStory:
-      '아니 내가 생일 2주전부터 얘기했는데 글쎄 내 생일에 PX에서 달팽이크림이랑 선크림을 사가지고 줬더라고 ㅋㅋㅋ 진짜 당황스러워서 선물 받고도 기분이 묘하고 속상함 ㅠㅠ 남친은 "이거 엄청 유명하고 비싼 크림이야!" 하면서 당당하게 주던데 솔직히 생일선물로 PX는 좀 성의 없어 보이는 거 맞아? 너네라면 남친한테 솔직하게 서운하다고 말할 거 같아 아니면 그냥 고맙다고 쓸 거 같아?',
-    images: [
-      'https://images.unsplash.com/photo-1577563908411-5077b6dc7624?w=400&auto=format&fit=crop&q=80',
-      'https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=400&auto=format&fit=crop&q=80',
-    ],
-    voteO: '괜찮은데?',
-    voteX: '난 싫어',
-    percentO: 45,
-    percentX: 55,
-    totalVotes: 512,
+    variantName: '사진 안넣음',
+    title: '하트시그널',
+    storySummary: '익명의 화해님이 하나 골라달래요. 하트시그널 정주행 하시나요?',
+    fullStory: '익명의 화해님이 하나 골라달래요. 하트시그널 정주행 하시나요?',
+    images: [],
+    voteO: '본다',
+    voteX: '안본다',
+    percentO: 50,
+    percentX: 50,
+    totalVotes: 48,
     topComments: [
-      {
-        id: 'c1',
-        user: '익명1',
-        text: '카톡 캡처 보니까 남친 말하는 게 더 열받네 ㅋㅋ',
-        likes: 142,
-      },
-      {
-        id: 'c2',
-        user: '익명2',
-        text: '선크림 피부타입은 맞춰서 사온 거임? ㅋㅋㅋ',
-        likes: 87,
-      },
-      {
-        id: 'c3',
-        user: '익명3',
-        text: '다음 남친 생일 때 똑같이 PX 선물 ㄱㄱ',
-        likes: 53,
-      },
+      { id: 'c1', user: '익명1', text: '시즌2가 레전드였음', likes: 142 },
+      { id: 'c2', user: '익명2', text: '요즘 연애프로 너무 많아', likes: 87 },
     ],
     reviewStatus: '후기 요청',
     hasReview: false,
     fireCount: 38,
     facepalmCount: 19,
-    commentCount: 42,
+    commentCount: 24,
   },
   {
     id: 'post-3',
     variantName: '사진 안넣음',
-    title: '아니 너네는 남친이\n피엑스에서 선물사주면 어떰?',
-    storySummary:
-      '아니 내가 생일 2주전부터 얘기했는데 글쎄 내 생일에 PX에서 달팽이크림이랑 선크림 사가지고 줬더라고 진짜...',
-    fullStory:
-      '아니 내가 생일 2주전부터 얘기했는데 글쎄 내 생일에 PX에서 달팽이크림이랑 선크림을 사가지고 줬더라고 ㅋㅋㅋ 진짜 당황스러워서.. 사진 없이 글로만 써보는데 너희들 의견은 어때?',
+    title: '무도 최애',
+    storySummary: '익명의 화해님이 하나 골라달래요. 무한도전 최애 멤버는?',
+    fullStory: '익명의 화해님이 하나 골라달래요. 무한도전 최애 멤버는?',
     images: [],
-    voteO: '괜찮은데?',
-    voteX: '난 싫어',
-    percentO: 28,
-    percentX: 72,
-    totalVotes: 189,
+    voteO: '유재석',
+    voteX: '박명수',
+    percentO: 60,
+    percentX: 40,
+    totalVotes: 86,
     topComments: [
-      {
-        id: 'c1',
-        user: '익명1',
-        text: '사진 없어도 상황 다 이해됨 헤어지는 게 답임',
-        likes: 115,
-      },
-      {
-        id: 'c2',
-        user: '익명2',
-        text: '미리 갖고 싶은 거 말해줬는데도 이러면 관심 없는 거임',
-        likes: 76,
-      },
-      {
-        id: 'c3',
-        user: '익명3',
-        text: '실수로 까먹고 급하게 PX에서 사온 듯 ㅠㅠ',
-        likes: 41,
-      },
+      { id: 'c1', user: '익명1', text: '거성 박명수 ㅋㅋㅋ', likes: 89 },
+      { id: 'c2', user: '익명2', text: '유반장이 근본이지!', likes: 45 },
     ],
-    reviewStatus: '후기 요청',
-    fireCount: 12,
-    facepalmCount: 45,
-    commentCount: 31,
+    reviewStatus: '후기 보기',
+    hasReview: true,
+    fireCount: 15,
+    facepalmCount: 5,
+    commentCount: 18,
   },
   {
     id: 'post-4',
@@ -676,7 +623,7 @@ function FeedCardItem({
 const FEED_STORAGE_KEY = '@xoxo_user_feed_posts_v1';
 
 export default function HomeScreen({ user, onLogout }: HomeScreenProps) {
-  const [postsList, setPostsList] = useState(SAMPLE_POSTS);
+  const [postsList, setPostsList] = useState<any[]>([]);
   const [activeTab, setActiveTab] = useState<
     'feed' | 'chat' | 'create' | 'my'
   >('feed');

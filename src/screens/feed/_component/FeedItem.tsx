@@ -1,4 +1,6 @@
-import React, { useState, useCallback } from 'react';
+'use client';
+
+import React, { useState } from 'react';
 import {
   StyleSheet,
   View,
@@ -7,47 +9,36 @@ import {
   Image,
   Platform,
 } from 'react-native';
-import { BlurView } from 'expo-blur';
-import Svg, { Rect, Path } from 'react-native-svg';
+import Svg, { Path, Circle, Rect } from 'react-native-svg';
 import { Post } from '../_model/feed.model';
 import {
   useVoteState,
-  useStoryState,
-  useImageState,
+  getHasSeenFirstVoteGuide,
+  setHasSeenFirstVoteGuideTrue,
 } from '../_state/useFeedState';
-import { FeedItemVoteCard } from './FeedItem.VoteCard';
-import { CaretDownSvg, CaretUpSvg } from '../_svg';
-
 import { VoteInfo } from '@/components/CommentBottomSheet';
+import { VoteConfirmModal } from '@/components/modal/VoteConfirmModal';
 
 interface FeedItemProps {
   post: Post;
-  pageHeight: number;
+  pageHeight?: number;
   onOpenImageModal?: (index: number) => void;
+  onOpenDetailPost?: (post: Post) => void;
   onOpenComments: (title: string, voteInfo?: VoteInfo) => void;
-  onOpenViewReview: () => void;
+  onOpenViewReview?: () => void;
+  onOpenOptions?: (post: Post) => void;
+  onRequireVoteToast?: () => void;
 }
-
-const DEFAULT_FALLBACK_IMAGE =
-  'https://images.unsplash.com/photo-1579546929518-9e396f3cc809?w=800&q=80';
 
 export function FeedItem({
   post,
-  pageHeight,
   onOpenImageModal,
+  onOpenDetailPost,
   onOpenComments,
   onOpenViewReview,
+  onOpenOptions,
+  onRequireVoteToast,
 }: FeedItemProps) {
-  const [hasMoreStory, setHasMoreStory] = useState(false);
-
-  const handleTextLayout = useCallback((e: any) => {
-    if (e?.nativeEvent?.lines) {
-      if (e.nativeEvent.lines.length > 4) {
-        setHasMoreStory(prev => (prev ? prev : true));
-      }
-    }
-  }, []);
-
   const {
     selectedVote,
     voteOCount,
@@ -57,59 +48,259 @@ export function FeedItem({
     handleVote,
   } = useVoteState(post);
 
-  const { isStoryExpanded, setIsStoryExpanded } = useStoryState();
-  const { imageErrorMap, handleImageError } = useImageState();
+  const [isExpanded, setIsExpanded] = useState(false);
+  const [pendingVoteChoice, setPendingVoteChoice] = useState<'O' | 'X' | null>(null);
 
-  const fullText = post.fullStory || post.storySummary || '';
+  const isVoted = hasVoted;
+
+  const totalVotes = totalVoteCount || 1;
+  const percentO = totalVoteCount > 0 ? Math.round((voteOCount / totalVotes) * 100) : 50;
+  const percentX = 100 - percentO;
+
+  const handleCardVote = (choice: 'O' | 'X') => {
+    if (!isVoted) {
+      if (!getHasSeenFirstVoteGuide()) {
+        // App-wide first time vote! Show confirmation guide modal
+        setPendingVoteChoice(choice);
+      } else {
+        // User has already confirmed guide before! Vote immediately
+        handleVote(choice);
+      }
+    } else {
+      handleVote(choice);
+    }
+  };
+
+  const handleConfirmVote = () => {
+    if (pendingVoteChoice) {
+      setHasSeenFirstVoteGuideTrue(); // Persist so future votes on any post never show modal!
+      handleVote(pendingVoteChoice);
+      setPendingVoteChoice(null);
+    }
+  };
 
   const handleOpenBottomSheet = () => {
+    if (!isVoted) {
+      if (onRequireVoteToast) onRequireVoteToast();
+      return;
+    }
+
     onOpenComments(post.title, {
       selectedVote: selectedVote,
       voteOText: post.voteO,
       voteXText: post.voteX,
-      percentO: post.percentO || 50,
-      percentX: post.percentX || 50,
-      totalVotes: totalVoteCount || 300,
+      percentO: percentO,
+      percentX: percentX,
+      totalVotes: totalVotes,
       hasReview: post.hasReview,
     });
   };
 
+  const voteOText = post.voteO || '괜찮은데?';
+  const voteXText = post.voteX || '난 싫어';
+  const fullText = post.fullStory || post.storySummary || '';
+
   return (
     <TouchableOpacity
       style={styles.cardPageWrapper}
-      onPress={handleOpenBottomSheet}
+      onPress={() => setIsExpanded(prev => !prev)}
       activeOpacity={0.92}
     >
       <View style={styles.cardContainer}>
-        {/* Top Meta Row: Badge Pill + Category & Time */}
+        {/* Top Meta Row: Badge Pills + Time (Left) & Three Dots More Menu (Right) */}
         <View style={styles.topMetaRow}>
-          <View style={styles.hotBadgePill}>
-            <Text style={styles.hotBadgeText}>HOT</Text>
+          <View style={styles.badgeChipsContainer}>
+            {post.isHot && (
+              <View style={styles.hotBadgePill}>
+                <Text style={styles.hotBadgeText}>HOT</Text>
+              </View>
+            )}
+            <View style={styles.categoryBadgePill}>
+              <Text style={styles.categoryBadgeText}>
+                {post.category || '연애/썸'}
+              </Text>
+            </View>
+            <Text style={styles.categoryTimeText}>5분 전</Text>
           </View>
-          <Text style={styles.categoryTimeText}>연애 · 5분 전</Text>
+
+          {/* Three Dots More Menu Button */}
+          <TouchableOpacity
+            style={styles.moreOptionsButton}
+            onPress={(e) => {
+              e.stopPropagation();
+              if (onOpenOptions) onOpenOptions(post);
+            }}
+            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+            activeOpacity={0.6}
+          >
+            <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
+              <Circle cx={5} cy={12} r={2} fill="#A0A0A0" />
+              <Circle cx={12} cy={12} r={2} fill="#A0A0A0" />
+              <Circle cx={19} cy={12} r={2} fill="#A0A0A0" />
+            </Svg>
+          </TouchableOpacity>
         </View>
 
         {/* Title Question */}
         <Text style={styles.questionTitle}>{post.title}</Text>
 
-        {/* Story Text Preview if any */}
+        {/* Story Text Preview (3 lines preview with ellipsis, expands on press) */}
         {fullText ? (
-          <Text style={styles.storyPreviewText} numberOfLines={2}>
+          <Text
+            style={styles.storyPreviewText}
+            numberOfLines={isExpanded ? undefined : 3}
+            ellipsizeMode="tail"
+          >
             {fullText}
           </Text>
         ) : null}
 
         {/* Attached Images Preview if any */}
-        {post.images.length > 0 && (
+        {post.images && post.images.length > 0 && (
           <View style={styles.imageListRow}>
-            {post.images.slice(0, 3).map((imgUri, index) => (
-              <Image
+            {post.images.slice(0, 3).map((imgUri: string, index: number) => (
+              <TouchableOpacity
                 key={index}
-                source={{ uri: imgUri || DEFAULT_FALLBACK_IMAGE }}
-                style={styles.cardImageThumb}
-                resizeMode="cover"
-              />
+                onPress={(e) => {
+                  e.stopPropagation();
+                  if (onOpenImageModal) onOpenImageModal(index);
+                }}
+                activeOpacity={0.88}
+              >
+                <Image
+                  source={{ uri: imgUri }}
+                  style={styles.cardImageThumb}
+                  resizeMode="cover"
+                />
+              </TouchableOpacity>
             ))}
+          </View>
+        )}
+
+        {/* Interactive Vote Options (Before vs After Voting) */}
+        {!isVoted ? (
+          <View style={styles.votedResultsContainer}>
+            <TouchableOpacity
+              style={styles.votedBarWrapper}
+              onPress={(e) => {
+                e.stopPropagation();
+                handleCardVote('O');
+              }}
+              activeOpacity={0.88}
+            >
+              <View style={styles.votedBarTrack}>
+                <Text
+                  style={[styles.votedBarOptionText, styles.votedBarOptionTextUnselected]}
+                  numberOfLines={1}
+                >
+                  {voteOText}
+                </Text>
+              </View>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.votedBarWrapper}
+              onPress={(e) => {
+                e.stopPropagation();
+                handleCardVote('X');
+              }}
+              activeOpacity={0.88}
+            >
+              <View style={styles.votedBarTrack}>
+                <Text
+                  style={[styles.votedBarOptionText, styles.votedBarOptionTextUnselected]}
+                  numberOfLines={1}
+                >
+                  {voteXText}
+                </Text>
+              </View>
+            </TouchableOpacity>
+          </View>
+        ) : (
+          <View style={styles.votedResultsContainer}>
+            <TouchableOpacity
+              style={styles.votedBarWrapper}
+              onPress={(e) => {
+                e.stopPropagation();
+                handleCardVote('O');
+              }}
+              activeOpacity={0.9}
+            >
+              <View style={styles.votedBarTrack}>
+                <View
+                  style={[
+                    styles.votedBarFill,
+                    selectedVote === 'O'
+                      ? styles.votedBarFillSelected
+                      : styles.votedBarFillUnselected,
+                    { width: `${percentO}%` },
+                  ]}
+                />
+                <Text
+                  style={[
+                    styles.votedBarOptionText,
+                    selectedVote === 'O'
+                      ? styles.votedBarOptionTextSelected
+                      : styles.votedBarOptionTextUnselected,
+                  ]}
+                  numberOfLines={1}
+                >
+                  {voteOText}
+                </Text>
+                <Text
+                  style={[
+                    styles.votedPercentText,
+                    selectedVote === 'O'
+                      ? styles.votedPercentTextSelected
+                      : styles.votedPercentTextUnselected,
+                  ]}
+                >
+                  {percentO}%
+                </Text>
+              </View>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.votedBarWrapper}
+              onPress={(e) => {
+                e.stopPropagation();
+                handleCardVote('X');
+              }}
+              activeOpacity={0.9}
+            >
+              <View style={styles.votedBarTrack}>
+                <View
+                  style={[
+                    styles.votedBarFill,
+                    selectedVote === 'X'
+                      ? styles.votedBarFillSelected
+                      : styles.votedBarFillUnselected,
+                    { width: `${percentX}%` },
+                  ]}
+                />
+                <Text
+                  style={[
+                    styles.votedBarOptionText,
+                    selectedVote === 'X'
+                      ? styles.votedBarOptionTextSelected
+                      : styles.votedBarOptionTextUnselected,
+                  ]}
+                  numberOfLines={1}
+                >
+                  {voteXText}
+                </Text>
+                <Text
+                  style={[
+                    styles.votedPercentText,
+                    selectedVote === 'X'
+                      ? styles.votedPercentTextSelected
+                      : styles.votedPercentTextUnselected,
+                  ]}
+                >
+                  {percentX}%
+                </Text>
+              </View>
+            </TouchableOpacity>
           </View>
         )}
 
@@ -117,28 +308,44 @@ export function FeedItem({
         <View style={styles.bottomStatsRow}>
           <View style={styles.statLeftCol}>
             <Svg width={16} height={16} viewBox="0 0 24 24" fill="none">
-              <Rect x={2} y={12} width={5} height={10} rx={2} fill="#94A3B8" />
-              <Rect x={9.5} y={6} width={5} height={16} rx={2} fill="#94A3B8" />
-              <Rect x={17} y={2} width={5} height={20} rx={2} fill="#94A3B8" />
+              <Rect x={2} y={12} width={5} height={10} rx={2} fill="#8F8F8F" />
+              <Rect x={9.5} y={6} width={5} height={16} rx={2} fill="#8F8F8F" />
+              <Rect x={17} y={2} width={5} height={20} rx={2} fill="#8F8F8F" />
             </Svg>
             <Text style={styles.statLeftText}>
-              {(totalVoteCount || 643).toLocaleString()}명 투표 중
+              {(totalVotes || 643).toLocaleString()}명 투표 중
             </Text>
           </View>
 
-          <View style={styles.statRightCol}>
+          <TouchableOpacity
+            style={styles.statRightCol}
+            onPress={(e) => {
+              e.stopPropagation();
+              handleOpenBottomSheet();
+            }}
+            activeOpacity={0.7}
+          >
             <Svg width={16} height={16} viewBox="0 0 24 24" fill="none">
               <Path
                 d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"
-                stroke="#94A3B8"
+                stroke="#8F8F8F"
                 strokeWidth={2}
                 strokeLinecap="round"
                 strokeLinejoin="round"
               />
             </Svg>
-            <Text style={styles.statRightText}>{post.commentCount || 128}</Text>
-          </View>
+            <Text style={styles.statRightText}>
+              {post.commentCount || (post.topComments ? post.topComments.length : 128)}
+            </Text>
+          </TouchableOpacity>
         </View>
+
+        <VoteConfirmModal
+          visible={!!pendingVoteChoice}
+          onClose={() => setPendingVoteChoice(null)}
+          onConfirm={handleConfirmVote}
+          choiceText={pendingVoteChoice === 'O' ? voteOText : pendingVoteChoice === 'X' ? voteXText : ''}
+        />
       </View>
     </TouchableOpacity>
   );
@@ -169,25 +376,51 @@ const styles = StyleSheet.create({
     width: '100%',
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
+    justifyContent: 'space-between',
     marginBottom: 10,
   },
+  badgeChipsContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
   hotBadgePill: {
-    backgroundColor: '#FF4D7B',
+    backgroundColor: 'transparent',
     paddingHorizontal: 8,
     paddingVertical: 3,
-    borderRadius: 10,
+    borderRadius: 4,
+    borderWidth: 1,
+    borderColor: '#FEB5C9',
   },
   hotBadgeText: {
     fontSize: 11,
-    fontWeight: '800',
-    color: '#FFFFFF',
+    fontWeight: '600',
+    color: '#F9758D',
+    letterSpacing: -0.2,
+  },
+  categoryBadgePill: {
+    backgroundColor: '#FFF8F8',
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 4,
+    borderWidth: 1,
+    borderColor: '#FFF8F8',
+  },
+  categoryBadgeText: {
+    fontSize: 11,
+    fontWeight: '400',
+    color: '#F9758D',
     letterSpacing: -0.2,
   },
   categoryTimeText: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: '#94A3B8',
+    fontSize: 12,
+    fontWeight: '500',
+    color: '#8F8F8F',
+  },
+  moreOptionsButton: {
+    padding: 4,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   questionTitle: {
     fontSize: 18,
@@ -200,19 +433,122 @@ const styles = StyleSheet.create({
   },
   storyPreviewText: {
     fontSize: 14,
-    color: '#64748B',
+    color: '#727272',
     lineHeight: 20,
     marginBottom: 14,
   },
   imageListRow: {
     flexDirection: 'row',
-    gap: 6,
+    gap: 8,
     marginBottom: 14,
   },
   cardImageThumb: {
     width: 64,
     height: 64,
     borderRadius: 10,
+  },
+  votePillRow: {
+    width: '100%',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 8,
+    marginBottom: 14,
+  },
+  pillButtonO: {
+    flex: 1,
+    height: 48,
+    borderRadius: 14,
+    backgroundColor: '#F5F5F5',
+    borderWidth: 1,
+    borderColor: '#F5F5F5',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  pillTextO: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: '#727272',
+  },
+  vsCenterText: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#8F8F8F',
+    paddingHorizontal: 4,
+  },
+  pillButtonX: {
+    flex: 1,
+    height: 48,
+    borderRadius: 14,
+    backgroundColor: '#F5F5F5',
+    borderWidth: 1,
+    borderColor: '#F5F5F5',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  pillTextX: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: '#727272',
+  },
+  votedResultsContainer: {
+    width: '100%',
+    gap: 10,
+    marginBottom: 14,
+  },
+  votedBarWrapper: {
+    width: '100%',
+  },
+  votedBarTrack: {
+    width: '100%',
+    height: 48,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: '#F5F5F5',
+    position: 'relative',
+    justifyContent: 'center',
+    overflow: 'hidden',
+  },
+  votedBarFill: {
+    position: 'absolute',
+    left: 0,
+    top: 0,
+    bottom: 0,
+    borderRadius: 15,
+  },
+  votedBarFillSelected: {
+    backgroundColor: '#FEEBED',
+  },
+  votedBarFillUnselected: {
+    backgroundColor: '#F5F5F5',
+  },
+  votedBarOptionText: {
+    position: 'absolute',
+    left: 16,
+    fontSize: 15,
+    zIndex: 2,
+  },
+  votedBarOptionTextSelected: {
+    color: '#F9758D',
+    fontWeight: '800',
+  },
+  votedBarOptionTextUnselected: {
+    color: '#727272',
+    fontWeight: '700',
+  },
+  votedPercentText: {
+    position: 'absolute',
+    right: 16,
+    fontSize: 15,
+    fontWeight: '800',
+    zIndex: 2,
+  },
+  votedPercentTextSelected: {
+    color: '#F9758D',
+  },
+  votedPercentTextUnselected: {
+    color: '#727272',
   },
   bottomStatsRow: {
     width: '100%',
@@ -222,7 +558,7 @@ const styles = StyleSheet.create({
     marginTop: 6,
     paddingTop: 12,
     borderTopWidth: 1,
-    borderTopColor: '#F1F5F9',
+    borderTopColor: '#F5F5F5',
   },
   statLeftCol: {
     flexDirection: 'row',
@@ -232,7 +568,7 @@ const styles = StyleSheet.create({
   statLeftText: {
     fontSize: 13,
     fontWeight: '600',
-    color: '#64748B',
+    color: '#727272',
   },
   statRightCol: {
     flexDirection: 'row',
@@ -243,216 +579,5 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontWeight: '600',
     color: '#64748B',
-  },
-  storyNoImagesCard: {
-    width: '100%',
-    borderRadius: 16,
-    backgroundColor: '#F8FAFC',
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-    overflow: 'hidden',
-    borderWidth: 0,
-    marginBottom: 14,
-  },
-  storyDropdownWrapper: {
-    width: '100%',
-    position: 'relative',
-    zIndex: 100,
-    marginBottom: 14,
-  },
-  storyDropdownCardCollapsed: {
-    width: '100%',
-    minHeight: 130,
-    borderRadius: 18,
-    backgroundColor: 'rgba(255, 255, 255, 0.9)',
-    paddingHorizontal: 20,
-    paddingTop: 16,
-    paddingBottom: 10,
-    flexDirection: 'column',
-    overflow: 'hidden',
-    borderWidth: 0,
-    ...(Platform.OS === 'web'
-      ? {
-          backdropFilter: 'blur(10px) saturate(180%)',
-          WebkitBackdropFilter: 'blur(10px) saturate(180%)',
-        }
-      : {}),
-    shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.04,
-    shadowRadius: 8,
-    elevation: 2,
-  },
-  storyDropdownTextCollapsed: {
-    width: '100%',
-    fontSize: 18,
-    color: '#0F172A',
-    letterSpacing: -0.3,
-    fontWeight: '500',
-    lineHeight: 25,
-    marginBottom: 6,
-  },
-  caretBottomRow: {
-    width: '100%',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingTop: 4,
-    paddingBottom: 2,
-  },
-  storyDropdownCardExpandedContainer: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    zIndex: 100,
-  },
-  storyDropdownCardExpandedToImagePos: {
-    width: '100%',
-    minHeight: 356,
-    borderRadius: 20,
-    backgroundColor: 'rgba(255, 255, 255, 0.9)',
-    paddingHorizontal: 20,
-    paddingTop: 18,
-    paddingBottom: 14,
-    overflow: 'hidden',
-    borderWidth: 0,
-    justifyContent: 'space-between',
-    ...(Platform.OS === 'web'
-      ? {
-          backdropFilter: 'blur(10px) saturate(180%)',
-          WebkitBackdropFilter: 'blur(10px) saturate(180%)',
-        }
-      : {}),
-    shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.08,
-    shadowRadius: 16,
-    elevation: 6,
-  },
-  storyDropdownTextExpanded: {
-    fontSize: 18,
-    color: '#0F172A',
-    lineHeight: 25,
-    letterSpacing: -0.3,
-    marginBottom: 12,
-    fontWeight: '500',
-  },
-  expandedCaretUpRow: {
-    width: '100%',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 2,
-  },
-  singleImageWrapper: {
-    width: '100%',
-    height: 270,
-    borderRadius: 20,
-    overflow: 'hidden',
-    marginBottom: 16,
-  },
-  multiImageRow: {
-    flexDirection: 'row',
-    gap: 12,
-    width: '100%',
-    height: 270,
-    marginBottom: 16,
-  },
-  multiImageHalf: {
-    flex: 1,
-    height: '100%',
-    borderRadius: 20,
-    overflow: 'hidden',
-  },
-  multiImageThird: {
-    flex: 1,
-    height: '100%',
-    borderRadius: 20,
-    overflow: 'hidden',
-    position: 'relative',
-  },
-  imageOverlay: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(0, 0, 0, 0.45)',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  imageOverlayText: {
-    color: '#FFFFFF',
-    fontSize: 18,
-    fontWeight: '800',
-  },
-  multiImage: {
-    width: '100%',
-    height: '100%',
-  },
-  voteRow: {
-    flexDirection: 'row',
-    gap: 12,
-    width: '100%',
-    marginBottom: 14,
-  },
-  reactionsRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    paddingVertical: 2,
-    width: '100%',
-  },
-  actionChip: {
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: 'rgba(255, 255, 255, 0.7)',
-    paddingHorizontal: 14,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 5,
-    overflow: 'hidden',
-    borderWidth: 1,
-    borderColor: 'transparent',
-    ...(Platform.OS === 'web'
-      ? {
-          backdropFilter: 'blur(12px) saturate(140%)',
-          WebkitBackdropFilter: 'blur(12px) saturate(140%)',
-        }
-      : {}),
-    shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.04,
-    shadowRadius: 6,
-    elevation: 2,
-  },
-  activeActionChip: {
-    backgroundColor: 'rgba(255, 238, 235, 0.95)',
-    borderColor: '#FF5A5F',
-  },
-  actionChipText: {
-    fontSize: 13.5,
-    fontWeight: '700',
-    color: '#FF5A5F',
-  },
-  activeActionChipText: {
-    color: '#FF5A5F',
-    fontWeight: '800',
-  },
-  actionChipIconOnly: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: 'rgba(255, 255, 255, 0.7)',
-    alignItems: 'center',
-    justifyContent: 'center',
-    overflow: 'hidden',
-    borderWidth: 0,
-    ...(Platform.OS === 'web'
-      ? {
-          backdropFilter: 'blur(12px) saturate(140%)',
-          WebkitBackdropFilter: 'blur(12px) saturate(140%)',
-        }
-      : {}),
-    shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.04,
-    shadowRadius: 6,
-    elevation: 2,
   },
 });

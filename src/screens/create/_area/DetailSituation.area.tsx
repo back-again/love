@@ -21,13 +21,13 @@ const styles = StyleSheet.create({
   createSectionTitle: {
     fontSize: 18,
     fontWeight: '700',
-    color: '#0F172A',
+    color: '#727272',
     letterSpacing: -0.3,
     marginBottom: 6,
   },
   createSectionSub: {
     fontSize: 14,
-    color: '#9C9C9C',
+    color: '#8F8F8F',
     letterSpacing: -0.3,
     marginBottom: 12,
   },

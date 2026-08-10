@@ -86,6 +86,8 @@ export function PostDetailModal({
   onOpenVoteResults,
 }: PostDetailModalProps) {
   const [userVote, setUserVote] = useState<'O' | 'X' | null>(null);
+  const [commentList, setCommentList] = useState<CommentItem[]>(DEFAULT_COMMENTS);
+  const [newCommentText, setNewCommentText] = useState('');
   const [imageModal, setImageModal] = useState<{ visible: boolean; index: number }>({
     visible: false,
     index: 0,
@@ -214,7 +216,7 @@ export function PostDetailModal({
         <View style={styles.headerRow}>
           <TouchableOpacity style={styles.headerBtn} onPress={onClose} activeOpacity={0.8}>
             <Svg width={22} height={22} viewBox="0 0 24 24" fill="none">
-              <Path d="M15 18l-6-6 6-6" stroke="#0F172A" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" />
+              <Path d="M15 18l-6-6 6-6" stroke="#727272" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" />
             </Svg>
           </TouchableOpacity>
 
@@ -222,7 +224,7 @@ export function PostDetailModal({
 
           <TouchableOpacity style={styles.headerBtn} onPress={handleSharePost} activeOpacity={0.8}>
             <Svg width={20} height={20} viewBox="0 0 24 24" fill="none">
-              <Path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8M16 6l-4-4-4 4M12 2v13" stroke="#0F172A" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
+              <Path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8M16 6l-4-4-4 4M12 2v13" stroke="#727272" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
             </Svg>
           </TouchableOpacity>
         </View>
@@ -354,13 +356,13 @@ const styles = StyleSheet.create({
     paddingTop: Platform.OS === 'ios' ? 48 : 24,
   },
   headerRow: {
-    height: 52,
+    height: 54,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: 16,
     borderBottomWidth: 1,
-    borderBottomColor: '#F1F5F9',
+    borderBottomColor: '#F5F5F5',
   },
   headerBtn: {
     width: 36,
@@ -371,7 +373,7 @@ const styles = StyleSheet.create({
   headerCategoryText: {
     fontSize: 15,
     fontWeight: '700',
-    color: '#64748B',
+    color: '#8F8F8F',
   },
   scrollArea: {
     flex: 1,
@@ -392,7 +394,7 @@ const styles = StyleSheet.create({
   fullStoryText: {
     fontSize: 16,
     fontWeight: '400',
-    color: '#334155',
+    color: '#1E293B',
     lineHeight: 24,
     marginBottom: 20,
   },
@@ -406,7 +408,7 @@ const styles = StyleSheet.create({
     height: 240,
     borderRadius: 16,
     overflow: 'hidden',
-    backgroundColor: '#F8FAFC',
+    backgroundColor: '#F5F5F5',
   },
   galleryImage: {
     width: '100%',
@@ -414,7 +416,7 @@ const styles = StyleSheet.create({
   },
   voteSectionCard: {
     width: '100%',
-    backgroundColor: '#F8FAFC',
+    backgroundColor: '#F5F5F5',
     borderRadius: 20,
     padding: 16,
     marginBottom: 20,
@@ -535,12 +537,12 @@ const styles = StyleSheet.create({
   votersCountTextCenter: {
     fontSize: 13,
     fontWeight: '600',
-    color: '#64748B',
+    color: '#8F8F8F',
   },
   singleLinearTrack: {
     width: '100%',
     height: 14,
-    backgroundColor: '#F8F9FA',
+    backgroundColor: '#F5F5F5',
     borderRadius: 7,
     flexDirection: 'row',
     overflow: 'hidden',
@@ -557,12 +559,12 @@ const styles = StyleSheet.create({
   },
   linearFillX: {
     height: '100%',
-    backgroundColor: '#FF4D7B',
+    backgroundColor: '#F9758D',
     borderTopRightRadius: 7,
     borderBottomRightRadius: 7,
   },
   linearFillXUnselected: {
-    backgroundColor: '#FFE5EC',
+    backgroundColor: '#FEEBED',
   },
   bottomWordingsRow: {
     flexDirection: 'row',
@@ -578,7 +580,7 @@ const styles = StyleSheet.create({
   percentLabelPink: {
     fontSize: 14,
     fontWeight: '700',
-    color: '#FF4D7B',
+    color: '#F9758D',
   },
   reviewGradientTouch: {
     width: '100%',
@@ -616,7 +618,7 @@ const styles = StyleSheet.create({
   },
   sectionDivider: {
     height: 8,
-    backgroundColor: '#F1F5F9',
+    backgroundColor: '#F5F5F5',
     marginHorizontal: -20,
     marginVertical: 20,
   },
@@ -629,7 +631,7 @@ const styles = StyleSheet.create({
   commentRowContainer: {
     paddingVertical: 14,
     borderBottomWidth: 1,
-    borderBottomColor: '#F1F5F9',
+    borderBottomColor: '#F5F5F5',
   },
   commentHeaderRow: {
     flexDirection: 'row',
@@ -654,7 +656,7 @@ const styles = StyleSheet.create({
     color: '#A855F7',
   },
   voteBadgeX: {
-    backgroundColor: '#FFE5EC',
+    backgroundColor: '#FEEBED',
     paddingHorizontal: 6,
     paddingVertical: 2,
     borderRadius: 6,
@@ -662,11 +664,11 @@ const styles = StyleSheet.create({
   voteBadgeTextX: {
     fontSize: 11,
     fontWeight: '800',
-    color: '#FF4D7B',
+    color: '#F9758D',
   },
   commentBodyText: {
     fontSize: 14,
-    color: '#334155',
+    color: '#1E293B',
     lineHeight: 20,
     marginBottom: 8,
   },
@@ -681,11 +683,11 @@ const styles = StyleSheet.create({
   },
   likeCountText: {
     fontSize: 13,
-    color: '#94A3B8',
+    color: '#8F8F8F',
     fontWeight: '600',
   },
   likeCountTextActive: {
-    color: '#FF4D7B',
+    color: '#F9758D',
   },
   inputBarContainer: {
     flexDirection: 'row',
@@ -693,7 +695,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 12,
     borderTopWidth: 1,
-    borderTopColor: '#F1F5F9',
+    borderTopColor: '#F5F5F5',
     backgroundColor: '#FFFFFF',
     gap: 10,
   },
@@ -701,7 +703,7 @@ const styles = StyleSheet.create({
     flex: 1,
     height: 44,
     borderRadius: 22,
-    backgroundColor: '#F8FAFC',
+    backgroundColor: '#F5F5F5',
     paddingHorizontal: 16,
     fontSize: 14,
     color: '#0F172A',
@@ -714,9 +716,9 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   sendButtonActive: {
-    backgroundColor: '#FF4D7B',
+    backgroundColor: '#F9758D',
   },
   sendButtonDisabled: {
-    backgroundColor: '#F1F5F9',
+    backgroundColor: '#F5F5F5',
   },
 });

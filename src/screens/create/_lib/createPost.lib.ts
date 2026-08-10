@@ -6,6 +6,8 @@ export interface CreatePostParams {
   content: string;
   images?: string[]; // 로컬 선택 이미지 URI 배열
   userId?: string;
+  voteO?: string;
+  voteX?: string;
 }
 
 export async function createPost({
@@ -13,6 +15,8 @@ export async function createPost({
   content,
   images = [],
   userId,
+  voteO,
+  voteX,
 }: CreatePostParams) {
   // 1. 로그인 유저 ID 확인 또는 기본 유저 ID 적용
   let activeUserId = userId;
@@ -45,15 +49,18 @@ export async function createPost({
   }
 
   // 3. Supabase public.posts 레코드 생성
+  const insertPayload: any = {
+    user_id: activeUserId,
+    title,
+    content,
+  };
+
+  if (voteO) insertPayload.vote_o = voteO;
+  if (voteX) insertPayload.vote_x = voteX;
+
   const { data: postData, error: postError } = await supabase
     .from('posts')
-    .insert([
-      {
-        user_id: activeUserId,
-        title,
-        content,
-      },
-    ])
+    .insert([insertPayload])
     .select()
     .single();
 

@@ -81,7 +81,7 @@ export function ImageAttachmentPickerAction() {
           <Svg width={28} height={28} viewBox="0 0 24 24" fill="none">
             <Path
               d="M12 5v14M5 12h14"
-              stroke="#9C9C9C"
+              stroke="#8F8F8F"
               strokeWidth={2.2}
               strokeLinecap="round"
               strokeLinejoin="round"

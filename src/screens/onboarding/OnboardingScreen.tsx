@@ -5,7 +5,17 @@ import TermsBottomSheet from '@/components/TermsBottomSheet';
 import { FormArea } from './_area/Form.area';
 import { OnboardingSubmitAction } from './_action/OnboardingSubmit.action';
 
-export default function OnboardingScreen() {
+import { User } from '@/types/database.types';
+
+interface OnboardingScreenProps {
+  user?: User;
+  onComplete?: (userData: User) => void;
+}
+
+export default function OnboardingScreen({
+  user,
+  onComplete,
+}: OnboardingScreenProps) {
   const insets = useSafeAreaInsets();
   const [termsModalType, setTermsModalType] = useState<
     'terms' | 'privacy' | null

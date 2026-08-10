@@ -4,6 +4,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { QuestionTitleArea } from './_area/QuestionTitle.area';
 import { DetailSituationArea } from './_area/DetailSituation.area';
 import { ImageAttachmentArea } from './_area/ImageAttachment.area';
+import { VoteOptionSettingArea } from './_area/VoteOptionSetting.area';
 import { CreateSubmitAction } from './_action/CreateSubmit.action';
 
 export default function CreateScreen() {
@@ -17,6 +18,7 @@ export default function CreateScreen() {
         <QuestionTitleArea />
         <DetailSituationArea />
         <ImageAttachmentArea />
+        <VoteOptionSettingArea />
 
         <CreateSubmitAction />
       </ScrollView>

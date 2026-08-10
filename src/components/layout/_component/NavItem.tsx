@@ -11,8 +11,8 @@ interface NavItemProps {
 }
 
 export function NavItem({ type, label, isActive, onPress }: NavItemProps) {
-  const activeColor = '#FF4D7B';
-  const inactiveColor = '#BCBCBC';
+  const activeColor = '#F9758D';
+  const inactiveColor = '#8F8F8F';
   const iconColor = isActive ? activeColor : inactiveColor;
 
   return (
@@ -32,8 +32,8 @@ export function NavItem({ type, label, isActive, onPress }: NavItemProps) {
       {type === 'chat' && (
         <Svg width={24} height={24} viewBox="0 0 24 24" fill="none">
           <Rect x={3} y={4} width={18} height={13} rx={5} fill={iconColor} />
-          <Circle cx={8.5} cy={10.5} r={1.5} fill={isActive ? '#FFEBF0' : '#FFFFFF'} />
-          <Circle cx={15.5} cy={10.5} r={1.5} fill={isActive ? '#FFEBF0' : '#FFFFFF'} />
+          <Circle cx={8.5} cy={10.5} r={1.5} fill={isActive ? '#FEEBED' : '#FFFFFF'} />
+          <Circle cx={15.5} cy={10.5} r={1.5} fill={isActive ? '#FEEBED' : '#FFFFFF'} />
           <Path d="M12 17v4M9 21h6" stroke={iconColor} strokeWidth={2} strokeLinecap="round" />
         </Svg>
       )}
@@ -49,7 +49,7 @@ export function NavItem({ type, label, isActive, onPress }: NavItemProps) {
             width={10}
             height={2.8}
             rx={1.4}
-            fill={isActive ? '#FFEBF0' : '#FFFFFF'}
+            fill={isActive ? '#FEEBED' : '#FFFFFF'}
           />
           <Rect
             x={6}
@@ -57,7 +57,7 @@ export function NavItem({ type, label, isActive, onPress }: NavItemProps) {
             width={6.5}
             height={2.8}
             rx={1.4}
-            fill={isActive ? '#FFEBF0' : '#FFFFFF'}
+            fill={isActive ? '#FEEBED' : '#FFFFFF'}
           />
         </Svg>
       )}
@@ -87,16 +87,16 @@ const styles = StyleSheet.create({
   navItemActiveCapsule: {
     height: 60,
     borderRadius: 30,
-    backgroundColor: '#FFEBF0',
+    backgroundColor: '#FEEBED',
   },
   navText: {
     fontSize: 13,
     fontWeight: '600',
-    color: '#BCBCBC',
+    color: '#8F8F8F',
     letterSpacing: -0.3,
   },
   navTextActive: {
-    color: '#FF4D7B',
+    color: '#F9758D',
     fontWeight: '700',
   },
 });

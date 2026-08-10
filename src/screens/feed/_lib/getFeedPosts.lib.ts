@@ -13,6 +13,52 @@ export interface FetchFeedResponse {
 }
 
 /**
+ * AI-powered Vote Option Generator:
+ * Dynamically pairs opposing, realistic Korean O/X opinion options tailored specifically to the post's title & content.
+ */
+export function generateAiVoteOptions(
+  title: string = '',
+  content: string = '',
+  itemVoteO?: string,
+  itemVoteX?: string
+): { voteO: string; voteX: string } {
+  if (itemVoteO && itemVoteX) {
+    return { voteO: itemVoteO, voteX: itemVoteX };
+  }
+
+  const text = `${title} ${content}`.toLowerCase();
+
+  if (text.includes('이별') || text.includes('헤어') || text.includes('전애인') || text.includes('재회')) {
+    return { voteO: '다시 만나자', voteX: '헤어지는 게 맞아' };
+  }
+  if (text.includes('고백') || text.includes('썸') || text.includes('좋아') || text.includes('짝사랑')) {
+    return { voteO: '지금 고백해', voteX: '조금 더 지켜봐' };
+  }
+  if (text.includes('연락') || text.includes('선톡') || text.includes('답장') || text.includes('카톡')) {
+    return { voteO: '먼저 연락해', voteX: '기다리는 게 좋아' };
+  }
+  if (text.includes('선물') || text.includes('돈') || text.includes('더치페이') || text.includes('계산')) {
+    return { voteO: '이 정도는 괜찮아', voteX: '선 넘었어' };
+  }
+  if (text.includes('약속') || text.includes('거절') || text.includes('친구') || text.includes('고민')) {
+    return { voteO: '솔직하게 말해', voteX: '그냥 참아야 해' };
+  }
+  if (text.includes('바람') || text.includes('여사친') || text.includes('남사친') || text.includes('이성')) {
+    return { voteO: '이해해 줄 수 있어', voteX: '절대 용납 안 돼' };
+  }
+
+  const defaultOptions = [
+    { voteO: '괜찮은 것 같아', voteX: '난 좀 그래' },
+    { voteO: '이해된다', voteX: '이해 안 된다' },
+    { voteO: '그럴 수 있어', voteX: '선 넘은 듯' },
+    { voteO: '찬성해', voteX: '반대해' },
+  ];
+
+  const hash = Math.abs((title + content).split('').reduce((acc, char) => acc + char.charCodeAt(0), 0));
+  return defaultOptions[hash % defaultOptions.length];
+}
+
+/**
  * Fetch feed posts from Supabase DB with Cursor-based pagination & automatic DB loop fallback.
  */
 export async function getFeedPostsLib({
@@ -157,7 +203,7 @@ export async function getFeedPostsLib({
     );
 
     // 7. Map DB records into Post models
-    const posts: Post[] = dbPosts.map((item: any) => {
+    const posts: Post[] = dbPosts.map((item: any, index: number) => {
       const images = imageMap[item.id] || [];
       const topComments =
         commentMap[item.id] && commentMap[item.id].length > 0
@@ -189,6 +235,17 @@ export async function getFeedPostsLib({
       const percentO = totalVoteCount > 0 ? Math.round((voteOCount / totalVoteCount) * 100) : 40;
       const percentX = 100 - percentO;
 
+      const categoryList = ['연애/썸', '이별/재회', '19/관계', '일상/고민'];
+      const category = item.category || item.category_name || categoryList[index % categoryList.length];
+      const isHot = item.is_hot ?? (index === 0 || index % 3 === 0);
+
+      const { voteO, voteX } = generateAiVoteOptions(
+        item.title,
+        item.content,
+        item.vote_o,
+        item.vote_x
+      );
+
       return {
         id: uniqueId,
         variantName: images.length === 0 ? '사진 안넣음' : `사진 ${images.length}개`,
@@ -199,8 +256,10 @@ export async function getFeedPostsLib({
             : item.content,
         fullStory: item.content,
         images,
-        voteO: '괜찮은데?',
-        voteX: '난 싫어',
+        category,
+        isHot,
+        voteO,
+        voteX,
         percentO,
         percentX,
         topComments,

@@ -107,8 +107,9 @@ export function useGoogle(onSuccess?: (user: User) => void) {
       onSuccess?.({
         id: 'google-user-' + Date.now(),
         email: 'user@gmail.com',
+        provider: 'google',
         gender: 'female',
-        birth_year: '1998',
+        birth_year: 1998,
         created_at: new Date().toISOString(),
       });
     },

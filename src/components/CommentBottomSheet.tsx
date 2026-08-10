@@ -356,13 +356,13 @@ export default function CommentBottomSheet({
             <View style={styles.modalHeaderRow}>
               <TouchableOpacity style={styles.headerIconButton} onPress={handleCloseWithAnim}>
                 <Svg width={20} height={20} viewBox="0 0 24 24" fill="none">
-                  <Path d="M15 18l-6-6 6-6" stroke="#1E293B" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" />
+                  <Path d="M15 18l-6-6 6-6" stroke="#0F172A" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" />
                 </Svg>
               </TouchableOpacity>
-              <Text style={styles.modalHeaderTitle}>투표 결과 및 상세페이지</Text>
+              <Text style={styles.modalHeaderTitle}>댓글</Text>
               <TouchableOpacity style={styles.headerIconButton} onPress={handleSharePost}>
                 <Svg width={20} height={20} viewBox="0 0 24 24" fill="none">
-                  <Path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8M16 6l-4-4-4 4M12 2v13" stroke="#1E293B" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
+                  <Path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8M16 6l-4-4-4 4M12 2v13" stroke="#0F172A" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
                 </Svg>
               </TouchableOpacity>
             </View>
@@ -372,125 +372,28 @@ export default function CommentBottomSheet({
               contentContainerStyle={styles.scrollContent}
               showsVerticalScrollIndicator={false}
             >
-              {/* Interactive O / X Vote Buttons */}
-              <View style={styles.interactiveVoteRow}>
-                <TouchableOpacity
-                  style={[
-                    styles.voteBtnO,
-                    isSelectedO && styles.voteBtnOSelected,
-                  ]}
-                  onPress={() => handleSelectVote('O')}
-                  activeOpacity={0.85}
-                >
-                  <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
-                    <Circle
-                      cx={12}
-                      cy={12}
-                      r={9}
-                      stroke={isSelectedO ? '#FFFFFF' : '#A855F7'}
-                      strokeWidth={3}
-                      fill="none"
-                    />
-                  </Svg>
-                  <Text
-                    style={[
-                      styles.voteBtnTextO,
-                      isSelectedO && styles.voteBtnTextActive,
-                    ]}
-                  >
-                    O {voteOText}
-                  </Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity
-                  style={[
-                    styles.voteBtnX,
-                    isSelectedX && styles.voteBtnXSelected,
-                  ]}
-                  onPress={() => handleSelectVote('X')}
-                  activeOpacity={0.85}
-                >
-                  <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
-                    <Path
-                      d="M18 6L6 18M6 6l12 12"
-                      stroke={isSelectedX ? '#FFFFFF' : '#FF4D7B'}
-                      strokeWidth={3}
-                      strokeLinecap="round"
-                    />
-                  </Svg>
-                  <Text
-                    style={[
-                      styles.voteBtnTextX,
-                      isSelectedX && styles.voteBtnTextActive,
-                    ]}
-                  >
-                    X {voteXText}
-                  </Text>
-                </TouchableOpacity>
-              </View>
-
-              {/* Pure Unboxed Vote Ratio (Percentages Above Bar) */}
+              {/* Luxury Linear Gradient Review CTA Button */}
               <View style={styles.voteSectionCleanWrapper}>
-                {/* 1. Top Line: Percentage Numbers Above Bar */}
-                <View style={styles.topPercentRow}>
-                  <Text style={[styles.percentNumberPurple, isSelectedX && styles.unselectedTextPurple]}>
-                    {percentO}%
-                  </Text>
-                  <Text style={styles.votersCountTextCenter}>{totalVotes.toLocaleString()}명 참여</Text>
-                  <Text style={[styles.percentNumberPink, isSelectedO && styles.unselectedTextPink]}>
-                    {percentX}%
-                  </Text>
-                </View>
-
-                {/* 2. Middle Line: Pure Single Linear Progress Bar */}
-                <View style={styles.singleLinearTrack}>
-                  <View
-                    style={[
-                      styles.linearFillO,
-                      { width: `${percentO}%` },
-                      isSelectedX && styles.linearFillOUnselected,
-                    ]}
-                  />
-                  <View
-                    style={[
-                      styles.linearFillX,
-                      { width: `${percentX}%` },
-                      isSelectedO && styles.linearFillXUnselected,
-                    ]}
-                  />
-                </View>
-
-                {/* 3. Below Bar Line: O & X Wordings */}
-                <View style={styles.bottomWordingsRow}>
-                  <Text style={[styles.percentLabelPurple, isSelectedX && styles.unselectedTextPurple]}>
-                    O {voteOText ? `(${voteOText})` : ''}
-                  </Text>
-                  <Text style={[styles.percentLabelPink, isSelectedO && styles.unselectedTextPink]}>
-                    {voteXText ? `(${voteXText})` : ''} X
-                  </Text>
-                </View>
-
-                {/* 4. Luxury Linear Gradient Review CTA Button */}
                 <TouchableOpacity
                   onPress={handleReviewRequest}
                   activeOpacity={0.88}
                   style={styles.reviewGradientTouch}
                 >
                   <LinearGradient
-                    colors={['#FF3B6B', '#FF758F']}
-                    start={{ x: 0, y: 0 }}
-                    end={{ x: 1, y: 0 }}
-                    style={styles.reviewGradientContainer}
-                  >
-                    <View style={styles.reviewIconBadgeWhite}>
-                      <Svg width={16} height={16} viewBox="0 0 24 24" fill="none">
-                        <Rect x={3} y={5} width={18} height={14} rx={3} stroke="#FF3B6B" strokeWidth={2.2} />
-                        <Path d="M4.5 7.5l7.5 5 7.5-5" stroke="#FF3B6B" strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round" />
-                      </Svg>
-                    </View>
+                  colors={['#FEEBED', '#FFFFFF']}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 0 }}
+                  style={styles.reviewGradientContainer}
+                >
+                  <View style={styles.reviewIconBadgeWhite}>
+                    <Svg width={16} height={16} viewBox="0 0 24 24" fill="none">
+                      <Rect x={3} y={5} width={18} height={14} rx={3} stroke="#F9758D" strokeWidth={2.2} />
+                      <Path d="M4.5 7.5l7.5 5 7.5-5" stroke="#F9758D" strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round" />
+                    </Svg>
+                  </View>
                     <Text style={styles.reviewGradientButtonText}>
                       {voteInfo?.hasReview
-                        ? '비슷한 고민의 후기 읽어보기'
+                        ? '작성자의 후기 읽어보기'
                         : '비슷한 고민을 겪고 있다면, 후기 요청하기'}
                     </Text>
                     <Text style={styles.reviewGradientArrow}>›</Text>
@@ -634,7 +537,7 @@ export default function CommentBottomSheet({
                     ? `@${replyTarget.userName} 님에게 답글 남기기...`
                     : '댓글을 입력하세요...'
                 }
-                placeholderTextColor="#BCBCBC"
+                placeholderTextColor="#8F8F8F"
                 value={newCommentText}
                 onChangeText={setNewCommentText}
                 onSubmitEditing={handleAddComment}
@@ -651,7 +554,7 @@ export default function CommentBottomSheet({
                 <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
                   <Path
                     d="M12 19V5M5 12l7-7 7 7"
-                    stroke={newCommentText.trim() ? '#FFFFFF' : '#BCBCBC'}
+                    stroke={newCommentText.trim() ? '#FFFFFF' : '#8F8F8F'}
                     strokeWidth={2.5}
                     strokeLinecap="round"
                     strokeLinejoin="round"
@@ -713,7 +616,7 @@ const styles = StyleSheet.create({
     width: 38,
     height: 4.5,
     borderRadius: 2.25,
-    backgroundColor: '#EAEAEA',
+    backgroundColor: '#F5F5F5',
   },
   modalHeaderRow: {
     width: '100%',
@@ -812,7 +715,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     fontSize: 12.5,
     fontWeight: '600',
-    color: '#888888',
+    color: '#727272',
   },
   percentNumberPink: {
     fontSize: 26,
@@ -882,16 +785,13 @@ const styles = StyleSheet.create({
     borderRadius: 25,
     marginTop: 6,
     marginBottom: 4,
-    shadowColor: '#FF3B6B',
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.18,
-    shadowRadius: 8,
-    elevation: 3,
+    borderWidth: 1,
+    borderColor: '#FEB5C9',
   },
   reviewGradientContainer: {
     width: '100%',
     height: 50,
-    borderRadius: 25,
+    borderRadius: 24,
     paddingHorizontal: 16,
     flexDirection: 'row',
     alignItems: 'center',
@@ -908,27 +808,26 @@ const styles = StyleSheet.create({
   },
   reviewGradientButtonText: {
     fontSize: 13.5,
-    fontWeight: '800',
-    color: '#FFFFFF',
+    fontWeight: '700',
+    color: '#F9758D',
     letterSpacing: -0.2,
     flex: 1,
     marginLeft: 10,
   },
   reviewGradientArrow: {
-    fontSize: 20,
-    fontWeight: '800',
-    color: '#FFFFFF',
-    opacity: 0.9,
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#F9758D',
   },
   sectionDivider: {
     height: 1,
-    backgroundColor: '#EEEEEE',
+    backgroundColor: '#F5F5F5',
     marginVertical: 12,
   },
   commentsSectionTitle: {
     fontSize: 15,
     fontWeight: '800',
-    color: '#222222',
+    color: '#0F172A',
     marginBottom: 10,
   },
   commentRowContainer: {
@@ -947,7 +846,7 @@ const styles = StyleSheet.create({
   userNameText: {
     fontSize: 14,
     fontWeight: '700',
-    color: '#222222',
+    color: '#0F172A',
   },
   voteBadgeO: {
     width: 20,
@@ -980,9 +879,9 @@ const styles = StyleSheet.create({
     color: '#FF5E85',
   },
   commentBodyText: {
-    fontSize: 16,
-    color: '#555555',
-    lineHeight: 23,
+    fontSize: 15,
+    color: '#1E293B',
+    lineHeight: 22,
     letterSpacing: -0.3,
     marginBottom: 4,
   },
@@ -1001,7 +900,7 @@ const styles = StyleSheet.create({
   replyBtnText: {
     fontSize: 12.5,
     fontWeight: '600',
-    color: '#AAAAAA',
+    color: '#8F8F8F',
   },
   thumbLikeBtn: {
     flexDirection: 'row',
@@ -1011,10 +910,10 @@ const styles = StyleSheet.create({
   thumbCountText: {
     fontSize: 12.5,
     fontWeight: '600',
-    color: '#888888',
+    color: '#8F8F8F',
   },
   thumbCountLiked: {
-    color: '#FF5E85',
+    color: '#F9758D',
   },
   repliesWrapper: {
     width: '100%',

@@ -15,6 +15,7 @@ import OnboardingScreen from '@/screens/onboarding/OnboardingScreen';
 import HomeScreen from '@/components/HomeScreen';
 import MyScreen from '@/screens/my/MyScreen';
 import CreateScreen from '@/screens/create/CreateScreen';
+import ChatScreen from '@/screens/chat/ChatScreen';
 import { Layout, MainTabType } from '@/components/layout/Layout';
 
 import { User } from '@/types/database.types';
@@ -36,6 +37,7 @@ export type RootStackParamList = {
   Onboarding: { user: User };
   Home: { user: User };
   Feed: undefined;
+  Chat: undefined;
   Create: undefined;
   Rank: { user: User };
   My: undefined;
@@ -58,6 +60,8 @@ function MainAppLayout({ mainNavRef }: { mainNavRef: any }) {
         mainNavRef.current.navigate('My');
       } else if (tab === 'feed') {
         mainNavRef.current.navigate('Feed');
+      } else if (tab === 'chat') {
+        mainNavRef.current.navigate('Chat');
       }
     }
   };
@@ -79,11 +83,13 @@ function MainAppLayout({ mainNavRef }: { mainNavRef: any }) {
               if (routeName === 'create') setActiveTab('create');
               else if (routeName === 'my') setActiveTab('my');
               else if (routeName === 'feed') setActiveTab('feed');
+              else if (routeName === 'chat') setActiveTab('chat');
             }
           },
         }}
       >
         <MainStack.Screen name="Feed" component={FeedScreen} />
+        <MainStack.Screen name="Chat" component={ChatScreen} />
         <MainStack.Screen name="Create" component={CreateScreen} />
         <MainStack.Screen name="My" component={MyScreen} />
       </MainStack.Navigator>
@@ -94,8 +100,9 @@ function MainAppLayout({ mainNavRef }: { mainNavRef: any }) {
 const MOCK_USER: User = {
   id: 'test-user-1',
   email: 'test@example.com',
+  provider: 'apple',
   gender: 'female',
-  birth_year: '1998',
+  birth_year: 1998,
   created_at: new Date().toISOString(),
 };
 

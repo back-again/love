@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Post } from '../_model/feed.model';
 import {
   submitVoteApi,
@@ -6,13 +7,28 @@ import {
   requestReviewApi,
 } from '../_lib/feedService';
 
+let globalHasSeenFirstVoteGuide = false;
+
+AsyncStorage.getItem('has_seen_first_vote_guide').then(val => {
+  if (val === 'true') {
+    globalHasSeenFirstVoteGuide = true;
+  }
+}).catch(() => {});
+
+export function getHasSeenFirstVoteGuide(): boolean {
+  return globalHasSeenFirstVoteGuide;
+}
+
+export function setHasSeenFirstVoteGuideTrue(): void {
+  globalHasSeenFirstVoteGuide = true;
+  AsyncStorage.setItem('has_seen_first_vote_guide', 'true').catch(() => {});
+}
+
 // 1. 투표 State & Action
 export function useVoteState(post: Post) {
-  const [selectedVote, setSelectedVote] = useState<'O' | 'X' | null>(
-    post.myVote ?? null,
-  );
-  const [voteOCount, setVoteOCount] = useState<number>(post.voteOCount ?? 0);
-  const [voteXCount, setVoteXCount] = useState<number>(post.voteXCount ?? 0);
+  const [selectedVote, setSelectedVote] = useState<'O' | 'X' | null>(null);
+  const [voteOCount, setVoteOCount] = useState<number>(post.voteOCount ?? 12);
+  const [voteXCount, setVoteXCount] = useState<number>(post.voteXCount ?? 8);
   const hasVoted = selectedVote !== null;
   const totalVoteCount = voteOCount + voteXCount;
 

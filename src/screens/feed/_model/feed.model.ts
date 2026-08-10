@@ -7,6 +7,9 @@ export interface CommentItem {
 
 export interface Post {
   id: string;
+  category?: string;
+  isHot?: boolean;
+  isMyPost?: boolean;
   variantName?: string;
   title: string;
   storySummary: string;
@@ -23,6 +26,9 @@ export interface Post {
   voteOCount?: number;
   voteXCount?: number;
   totalVoteCount?: number;
+  percentO?: number;
+  percentX?: number;
+  totalVotes?: number;
   myVote?: 'O' | 'X' | null;
   hasFired?: boolean;
   hasFacepalmed?: boolean;

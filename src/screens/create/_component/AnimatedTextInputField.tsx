@@ -92,10 +92,10 @@ const styles = StyleSheet.create({
     width: '100%',
     borderRadius: 16,
     borderWidth: 1,
-    borderColor: '#EBEBEB',
+    borderColor: '#D6D6D6',
     paddingHorizontal: 16,
     fontSize: 15,
-    color: '#0F172A',
+    color: '#727272',
     backgroundColor: '#FFFFFF',
     letterSpacing: -0.3,
     ...(Platform.OS === 'web'
@@ -112,7 +112,7 @@ const styles = StyleSheet.create({
     right: 16,
     top: 18,
     fontSize: 13,
-    color: '#9C9C9C',
+    color: '#8F8F8F',
     fontWeight: '400',
   },
 });
