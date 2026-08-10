@@ -25,8 +25,8 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   mySectionTitle: {
-    fontSize: 18,
-    fontWeight: '700',
+    fontSize: 17,
+    fontWeight: '800',
     color: '#0F172A',
     letterSpacing: -0.3,
   },

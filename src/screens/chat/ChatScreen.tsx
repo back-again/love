@@ -600,10 +600,10 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   hubTitle: {
-    fontSize: 20,
+    fontSize: 17,
     fontWeight: '800',
     color: '#0F172A',
-    marginBottom: 6,
+    marginBottom: 4,
   },
   hubHighlightPhrase: {
     fontSize: 15,
@@ -612,9 +612,10 @@ const styles = StyleSheet.create({
     marginBottom: 6,
   },
   hubSub: {
-    fontSize: 14.5,
+    fontSize: 13,
     color: '#8F8F8F',
-    lineHeight: 21,
+    lineHeight: 18,
+    marginTop: 4,
   },
   generalRoomCard: {
     flexDirection: 'row',

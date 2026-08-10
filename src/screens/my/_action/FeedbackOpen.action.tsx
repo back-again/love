@@ -26,16 +26,18 @@ const styles = StyleSheet.create({
   myMenuTileCard: {
     flex: 1,
     height: 54,
-    backgroundColor: '#F8F8F8',
+    backgroundColor: '#F5F5F5',
     borderRadius: 14,
     paddingHorizontal: 16,
     alignItems: 'center',
     justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: '#E8E8E8',
   },
   myMenuTileTitle: {
     fontSize: 15,
     fontWeight: '600',
-    color: '#9C9C9C',
+    color: '#727272',
     letterSpacing: -0.3,
   },
 });

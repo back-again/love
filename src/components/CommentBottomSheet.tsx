@@ -821,7 +821,7 @@ const styles = StyleSheet.create({
   },
   sectionDivider: {
     height: 1,
-    backgroundColor: '#F5F5F5',
+    backgroundColor: '#E8E8E8',
     marginVertical: 12,
   },
   commentsSectionTitle: {
@@ -834,7 +834,7 @@ const styles = StyleSheet.create({
     width: '100%',
     paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: '#F5F5F5',
+    borderBottomColor: '#E8E8E8',
     gap: 4,
   },
   commentHeaderRow: {
@@ -879,9 +879,9 @@ const styles = StyleSheet.create({
     color: '#FF5E85',
   },
   commentBodyText: {
-    fontSize: 15,
-    color: '#1E293B',
-    lineHeight: 22,
+    fontSize: 14.5,
+    color: '#0F172A',
+    lineHeight: 21,
     letterSpacing: -0.3,
     marginBottom: 4,
   },
@@ -920,7 +920,7 @@ const styles = StyleSheet.create({
     paddingLeft: 14,
     marginTop: 8,
     borderLeftWidth: 2,
-    borderLeftColor: '#EEEEEE',
+    borderLeftColor: '#E8E8E8',
     gap: 10,
   },
   replyItemRow: {
@@ -939,12 +939,12 @@ const styles = StyleSheet.create({
   },
   replyTargetText: {
     fontSize: 13,
-    color: '#555555',
+    color: '#727272',
   },
   replyCancelText: {
     fontSize: 13,
     fontWeight: '600',
-    color: '#888888',
+    color: '#8F8F8F',
   },
   inputContainer: {
     width: '100%',
@@ -953,7 +953,7 @@ const styles = StyleSheet.create({
     gap: 10,
     paddingTop: 10,
     borderTopWidth: 1,
-    borderTopColor: '#EEEEEE',
+    borderTopColor: '#E8E8E8',
   },
   commentInput: {
     flex: 1,
@@ -962,7 +962,7 @@ const styles = StyleSheet.create({
     borderRadius: 23,
     paddingHorizontal: 18,
     fontSize: 14,
-    color: '#222222',
+    color: '#0F172A',
   },
   sendBtn: {
     width: 40,
@@ -973,8 +973,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   sendBtnDisabled: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#F5F5F5',
     borderWidth: 1,
-    borderColor: '#EBEBEB',
+    borderColor: '#E8E8E8',
   },
 });

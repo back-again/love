@@ -393,9 +393,9 @@ const styles = StyleSheet.create({
     borderColor: '#FEB5C9',
   },
   hotBadgeText: {
-    fontSize: 11,
-    fontWeight: '600',
-    color: '#F9758D',
+    fontSize: 11.5,
+    fontWeight: '900',
+    color: '#FF5D7B',
     letterSpacing: -0.2,
   },
   categoryBadgePill: {

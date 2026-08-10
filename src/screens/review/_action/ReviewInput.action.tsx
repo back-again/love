@@ -18,7 +18,7 @@ export function ReviewInputAction() {
     <BottomSheetTextInput
       style={styles.reviewInput}
       placeholder="결과나 당시 대화 내용, 현재 상태 등을 들려주세요."
-      placeholderTextColor="#BCBCBC"
+      placeholderTextColor="#C0C0C0"
       multiline={true}
       numberOfLines={5}
       textAlignVertical="top"
@@ -32,10 +32,12 @@ const styles = StyleSheet.create({
   reviewInput: {
     width: '100%',
     height: 120,
-    backgroundColor: '#F8F8F8',
+    backgroundColor: '#F5F5F5',
     borderRadius: 16,
+    borderWidth: 1,
+    borderColor: '#E8E8E8',
     padding: 16,
-    fontSize: 15,
+    fontSize: 14.5,
     color: '#0F172A',
     marginBottom: 16,
     letterSpacing: -0.3,

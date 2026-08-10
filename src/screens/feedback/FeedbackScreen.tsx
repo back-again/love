@@ -49,8 +49,8 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   sheetTitle: {
-    fontSize: 20,
-    fontWeight: '700',
+    fontSize: 17,
+    fontWeight: '800',
     color: '#0F172A',
     letterSpacing: -0.3,
   },
@@ -58,9 +58,9 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
   sectionDesc: {
-    fontSize: 14.5,
-    color: '#475569',
-    lineHeight: 22,
+    fontSize: 13,
+    color: '#8F8F8F',
+    lineHeight: 18,
     marginBottom: 16,
     letterSpacing: -0.3,
   },

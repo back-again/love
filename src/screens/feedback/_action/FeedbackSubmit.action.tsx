@@ -86,20 +86,22 @@ export function FeedbackSubmitAction({ onClose }: FeedbackSubmitActionProps) {
 const styles = StyleSheet.create({
   submitButton: {
     width: '100%',
-    height: 56,
-    borderRadius: 28,
-    backgroundColor: '#FF8E7A',
+    height: 54,
+    borderRadius: 16,
+    backgroundColor: '#FF5D7B',
     alignItems: 'center',
     justifyContent: 'center',
     marginTop: 8,
-    shadowColor: '#FF8E7A',
+    shadowColor: '#FF5D7B',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.2,
     shadowRadius: 8,
     elevation: 3,
   },
   submitButtonDisabled: {
-    backgroundColor: '#F1F5F9',
+    backgroundColor: '#F5F5F5',
+    borderWidth: 1,
+    borderColor: '#E8E8E8',
     shadowOpacity: 0,
     elevation: 0,
   },
@@ -110,6 +112,6 @@ const styles = StyleSheet.create({
     letterSpacing: -0.3,
   },
   submitButtonTextDisabled: {
-    color: '#94A3B8',
+    color: '#C0C0C0',
   },
 });

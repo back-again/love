@@ -210,15 +210,16 @@ const styles = StyleSheet.create({
     paddingRight: 16,
   },
   createSectionTitle: {
-    fontSize: 18,
-    fontWeight: '700',
+    fontSize: 17,
+    fontWeight: '800',
     color: '#0F172A',
     letterSpacing: -0.3,
     marginBottom: 4,
   },
   createSectionSub: {
-    fontSize: 14,
+    fontSize: 13,
     color: '#8F8F8F',
+    lineHeight: 18,
     letterSpacing: -0.3,
   },
   voteFieldsContainer: {
