@@ -126,7 +126,14 @@ export default function App() {
             }}
           >
             {!user ? (
-              <Stack.Screen name="Login" component={LoginScreen} />
+              <Stack.Screen name="Login">
+                {props => (
+                  <LoginScreen
+                    {...props}
+                    onLoginSuccess={handleLoginSuccess}
+                  />
+                )}
+              </Stack.Screen>
             ) : !hasOnboarded ? (
               <Stack.Screen name="Onboarding">
                 {props => (

@@ -22,6 +22,7 @@ import MyMenuBottomSheet, { MyMenuType } from './MyMenuBottomSheet';
 import CommentBottomSheet, { VoteInfo } from './CommentBottomSheet';
 import ReviewBottomSheet from './ReviewBottomSheet';
 import { PostDetailModal } from './PostDetailModal';
+import ChatScreen from '../screens/chat/ChatScreen';
 import { supabase } from '../api/supabase';
 import { createPost } from '../screens/create/_lib/createPost.lib';
 
@@ -677,7 +678,7 @@ const FEED_STORAGE_KEY = '@xoxo_user_feed_posts_v1';
 export default function HomeScreen({ user, onLogout }: HomeScreenProps) {
   const [postsList, setPostsList] = useState(SAMPLE_POSTS);
   const [activeTab, setActiveTab] = useState<
-    'feed' | 'ranking' | 'create' | 'my'
+    'feed' | 'chat' | 'create' | 'my'
   >('feed');
   const [activeMenuType, setActiveMenuType] = useState<MyMenuType>(null);
   const [activeDetailPost, setActiveDetailPost] = useState<any | null>(null);
@@ -890,11 +891,8 @@ export default function HomeScreen({ user, onLogout }: HomeScreenProps) {
           <CreatePageContent onComplete={handleAddNewPost} />
         )}
 
-        {activeTab === 'ranking' && (
-          <View style={styles.placeholderTabContent}>
-            <Text style={styles.placeholderTabTitle}>랭킹 기능 준비 중</Text>
-            <Text style={styles.placeholderTabSub}>곧 출시될 예정입니다!</Text>
-          </View>
+        {activeTab === 'chat' && (
+          <ChatScreen onGoToCreate={() => setActiveTab('create')} />
         )}
 
         {/* 7. Floating Glassmorphism Bottom Navigation Bar (-45° Light, Refraction 80, Depth 20, Frost 4) */}
@@ -964,57 +962,50 @@ export default function HomeScreen({ user, onLogout }: HomeScreenProps) {
                 </Text>
               </TouchableOpacity>
 
-              {/* Ranking Tab */}
+              {/* AI Chat Counselling Tab */}
               <TouchableOpacity
                 style={[
                   styles.navItem,
-                  activeTab === 'ranking' && styles.navItemActiveCapsule,
+                  activeTab === 'chat' && styles.navItemActiveCapsule,
                 ]}
-                onPress={() => setActiveTab('ranking')}
+                onPress={() => setActiveTab('chat')}
                 activeOpacity={0.85}
               >
-                {/* Image 2: Ranking Icon (4 Stacked Rounded Bars) */}
                 <Svg width={24} height={24} viewBox="0 0 24 24" fill="none">
                   <Rect
-                    x={2}
-                    y={2}
-                    width={20}
-                    height={4.5}
-                    rx={2.25}
-                    fill={activeTab === 'ranking' ? '#FF4D7B' : '#BCBCBC'}
+                    x={3}
+                    y={4}
+                    width={18}
+                    height={13}
+                    rx={5}
+                    fill={activeTab === 'chat' ? '#FF4D7B' : '#BCBCBC'}
                   />
-                  <Rect
-                    x={2}
-                    y={8}
-                    width={20}
-                    height={4.5}
-                    rx={2.25}
-                    fill={activeTab === 'ranking' ? '#FF4D7B' : '#BCBCBC'}
+                  <Circle
+                    cx={8.5}
+                    cy={10.5}
+                    r={1.5}
+                    fill={activeTab === 'chat' ? '#FFEBF0' : '#FFFFFF'}
                   />
-                  <Rect
-                    x={2}
-                    y={14}
-                    width={20}
-                    height={4.5}
-                    rx={2.25}
-                    fill={activeTab === 'ranking' ? '#FF4D7B' : '#BCBCBC'}
+                  <Circle
+                    cx={15.5}
+                    cy={10.5}
+                    r={1.5}
+                    fill={activeTab === 'chat' ? '#FFEBF0' : '#FFFFFF'}
                   />
-                  <Rect
-                    x={2}
-                    y={20}
-                    width={20}
-                    height={2.5}
-                    rx={1.25}
-                    fill={activeTab === 'ranking' ? '#FF4D7B' : '#BCBCBC'}
+                  <Path
+                    d="M12 17v4M9 21h6"
+                    stroke={activeTab === 'chat' ? '#FF4D7B' : '#BCBCBC'}
+                    strokeWidth={2}
+                    strokeLinecap="round"
                   />
                 </Svg>
                 <Text
                   style={[
                     styles.navText,
-                    activeTab === 'ranking' && styles.navTextActive,
+                    activeTab === 'chat' && styles.navTextActive,
                   ]}
                 >
-                  랭킹
+                  AI 상담
                 </Text>
               </TouchableOpacity>
 

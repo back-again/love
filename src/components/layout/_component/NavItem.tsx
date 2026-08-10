@@ -1,6 +1,6 @@
 import React from 'react';
 import { StyleSheet, Text, TouchableOpacity } from 'react-native';
-import Svg, { Circle, Rect, Ellipse } from 'react-native-svg';
+import Svg, { Circle, Rect, Ellipse, Path } from 'react-native-svg';
 import { MainTabType } from '../Layout';
 
 interface NavItemProps {
@@ -29,12 +29,12 @@ export function NavItem({ type, label, isActive, onPress }: NavItemProps) {
         </Svg>
       )}
 
-      {type === 'ranking' && (
+      {type === 'chat' && (
         <Svg width={24} height={24} viewBox="0 0 24 24" fill="none">
-          <Rect x={2} y={2} width={20} height={4.5} rx={2.25} fill={iconColor} />
-          <Rect x={2} y={8} width={20} height={4.5} rx={2.25} fill={iconColor} />
-          <Rect x={2} y={14} width={20} height={4.5} rx={2.25} fill={iconColor} />
-          <Rect x={2} y={20} width={20} height={2.5} rx={1.25} fill={iconColor} />
+          <Rect x={3} y={4} width={18} height={13} rx={5} fill={iconColor} />
+          <Circle cx={8.5} cy={10.5} r={1.5} fill={isActive ? '#FFEBF0' : '#FFFFFF'} />
+          <Circle cx={15.5} cy={10.5} r={1.5} fill={isActive ? '#FFEBF0' : '#FFFFFF'} />
+          <Path d="M12 17v4M9 21h6" stroke={iconColor} strokeWidth={2} strokeLinecap="round" />
         </Svg>
       )}
 

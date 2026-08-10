@@ -14,10 +14,11 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { NavItem } from './_component/NavItem';
 import { OpenSettingBottomSheetAction } from '@/screens/setting/_action/OpenSettingBottomSheet.action';
 
-export type MainTabType = 'feed' | 'ranking' | 'create' | 'my';
+export type MainTabType = 'feed' | 'chat' | 'create' | 'my';
 
 const NAV_TABS: { type: MainTabType; label: string }[] = [
   { type: 'feed', label: '피드' },
+  { type: 'chat', label: 'AI 상담' },
   { type: 'create', label: '작성' },
   { type: 'my', label: '마이' },
 ];
