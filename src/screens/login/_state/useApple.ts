@@ -72,8 +72,9 @@ export function useApple(onSuccess?: (user: User) => void) {
       onSuccess?.({
         id: 'apple-user-' + Date.now(),
         email: 'user@apple.com',
+        provider: 'apple',
         gender: 'female',
-        birth_year: '1998',
+        birth_year: 1998,
         created_at: new Date().toISOString(),
       });
     },

@@ -18,7 +18,7 @@ export function DetailSituationInputAction() {
       height={160}
       style={{ padding: 16 }}
       placeholder="자유롭게 작성해주세요."
-      placeholderTextColor="#BCBCBC"
+      placeholderTextColor="#8F8F8F"
       multiline={true}
       numberOfLines={6}
       textAlignVertical="top"

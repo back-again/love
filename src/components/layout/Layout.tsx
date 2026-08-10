@@ -1,4 +1,4 @@
-import React, { ReactNode } from 'react';
+import React, { ReactNode, useEffect } from 'react';
 import {
   StyleSheet,
   View,
@@ -11,13 +11,15 @@ import { BlurView } from 'expo-blur';
 import Svg, { Path } from 'react-native-svg';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { StatusBar } from 'expo-status-bar';
 import { NavItem } from './_component/NavItem';
 import { OpenSettingBottomSheetAction } from '@/screens/setting/_action/OpenSettingBottomSheet.action';
+import { useCreateForm } from '@/screens/create/_state/useCreateForm';
 
 export type MainTabType = 'feed' | 'chat' | 'create' | 'my';
 
 const NAV_TABS: { type: MainTabType; label: string }[] = [
-  { type: 'feed', label: '피드' },
+  { type: 'feed', label: 'OX' },
   { type: 'chat', label: 'AI 상담' },
   { type: 'create', label: '작성' },
   { type: 'my', label: '마이' },
@@ -38,29 +40,25 @@ export function Layout({
 }: LayoutProps) {
   const insets = useSafeAreaInsets();
 
+  useEffect(() => {
+    if (activeTab !== 'create') {
+      useCreateForm.getState().reset();
+    }
+  }, [activeTab]);
+
   return (
-    <LinearGradient
-      colors={
-        activeTab === 'my' || activeTab === 'create'
-          ? ['#FFFFFF', '#FFFFFF']
-          : ['#FFF5F7', '#FFEBEF']
-      }
-      style={[
-        styles.container,
-        {
-          paddingTop: insets.top,
-          paddingBottom: insets.bottom,
-        },
-      ]}
-    >
-      {/* Top Header Bar */}
-      <View style={styles.header}>
-        <View style={styles.headerLeftSpacer} />
-        <Image
-          source={require('../../assets/xoxo_logo.png')}
-          style={styles.logoImage}
-          resizeMode="contain"
-        />
+    <View style={styles.container}>
+      <StatusBar style="dark" />
+
+      {/* Top White Status Bar & Header Container */}
+      <View style={[styles.topWhiteArea, { paddingTop: insets.top }]}>
+        <View style={styles.header}>
+          <View style={styles.headerLeftSpacer} />
+          <Image
+            source={require('../../assets/xoxo_logo.png')}
+            style={styles.logoImage}
+            resizeMode="contain"
+          />
 
         {activeTab === 'create' ? (
           <TouchableOpacity
@@ -71,7 +69,7 @@ export function Layout({
             <Svg width={24} height={24} viewBox="0 0 24 24" fill="none">
               <Path
                 d="M18 6L6 18M6 6l12 12"
-                stroke="#9C9C9C"
+                stroke="#8F8F8F"
                 strokeWidth={2.2}
                 strokeLinecap="round"
                 strokeLinejoin="round"
@@ -98,6 +96,7 @@ export function Layout({
           </TouchableOpacity>
         )}
       </View>
+    </View>
 
       {/* Main Content Area */}
       <View style={styles.contentArea}>{children}</View>
@@ -139,13 +138,18 @@ export function Layout({
           </View>
         </View>
       </View>
-    </LinearGradient>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: '#FEFEFE',
+  },
+  topWhiteArea: {
+    width: '100%',
+    backgroundColor: '#FFFFFF',
   },
   header: {
     height: 52,
@@ -153,6 +157,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: 24,
+    backgroundColor: '#FFFFFF',
   },
   headerLeftSpacer: {
     width: 32,
@@ -172,7 +177,7 @@ const styles = StyleSheet.create({
     width: 7,
     height: 7,
     borderRadius: 3.5,
-    backgroundColor: '#FF858F',
+    backgroundColor: '#F9758D',
   },
   contentArea: {
     flex: 1,

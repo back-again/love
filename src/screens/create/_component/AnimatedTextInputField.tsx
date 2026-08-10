@@ -49,7 +49,7 @@ export function AnimatedTextInputField({
 
   const animatedBorderColor = focusAnim.interpolate({
     inputRange: [0, 1],
-    outputRange: ['#EBEBEB', '#FFC8B3'],
+    outputRange: ['#EBEBEB', '#FFB5C5'],
   });
 
   return (
@@ -65,7 +65,7 @@ export function AnimatedTextInputField({
           },
           Platform.OS === 'web' && isFocused
             ? ({
-                boxShadow: '0 0 0 3px rgba(255, 200, 179, 0.45)',
+                boxShadow: '0 0 0 3px rgba(255, 181, 197, 0.25)',
               } as any)
             : {},
           style,
@@ -92,10 +92,10 @@ const styles = StyleSheet.create({
     width: '100%',
     borderRadius: 16,
     borderWidth: 1,
-    borderColor: '#EBEBEB',
+    borderColor: '#D6D6D6',
     paddingHorizontal: 16,
     fontSize: 15,
-    color: '#0F172A',
+    color: '#727272',
     backgroundColor: '#FFFFFF',
     letterSpacing: -0.3,
     ...(Platform.OS === 'web'
@@ -112,7 +112,7 @@ const styles = StyleSheet.create({
     right: 16,
     top: 18,
     fontSize: 13,
-    color: '#9C9C9C',
+    color: '#8F8F8F',
     fontWeight: '400',
   },
 });

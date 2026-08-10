@@ -17,7 +17,7 @@ export function QuestionTitleInputAction() {
     <AnimatedTextInputField
       height={56}
       placeholder="예시) 여사친이랑 단둘이 코노 가는 남친, 괜찮아?"
-      placeholderTextColor="#BCBCBC"
+      placeholderTextColor="#8F8F8F"
       maxLength={20}
       value={questionTitle}
       onChangeText={setQuestionTitle}

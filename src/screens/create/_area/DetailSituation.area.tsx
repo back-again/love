@@ -27,7 +27,7 @@ const styles = StyleSheet.create({
   },
   createSectionSub: {
     fontSize: 14,
-    color: '#9C9C9C',
+    color: '#8F8F8F',
     letterSpacing: -0.3,
     marginBottom: 12,
   },
