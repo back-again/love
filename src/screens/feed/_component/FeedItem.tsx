@@ -18,7 +18,6 @@ import {
 } from '../_state/useFeedState';
 import { VoteInfo } from '@/components/CommentBottomSheet';
 import { VoteConfirmModal } from '@/components/modal/VoteConfirmModal';
-import { VotingLoadingModal } from '@/components/modal/VotingLoadingModal';
 
 interface FeedItemProps {
   post: Post;
@@ -51,8 +50,6 @@ export function FeedItem({
 
   const [isExpanded, setIsExpanded] = useState(false);
   const [pendingVoteChoice, setPendingVoteChoice] = useState<'O' | 'X' | null>(null);
-  const [isVotingLoading, setIsVotingLoading] = useState(false);
-  const [votingChoice, setVotingChoice] = useState<'O' | 'X' | null>(null);
 
   const isVoted = hasVoted;
 
@@ -60,35 +57,25 @@ export function FeedItem({
   const percentO = totalVoteCount > 0 ? Math.round((voteOCount / totalVotes) * 100) : 50;
   const percentX = 100 - percentO;
 
-  const triggerVoteWithLoading = (choice: 'O' | 'X') => {
-    setVotingChoice(choice);
-    setIsVotingLoading(true);
-    setTimeout(() => {
-      handleVote(choice);
-      setIsVotingLoading(false);
-    }, 650);
-  };
-
   const handleCardVote = (choice: 'O' | 'X') => {
     if (!isVoted) {
       if (!getHasSeenFirstVoteGuide()) {
         // App-wide first time vote! Show confirmation guide modal
         setPendingVoteChoice(choice);
       } else {
-        // User has already confirmed guide before! Vote with loading modal
-        triggerVoteWithLoading(choice);
+        // Vote immediately
+        handleVote(choice);
       }
     } else {
-      triggerVoteWithLoading(choice);
+      handleVote(choice);
     }
   };
 
   const handleConfirmVote = () => {
     if (pendingVoteChoice) {
-      const choice = pendingVoteChoice;
       setHasSeenFirstVoteGuideTrue(); // Persist so future votes on any post never show modal!
+      handleVote(pendingVoteChoice);
       setPendingVoteChoice(null);
-      triggerVoteWithLoading(choice);
     }
   };
 
@@ -358,11 +345,6 @@ export function FeedItem({
           onClose={() => setPendingVoteChoice(null)}
           onConfirm={handleConfirmVote}
           choiceText={pendingVoteChoice === 'O' ? voteOText : pendingVoteChoice === 'X' ? voteXText : ''}
-        />
-
-        <VotingLoadingModal
-          visible={isVotingLoading}
-          choice={votingChoice}
         />
       </View>
     </TouchableOpacity>
