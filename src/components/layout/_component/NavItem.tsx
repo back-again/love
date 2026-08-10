@@ -23,49 +23,69 @@ export function NavItem({ type, label, isActive, onPress }: NavItemProps) {
     >
       {type === 'feed' && (
         <Svg width={24} height={24} viewBox="0 0 24 24" fill="none">
-          <Rect x={4} y={2} width={16} height={2.5} rx={1.25} fill={iconColor} />
-          <Rect x={2} y={6} width={20} height={13} rx={4.5} fill={iconColor} />
-          <Rect x={4} y={20} width={16} height={2.5} rx={1.25} fill={iconColor} />
+          <Rect
+            x={3}
+            y={3}
+            width={18}
+            height={18}
+            rx={4}
+            fill={isActive ? iconColor : 'none'}
+            stroke={iconColor}
+            strokeWidth={2}
+          />
+          <Path
+            d="M7 8H17M7 12H17M7 16H12"
+            stroke={isActive ? '#FFFFFF' : iconColor}
+            strokeWidth={2}
+            strokeLinecap="round"
+          />
         </Svg>
       )}
 
       {type === 'chat' && (
         <Svg width={24} height={24} viewBox="0 0 24 24" fill="none">
-          <Rect x={3} y={4} width={18} height={13} rx={5} fill={iconColor} />
-          <Circle cx={8.5} cy={10.5} r={1.5} fill={isActive ? '#FEEBED' : '#FFFFFF'} />
-          <Circle cx={15.5} cy={10.5} r={1.5} fill={isActive ? '#FEEBED' : '#FFFFFF'} />
-          <Path d="M12 17v4M9 21h6" stroke={iconColor} strokeWidth={2} strokeLinecap="round" />
+          <Path
+            d="M21 11.5C21 15.6421 17.1944 19 12.5 19C11.1378 19 9.85177 18.7093 8.71077 18.1884L3 20L4.70757 15.8202C3.63007 14.5772 3 13.1026 3 11.5C3 7.35786 6.80558 4 11.5 4C16.1944 4 21 7.35786 21 11.5Z"
+            fill={isActive ? iconColor : 'none'}
+            stroke={iconColor}
+            strokeWidth={2}
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
         </Svg>
       )}
 
       {type === 'create' && (
         <Svg width={24} height={24} viewBox="0 0 24 24" fill="none">
-          <Rect x={7} y={1} width={2.2} height={4} rx={1.1} fill={iconColor} />
-          <Rect x={14.8} y={1} width={2.2} height={4} rx={1.1} fill={iconColor} />
-          <Rect x={2} y={3.5} width={20} height={19.5} rx={5.5} fill={iconColor} />
-          <Rect
-            x={6}
-            y={10.5}
-            width={10}
-            height={2.8}
-            rx={1.4}
-            fill={isActive ? '#FEEBED' : '#FFFFFF'}
-          />
-          <Rect
-            x={6}
-            y={15.5}
-            width={6.5}
-            height={2.8}
-            rx={1.4}
-            fill={isActive ? '#FEEBED' : '#FFFFFF'}
+          <Path
+            d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
+            fill={isActive ? iconColor : 'none'}
+            stroke={iconColor}
+            strokeWidth={2}
+            strokeLinecap="round"
+            strokeLinejoin="round"
           />
         </Svg>
       )}
 
       {type === 'my' && (
         <Svg width={24} height={24} viewBox="0 0 24 24" fill="none">
-          <Circle cx={12} cy={6.5} r={5} fill={iconColor} />
-          <Ellipse cx={12} cy={18} rx={9.5} ry={5} fill={iconColor} />
+          <Circle
+            cx={12}
+            cy={7}
+            r={4}
+            fill={isActive ? iconColor : 'none'}
+            stroke={iconColor}
+            strokeWidth={2}
+          />
+          <Path
+            d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"
+            fill={isActive ? iconColor : 'none'}
+            stroke={iconColor}
+            strokeWidth={2}
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
         </Svg>
       )}
 
