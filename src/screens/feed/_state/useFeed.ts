@@ -1,51 +1,95 @@
-import { useCallback, useEffect } from 'react';
-import {
-  useSuspenseInfiniteQuery,
-  useQueryClient,
-} from '@tanstack/react-query';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useCallback } from 'react';
+import { useSuspenseInfiniteQuery } from '@tanstack/react-query';
 import { Post } from '../_model/feed.model';
-import { fetchFeedPostsApi, FetchFeedResponse } from '../_lib/feedService';
+import { getFeedPostsLib, FetchFeedResponse, RawFeedPost } from '../_lib/getFeedPosts.lib';
+import { useCategoryStore } from './useCategoryStore';
 
-const ASYNC_STORAGE_LAST_READ_KEY = '@odaplove_last_read_post_cursor';
-export const FEED_QUERY_KEY = ['feedPosts'] as const;
+export const getFeedQueryKey = (
+  type: 'hot' | 'recent' = 'recent',
+  category: string = '전체',
+  pageSize: number = 5
+) => ['feedPosts', type, category, pageSize] as const;
 
-/**
- * Prefetch initial feed query helper
- */
-export async function prefetchFeed(
-  queryClient: any,
-  cursorId: string | null = null,
+export function useFeed(
+  type: 'hot' | 'recent' = 'recent',
+  pageSize: number = 5
 ) {
-  await queryClient.prefetchQuery({
-    queryKey: [...FEED_QUERY_KEY, cursorId],
-    queryFn: () => fetchFeedPostsApi({ cursorId, pageSize: 5 }),
+  const selectedCategory = useCategoryStore(state => state.selectedCategory);
+
+  const {
+    data,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+    isLoading,
+    isPending,
+    refetch,
+  } = useSuspenseInfiniteQuery<FetchFeedResponse>({
+    queryKey: getFeedQueryKey(type, selectedCategory, pageSize),
+    queryFn: async ({ pageParam }) => {
+      const page = (pageParam as number) || 1;
+      return getFeedPostsLib({
+        type,
+        category: selectedCategory,
+        page,
+        pageSize,
+      });
+    },
+    initialPageParam: 1,
+    getNextPageParam: lastPage => lastPage.nextPage ?? undefined,
+    refetchInterval: 30000,
   });
-}
 
-/**
- * Feed hook using SuspenseQuery (useSuspenseInfiniteQuery) & Prefetch pattern
- */
-export function useFeed() {
-  const queryClient = useQueryClient();
-
-  const { data, fetchNextPage, hasNextPage, isFetchingNextPage, refetch } =
-    useSuspenseInfiniteQuery<FetchFeedResponse>({
-      queryKey: FEED_QUERY_KEY,
-      queryFn: async ({ pageParam }) => {
-        const cursorId = (pageParam as string | null) ?? null;
-        return fetchFeedPostsApi({ cursorId, pageSize: 5 });
-      },
-      initialPageParam: null,
-      getNextPageParam: lastPage => lastPage.nextCursorId ?? undefined,
-      refetchInterval: 30000,
-    });
-
-  // Deduplicate and combine posts across fetched pages
   const posts: Post[] = data
     ? Array.from(
         data.pages
-          .flatMap(page => page.posts)
+          .flatMap(page => {
+            const userVoteMap = page.userVoteMap || {};
+            return page.rawPosts.map((item: RawFeedPost, index: number) => {
+              const images: string[] = item.image_urls
+                ? item.image_urls.split(',').filter(Boolean)
+                : [];
+
+              const voteOCount = item.vote_o_count ?? 0;
+              const voteXCount = item.vote_x_count ?? 0;
+              const totalVoteCount = voteOCount + voteXCount;
+              const percentO =
+                totalVoteCount > 0
+                  ? Math.round((voteOCount / totalVoteCount) * 100)
+                  : 50;
+              const percentX = 100 - percentO;
+
+              const rawId = item.id.split('-loop-')[0];
+              const myVoteChoice =
+                userVoteMap[item.id] || userVoteMap[rawId] || null;
+
+              return {
+                id: item.id,
+                category: item.category || '',
+                isHot: type === 'hot' || index < 3,
+                title: item.title,
+                storySummary: item.content,
+                fullStory: item.content,
+                images,
+                voteO: item.vote_o || '',
+                voteX: item.vote_x || '',
+                topComments: [],
+                reviewStatus: item.has_review ? '후기 보기' : '후기 요청',
+                hasReview: Boolean(item.has_review),
+                fireCount: 0,
+                facepalmCount: 0,
+                commentCount: item.comment_count ?? 0,
+                voteOCount,
+                voteXCount,
+                totalVoteCount,
+                totalVotes: totalVoteCount,
+                percentO,
+                percentX,
+                myVote: myVoteChoice,
+                createdAt: item.created_at,
+              };
+            });
+          })
           .reduce((map, post) => {
             if (!map.has(post.id)) {
               map.set(post.id, post);
@@ -56,55 +100,17 @@ export function useFeed() {
       )
     : [];
 
-  const lastPage = data?.pages[data.pages.length - 1];
-  const isFallbackMode = lastPage?.isFallbackLoop ?? false;
-  const nextCursorId = lastPage?.nextCursorId ?? null;
-
-  // Prefetch Pattern: Automatically prefetch next cursor data into cache
-  const prefetchNextPage = useCallback(() => {
-    if (nextCursorId) {
-      queryClient.prefetchQuery({
-        queryKey: [...FEED_QUERY_KEY, 'prefetch', nextCursorId],
-        queryFn: () =>
-          fetchFeedPostsApi({
-            cursorId: nextCursorId,
-            pageSize: 5,
-          }),
-      });
-    }
-  }, [nextCursorId, queryClient]);
-
-  useEffect(() => {
-    prefetchNextPage();
-  }, [prefetchNextPage]);
-
-  // Save last read cursor to AsyncStorage
-  const saveLastReadCursor = useCallback(async (cursorId: string) => {
-    try {
-      await AsyncStorage.setItem(ASYNC_STORAGE_LAST_READ_KEY, cursorId);
-    } catch (e) {
-      console.warn('Failed to save last read cursor to AsyncStorage', e);
-    }
-  }, []);
-
   const loadMore = useCallback(async () => {
     if (isFetchingNextPage || !hasNextPage) return;
-    const res = await fetchNextPage();
-    const newLastPage = res.data?.pages[res.data.pages.length - 1];
-    if (newLastPage?.nextCursorId) {
-      saveLastReadCursor(newLastPage.nextCursorId);
-    }
-  }, [isFetchingNextPage, hasNextPage, fetchNextPage, saveLastReadCursor]);
+    await fetchNextPage();
+  }, [isFetchingNextPage, hasNextPage, fetchNextPage]);
 
   return {
     posts,
-    isLoading: false,
+    isLoading: isLoading || isPending,
     isFetchingNextPage,
-    isFallbackMode,
     hasNextPage,
     loadMore,
     refresh: refetch,
-    saveLastReadCursor,
-    prefetchNextPage,
   };
 }

@@ -33,4 +33,5 @@ export interface Post {
   hasFired?: boolean;
   hasFacepalmed?: boolean;
   hasRequestedReview?: boolean;
+  createdAt?: string;
 }

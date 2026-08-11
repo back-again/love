@@ -6,81 +6,70 @@ import { useUserStore } from '@/_state/useUserStore';
 import { WrittenPostCard, WrittenPost } from '../_component/WrittenPostCard';
 import { getWrittenPosts } from '../_lib/getWrittenPosts.lib';
 import ReviewScreen, { ReviewMode } from '@/screens/review/ReviewScreen';
-import { PostOptionsBottomSheet } from '@/components/modal/PostOptionsBottomSheet';
-import { ToastMessage } from '@/components/modal/ToastMessage';
+import { useReviewModalStore } from '@/screens/review/_state/useReviewModalStore';
+import { PostOptionsScreen } from '@/screens/postOptions/PostOptionsScreen';
+import { usePostOptionsStore } from '@/screens/postOptions/_state/usePostOptionsStore';
 
 export function WrittenPostListAction() {
   const user = useUserStore(state => state.user);
   const userId = user?.id;
 
   const [selectedPost, setSelectedPost] = useState<WrittenPost | null>(null);
-  const [reviewMode, setReviewMode] = useState<ReviewMode>('view');
-  const [isReviewVisible, setIsReviewVisible] = useState(false);
-
-  const [optionsPost, setOptionsPost] = useState<WrittenPost | null>(null);
-  const [deletedPostIds, setDeletedPostIds] = useState<string[]>([]);
-  const [toast, setToast] = useState<{ visible: boolean; message: string }>({
-    visible: false,
-    message: '',
-  });
+  const [deletedPostIds] = useState<string[]>([]);
 
   const { data: writtenPosts } = useSuspenseQuery({
     queryKey: ['writtenPosts', userId],
     queryFn: () => getWrittenPosts({ userId }),
   });
 
-  const activePosts = writtenPosts.filter(post => !deletedPostIds.includes(post.id));
+  const activePosts = writtenPosts.filter(
+    post => !deletedPostIds.includes(post.id),
+  );
+
+  const openReviewModal = useReviewModalStore(state => state.openReviewModal);
 
   const handleOpenReview = (mode: ReviewMode) => (post: WrittenPost) => {
     setSelectedPost(post);
-    setReviewMode(mode);
-    setIsReviewVisible(true);
+    openReviewModal({
+      mode,
+      reviewText: post.reviewContent,
+      postId: post.id,
+    });
   };
 
-  const showToast = (message: string) => {
-    setToast({ visible: true, message });
-  };
+  const openPostOptions = usePostOptionsStore(state => state.openPostOptions);
 
   return (
     <>
-      {activePosts.map((post, idx) => (
+      {activePosts.map((post: WrittenPost) => (
         <WrittenPostCard
-          key={post.id + idx}
+          key={post.id}
           post={post}
           onOpenViewReview={handleOpenReview('view')}
           onOpenWriteReview={handleOpenReview('write')}
-          onOpenOptions={targetPost => setOptionsPost(targetPost)}
+          onOpenOptions={targetPost => {
+            setSelectedPost(targetPost);
+            openPostOptions({
+              ...targetPost,
+              storySummary: targetPost.title || '',
+              fullStory: targetPost.title || '',
+              images: [],
+              voteO: '',
+              voteX: '',
+              topComments: [],
+              reviewStatus: '',
+              fireCount: 0,
+              facepalmCount: 0,
+              commentCount: 0,
+              isMyPost: true,
+            });
+          }}
         />
       ))}
 
-      <ReviewScreen
-        visible={isReviewVisible}
-        onClose={() => setIsReviewVisible(false)}
-        mode={reviewMode}
-        reviewText={selectedPost?.reviewContent}
-        postId={selectedPost?.id}
-      />
+      <ReviewScreen />
 
-      <PostOptionsBottomSheet
-        visible={!!optionsPost}
-        onClose={() => setOptionsPost(null)}
-        isMyPost={true}
-        onEdit={() => {
-          showToast('게시글 수정 페이지로 이동합니다.');
-        }}
-        onDelete={() => {
-          if (optionsPost) {
-            setDeletedPostIds(prev => [...prev, optionsPost.id]);
-            showToast('게시글이 삭제되었습니다.');
-          }
-        }}
-      />
-
-      <ToastMessage
-        visible={toast.visible}
-        message={toast.message}
-        onHide={() => setToast(prev => ({ ...prev, visible: false }))}
-      />
+      <PostOptionsScreen />
     </>
   );
 }

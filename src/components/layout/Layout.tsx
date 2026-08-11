@@ -15,6 +15,7 @@ import { StatusBar } from 'expo-status-bar';
 import { NavItem } from './_component/NavItem';
 import { OpenSettingBottomSheetAction } from '@/screens/setting/_action/OpenSettingBottomSheet.action';
 import { useCreateForm } from '@/screens/create/_state/useCreateForm';
+import { ToastProvider } from '@/_provider/ToastProvider';
 
 export type MainTabType = 'feed' | 'chat' | 'create' | 'my';
 
@@ -52,7 +53,6 @@ export function Layout({
     <View style={styles.container}>
       <StatusBar style="dark" />
 
-      {/* Top White Status Bar & Header Container */}
       {activeTab !== 'chat' ? (
         <View style={[styles.topWhiteArea, { paddingTop: insets.top }]}>
           <View style={styles.header}>
@@ -63,23 +63,7 @@ export function Layout({
               resizeMode="contain"
             />
 
-            {activeTab === 'create' ? (
-              <TouchableOpacity
-                style={styles.notificationButton}
-                onPress={() => onTabChange('feed')}
-                activeOpacity={0.7}
-              >
-                <Svg width={24} height={24} viewBox="0 0 24 24" fill="none">
-                  <Path
-                    d="M18 6L6 18M6 6l12 12"
-                    stroke="#8F8F8F"
-                    strokeWidth={2.2}
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </Svg>
-              </TouchableOpacity>
-            ) : activeTab === 'my' ? (
+            {activeTab === 'my' ? (
               <OpenSettingBottomSheetAction onSettingsPress={onSettingsPress} />
             ) : (
               <TouchableOpacity
@@ -104,10 +88,8 @@ export function Layout({
         <View style={{ paddingTop: insets.top, backgroundColor: '#FFFFFF' }} />
       )}
 
-      {/* Main Content Area */}
       <View style={styles.contentArea}>{children}</View>
 
-      {/* Floating Glassmorphism Bottom Navigation Bar */}
       {!hideBottomNav && (
         <View
           style={[
@@ -146,6 +128,8 @@ export function Layout({
           </View>
         </View>
       )}
+
+      <ToastProvider />
     </View>
   );
 }

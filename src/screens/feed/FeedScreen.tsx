@@ -1,14 +1,20 @@
-import React, { Suspense, useState } from 'react';
+import React, { Suspense } from 'react';
 import { StyleSheet, View } from 'react-native';
-import { FeedListAction } from './_action/FeedList.action';
-import { FeedLoadingFallback } from './_component/FeedLoadingFallback';
+import { CategoryHeaderArea } from './_area/CategoryHeader.area';
+import { FeedPostsArea } from './_area/FeedPosts.area';
+import { CategoryHydration } from './_component/CategoryHydration';
+import { CategoryHeaderFallback } from './_component/CategoryHeaderFallback';
 
 export default function FeedScreen() {
   return (
     <View style={styles.container}>
-      <Suspense fallback={<FeedLoadingFallback />}>
-        <FeedListAction />
-      </Suspense>
+      <CategoryHydration>
+        <Suspense fallback={<CategoryHeaderFallback />}>
+          <CategoryHeaderArea />
+        </Suspense>
+      </CategoryHydration>
+
+      <FeedPostsArea />
     </View>
   );
 }
@@ -17,6 +23,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     width: '100%',
+    position: 'relative',
     backgroundColor: 'transparent',
   },
 });

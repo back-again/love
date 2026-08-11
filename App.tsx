@@ -19,6 +19,7 @@ import { Layout, MainTabType } from '@/components/layout/Layout';
 
 import { User } from '@/types/database.types';
 import { useLoadApp } from '@/_state/useLoadApp';
+import { ToastProvider } from '@/_provider/ToastProvider';
 import FeedScreen from '@/screens/feed/FeedScreen';
 
 const queryClient = new QueryClient();

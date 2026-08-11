@@ -4,6 +4,7 @@ import { uploadImageToR2 } from '@/api/storage.api';
 export interface CreatePostParams {
   title: string;
   content: string;
+  category?: string;
   images?: string[]; // 로컬 선택 이미지 URI 배열
   userId?: string;
   voteO?: string;
@@ -13,10 +14,11 @@ export interface CreatePostParams {
 export async function createPost({
   title,
   content,
+  category = '연애/썸',
   images = [],
   userId,
-  voteO,
-  voteX,
+  voteO = '괜찮은데?',
+  voteX = '난 싫어',
 }: CreatePostParams) {
   // 1. 로그인 유저 ID 확인 또는 기본 유저 ID 적용
   let activeUserId = userId;
@@ -53,10 +55,10 @@ export async function createPost({
     user_id: activeUserId,
     title,
     content,
+    category,
+    vote_o: voteO,
+    vote_x: voteX,
   };
-
-  if (voteO) insertPayload.vote_o = voteO;
-  if (voteX) insertPayload.vote_x = voteX;
 
   const { data: postData, error: postError } = await supabase
     .from('posts')

@@ -1,27 +1,28 @@
+'use client';
+
 import React, { useEffect } from 'react';
 import { StyleSheet, View, Text } from 'react-native';
+import { useShallow } from 'zustand/react/shallow';
 import { BottomSheetModal } from '@/components/modal/BottomSheetModal';
 import { ReviewInputAction } from './_action/ReviewInput.action';
 import { ReviewSubmitAction } from './_action/ReviewSubmit.action';
 import { useReviewForm } from './_state/useReviewForm';
+import { useReviewModalStore, ReviewMode } from './_state/useReviewModalStore';
 
-export type ReviewMode = 'view' | 'write';
+export type { ReviewMode };
 
-interface ReviewScreenProps {
-  visible: boolean;
-  onClose: () => void;
-  mode?: ReviewMode;
-  reviewText?: string;
-  postId?: string;
-}
+export default function ReviewScreen() {
+  const { visible, mode, reviewText, postId, closeReviewModal } =
+    useReviewModalStore(
+      useShallow(state => ({
+        visible: state.visible,
+        mode: state.mode,
+        reviewText: state.reviewText,
+        postId: state.postId,
+        closeReviewModal: state.closeReviewModal,
+      })),
+    );
 
-export default function ReviewScreen({
-  visible,
-  onClose,
-  mode = 'view',
-  reviewText = '"결국 솔직하게 서운했던 부분 대화 나누고 서로 이해했어요! 다들 O 투표로 제 편을 들어주셔서 용기 얻고 대화할 수 있었습니다. 감사합니다!"',
-  postId,
-}: ReviewScreenProps) {
   const isWriteMode = mode === 'write';
   const reset = useReviewForm(state => state.reset);
 
@@ -34,7 +35,7 @@ export default function ReviewScreen({
   return (
     <BottomSheetModal
       visible={visible}
-      onClose={onClose}
+      onClose={closeReviewModal}
       snapPoints={isWriteMode ? ['65%'] : ['40%']}
     >
       <View style={styles.headerRow}>
@@ -50,7 +51,7 @@ export default function ReviewScreen({
           </Text>
 
           <ReviewInputAction />
-          <ReviewSubmitAction onClose={onClose} postId={postId} />
+          <ReviewSubmitAction onClose={closeReviewModal} postId={postId} />
         </View>
       ) : (
         <View style={styles.reviewCardBox}>

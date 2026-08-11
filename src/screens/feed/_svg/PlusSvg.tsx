@@ -5,21 +5,22 @@ interface SvgProps {
   width?: number;
   height?: number;
   color?: string;
+  strokeWidth?: number;
 }
 
-export function LikeSvg({
-  width = 16,
-  height = 16,
-  color = '#475569',
+export function PlusSvg({
+  width = 24,
+  height = 24,
+  color = '#FFFFFF',
+  strokeWidth = 3,
 }: SvgProps) {
   return (
     <Svg width={width} height={height} viewBox="0 0 24 24" fill="none">
       <Path
-        d="M14 9V5a3 3 0 00-3-3l-4 9v11h11.28a2 2 0 002-1.7l1.38-9a2 2 0 00-2-2.3zM7 22H4a2 2 0 01-2-2v-7a2 2 0 012-2h3"
+        d="M12 5v14M5 12h14"
         stroke={color}
-        strokeWidth={2}
+        strokeWidth={strokeWidth}
         strokeLinecap="round"
-        strokeLinejoin="round"
       />
     </Svg>
   );

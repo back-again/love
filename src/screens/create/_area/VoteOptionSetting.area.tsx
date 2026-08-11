@@ -11,7 +11,6 @@ import {
 } from 'react-native';
 import { useShallow } from 'zustand/react/shallow';
 import { useCreateForm } from '../_state/useCreateForm';
-import { generateAiVoteOptions } from '@/screens/feed/_lib/getFeedPosts.lib';
 import { inspectPostQualityWithAi } from '../_lib/aiModeration.lib';
 import Svg, { Path } from 'react-native-svg';
 
@@ -64,9 +63,8 @@ export function VoteOptionSettingArea() {
         setAiStatus('invalid');
       } else {
         setAiStatus('idle');
-        const options = generateAiVoteOptions(questionTitle, detailSituation);
-        setVoteO(options.voteO);
-        setVoteX(options.voteX);
+        setVoteO('');
+        setVoteX('');
       }
     });
   };

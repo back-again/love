@@ -9,63 +9,45 @@ import {
   Image,
   Platform,
 } from 'react-native';
-import Svg, { Path, Circle, Rect } from 'react-native-svg';
+import { MoreOptionsSvg, VoteStatsSvg, CommentCountSvg } from '../_svg';
 import { Post } from '../_model/feed.model';
 import {
   useVoteState,
   getHasSeenFirstVoteGuide,
   setHasSeenFirstVoteGuideTrue,
 } from '../_state/useFeedState';
-import { VoteInfo } from '@/components/CommentBottomSheet';
+import { VoteInfo } from '@/screens/feed/comment/_model/comment.model';
 import { VoteConfirmModal } from '@/components/modal/VoteConfirmModal';
+import { useImageModalStore } from '../_state/useImageModalStore';
+import { usePostOptionsStore } from '@/screens/postOptions/_state/usePostOptionsStore';
+import { useCommentStore } from '@/screens/feed/comment/_state/useCommentStore';
+import { useReviewModalStore } from '@/screens/review/_state/useReviewModalStore';
+import { useToastStore } from '@/_state/useToastStore';
+import { formatTimeAgo } from '../_lib/formatTimeAgo.lib';
 
 interface FeedItemProps {
   post: Post;
-  pageHeight?: number;
-  onOpenImageModal?: (index: number) => void;
-  onOpenDetailPost?: (post: Post) => void;
-  onOpenComments: (title: string, voteInfo?: VoteInfo) => void;
-  onOpenViewReview?: () => void;
-  onOpenOptions?: (post: Post) => void;
-  onRequireVoteToast?: () => void;
 }
 
-export function FeedItem({
-  post,
-  onOpenImageModal,
-  onOpenDetailPost,
-  onOpenComments,
-  onOpenViewReview,
-  onOpenOptions,
-  onRequireVoteToast,
-}: FeedItemProps) {
-  const {
-    selectedVote,
-    voteOCount,
-    voteXCount,
-    hasVoted,
-    totalVoteCount,
-    handleVote,
-  } = useVoteState(post);
+export function FeedItem({ post }: FeedItemProps) {
+  const { selectedVote, isVoted, totalVotes, percentO, percentX, handleVote } =
+    useVoteState(post);
 
+  const openImageModal = useImageModalStore(state => state.openImageModal);
+  const openPostOptions = usePostOptionsStore(state => state.openPostOptions);
+  const openComments = useCommentStore(state => state.openComments);
+  const openReviewModal = useReviewModalStore(state => state.openReviewModal);
+  const showToast = useToastStore(state => state.showToast);
   const [isExpanded, setIsExpanded] = useState(false);
-  const [pendingVoteChoice, setPendingVoteChoice] = useState<'O' | 'X' | null>(null);
-
-  const isVoted = hasVoted;
-
-  const totalVotes = totalVoteCount || 1;
-  const percentO = totalVoteCount > 0 ? Math.round((voteOCount / totalVotes) * 100) : 50;
-  const percentX = 100 - percentO;
+  const [pendingVoteChoice, setPendingVoteChoice] = useState<'O' | 'X' | null>(
+    null,
+  );
 
   const handleCardVote = (choice: 'O' | 'X') => {
-    if (!isVoted) {
-      if (!getHasSeenFirstVoteGuide()) {
-        // App-wide first time vote! Show confirmation guide modal
-        setPendingVoteChoice(choice);
-      } else {
-        // Vote immediately
-        handleVote(choice);
-      }
+    if (isVoted) return;
+
+    if (!getHasSeenFirstVoteGuide()) {
+      setPendingVoteChoice(choice);
     } else {
       handleVote(choice);
     }
@@ -73,19 +55,23 @@ export function FeedItem({
 
   const handleConfirmVote = () => {
     if (pendingVoteChoice) {
-      setHasSeenFirstVoteGuideTrue(); // Persist so future votes on any post never show modal!
+      setHasSeenFirstVoteGuideTrue();
       handleVote(pendingVoteChoice);
       setPendingVoteChoice(null);
     }
   };
 
+  const handleImageClick = (index: number) => {
+    openImageModal(post.images, index);
+  };
+
   const handleOpenBottomSheet = () => {
     if (!isVoted) {
-      if (onRequireVoteToast) onRequireVoteToast();
+      showToast('💡 소신 있는 투표를 위해, 투표 후 댓글이 열려요!');
       return;
     }
 
-    onOpenComments(post.title, {
+    openComments(post.title, {
       selectedVote: selectedVote,
       voteOText: post.voteO,
       voteXText: post.voteX,
@@ -96,18 +82,13 @@ export function FeedItem({
     });
   };
 
-  const voteOText = post.voteO || '괜찮은데?';
-  const voteXText = post.voteX || '난 싫어';
+  const voteOText = post.voteO;
+  const voteXText = post.voteX;
   const fullText = post.fullStory || post.storySummary || '';
 
   return (
-    <TouchableOpacity
-      style={styles.cardPageWrapper}
-      onPress={() => setIsExpanded(prev => !prev)}
-      activeOpacity={0.92}
-    >
+    <View style={styles.cardPageWrapper}>
       <View style={styles.cardContainer}>
-        {/* Top Meta Row: Badge Pills + Time (Left) & Three Dots More Menu (Right) */}
         <View style={styles.topMetaRow}>
           <View style={styles.badgeChipsContainer}>
             {post.isHot && (
@@ -116,54 +97,51 @@ export function FeedItem({
               </View>
             )}
             <View style={styles.categoryBadgePill}>
-              <Text style={styles.categoryBadgeText}>
-                {post.category || '연애/썸'}
-              </Text>
+              <Text style={styles.categoryBadgeText}>{post.category}</Text>
             </View>
-            <Text style={styles.categoryTimeText}>5분 전</Text>
+            <Text style={styles.categoryTimeText}>
+              {formatTimeAgo(post.createdAt)}
+            </Text>
           </View>
 
-          {/* Three Dots More Menu Button */}
           <TouchableOpacity
             style={styles.moreOptionsButton}
-            onPress={(e) => {
+            onPress={e => {
               e.stopPropagation();
-              if (onOpenOptions) onOpenOptions(post);
+              openPostOptions(post);
             }}
             hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
             activeOpacity={0.6}
           >
-            <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
-              <Circle cx={5} cy={12} r={2} fill="#A0A0A0" />
-              <Circle cx={12} cy={12} r={2} fill="#A0A0A0" />
-              <Circle cx={19} cy={12} r={2} fill="#A0A0A0" />
-            </Svg>
+            <MoreOptionsSvg />
           </TouchableOpacity>
         </View>
 
-        {/* Title Question */}
-        <Text style={styles.questionTitle}>{post.title}</Text>
+        <TouchableOpacity
+          onPress={() => setIsExpanded(prev => !prev)}
+          activeOpacity={0.9}
+          style={styles.storyClickArea}
+        >
+          <Text style={styles.questionTitle}>{post.title}</Text>
+          {fullText ? (
+            <Text
+              style={styles.storyPreviewText}
+              numberOfLines={isExpanded ? undefined : 3}
+              ellipsizeMode="tail"
+            >
+              {fullText}
+            </Text>
+          ) : null}
+        </TouchableOpacity>
 
-        {/* Story Text Preview (3 lines preview with ellipsis, expands on press) */}
-        {fullText ? (
-          <Text
-            style={styles.storyPreviewText}
-            numberOfLines={isExpanded ? undefined : 3}
-            ellipsizeMode="tail"
-          >
-            {fullText}
-          </Text>
-        ) : null}
-
-        {/* Attached Images Preview if any */}
         {post.images && post.images.length > 0 && (
           <View style={styles.imageListRow}>
             {post.images.slice(0, 3).map((imgUri: string, index: number) => (
               <TouchableOpacity
                 key={index}
-                onPress={(e) => {
+                onPress={e => {
                   e.stopPropagation();
-                  if (onOpenImageModal) onOpenImageModal(index);
+                  handleImageClick(index);
                 }}
                 activeOpacity={0.88}
               >
@@ -177,12 +155,11 @@ export function FeedItem({
           </View>
         )}
 
-        {/* Interactive Vote Options (Before vs After Voting) */}
         {!isVoted ? (
           <View style={styles.votedResultsContainer}>
             <TouchableOpacity
               style={styles.votedBarWrapper}
-              onPress={(e) => {
+              onPress={e => {
                 e.stopPropagation();
                 handleCardVote('O');
               }}
@@ -190,7 +167,10 @@ export function FeedItem({
             >
               <View style={styles.votedBarTrack}>
                 <Text
-                  style={[styles.votedBarOptionText, styles.votedBarOptionTextUnselected]}
+                  style={[
+                    styles.votedBarOptionText,
+                    styles.votedBarOptionTextUnselected,
+                  ]}
                   numberOfLines={1}
                 >
                   {voteOText}
@@ -200,7 +180,7 @@ export function FeedItem({
 
             <TouchableOpacity
               style={styles.votedBarWrapper}
-              onPress={(e) => {
+              onPress={e => {
                 e.stopPropagation();
                 handleCardVote('X');
               }}
@@ -208,7 +188,10 @@ export function FeedItem({
             >
               <View style={styles.votedBarTrack}>
                 <Text
-                  style={[styles.votedBarOptionText, styles.votedBarOptionTextUnselected]}
+                  style={[
+                    styles.votedBarOptionText,
+                    styles.votedBarOptionTextUnselected,
+                  ]}
                   numberOfLines={1}
                 >
                   {voteXText}
@@ -220,7 +203,7 @@ export function FeedItem({
           <View style={styles.votedResultsContainer}>
             <TouchableOpacity
               style={styles.votedBarWrapper}
-              onPress={(e) => {
+              onPress={e => {
                 e.stopPropagation();
                 handleCardVote('O');
               }}
@@ -262,7 +245,7 @@ export function FeedItem({
 
             <TouchableOpacity
               style={styles.votedBarWrapper}
-              onPress={(e) => {
+              onPress={e => {
                 e.stopPropagation();
                 handleCardVote('X');
               }}
@@ -304,39 +287,24 @@ export function FeedItem({
           </View>
         )}
 
-        {/* Bottom Stats Row: Vote Count & Comment Count */}
         <View style={styles.bottomStatsRow}>
           <View style={styles.statLeftCol}>
-            <Svg width={16} height={16} viewBox="0 0 24 24" fill="none">
-              <Rect x={2} y={12} width={5} height={10} rx={2} fill="#8F8F8F" />
-              <Rect x={9.5} y={6} width={5} height={16} rx={2} fill="#8F8F8F" />
-              <Rect x={17} y={2} width={5} height={20} rx={2} fill="#8F8F8F" />
-            </Svg>
+            <VoteStatsSvg />
             <Text style={styles.statLeftText}>
-              {(totalVotes || 643).toLocaleString()}명 투표 중
+              {totalVotes.toLocaleString()}명 투표 중
             </Text>
           </View>
 
           <TouchableOpacity
             style={styles.statRightCol}
-            onPress={(e) => {
+            onPress={e => {
               e.stopPropagation();
               handleOpenBottomSheet();
             }}
             activeOpacity={0.7}
           >
-            <Svg width={16} height={16} viewBox="0 0 24 24" fill="none">
-              <Path
-                d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"
-                stroke="#8F8F8F"
-                strokeWidth={2}
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </Svg>
-            <Text style={styles.statRightText}>
-              {post.commentCount || (post.topComments ? post.topComments.length : 128)}
-            </Text>
+            <CommentCountSvg />
+            <Text style={styles.statRightText}>{post.commentCount}</Text>
           </TouchableOpacity>
         </View>
 
@@ -344,10 +312,16 @@ export function FeedItem({
           visible={!!pendingVoteChoice}
           onClose={() => setPendingVoteChoice(null)}
           onConfirm={handleConfirmVote}
-          choiceText={pendingVoteChoice === 'O' ? voteOText : pendingVoteChoice === 'X' ? voteXText : ''}
+          choiceText={
+            pendingVoteChoice === 'O'
+              ? voteOText
+              : pendingVoteChoice === 'X'
+                ? voteXText
+                : ''
+          }
         />
       </View>
-    </TouchableOpacity>
+    </View>
   );
 }
 
@@ -367,6 +341,9 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.04,
     shadowRadius: 8,
     elevation: 2,
+  },
+  storyClickArea: {
+    width: '100%',
   },
   cardContainer: {
     width: '100%',

@@ -1,0 +1,59 @@
+import React from 'react';
+import { StyleSheet, TouchableOpacity, Text } from 'react-native';
+
+interface CategoryChipProps {
+  category: string;
+  isSelected: boolean;
+  onPress: () => void;
+}
+
+export function CategoryChip({
+  category,
+  isSelected,
+  onPress,
+}: CategoryChipProps) {
+  return (
+    <TouchableOpacity
+      style={[
+        styles.categoryChip,
+        isSelected && styles.categoryChipActive,
+      ]}
+      onPress={onPress}
+      activeOpacity={0.85}
+    >
+      <Text
+        style={[
+          styles.categoryChipText,
+          isSelected && styles.categoryChipTextActive,
+        ]}
+      >
+        {category}
+      </Text>
+    </TouchableOpacity>
+  );
+}
+
+const styles = StyleSheet.create({
+  categoryChip: {
+    paddingHorizontal: 14,
+    paddingVertical: 7,
+    borderRadius: 8,
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1,
+    borderColor: '#F5F5F5',
+  },
+  categoryChipActive: {
+    backgroundColor: '#FFF8F8',
+    borderColor: '#FFD1DC',
+    borderWidth: 1,
+  },
+  categoryChipText: {
+    fontSize: 13,
+    fontWeight: '400',
+    color: '#727272',
+  },
+  categoryChipTextActive: {
+    color: '#FF5D7B',
+    fontWeight: '600',
+  },
+});

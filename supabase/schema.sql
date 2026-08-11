@@ -2,7 +2,15 @@
 -- 오답연애 (Odap Love) Fully Normalized Supabase PostgreSQL Schema (11 Tables + 2 Views)
 -- ========================================================
 
--- 1. users
+-- 1. categories
+CREATE TABLE IF NOT EXISTS public.categories (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  name VARCHAR(50) NOT NULL UNIQUE,
+  order_index INT DEFAULT 0,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- 2. users
 CREATE TABLE IF NOT EXISTS public.users (
   id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
   email VARCHAR(255) NOT NULL,
@@ -13,12 +21,15 @@ CREATE TABLE IF NOT EXISTS public.users (
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
--- 2. posts
+-- 3. posts
 CREATE TABLE IF NOT EXISTS public.posts (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID NOT NULL REFERENCES public.users(id) ON DELETE CASCADE,
+  category_id UUID NOT NULL REFERENCES public.categories(id) ON DELETE CASCADE,
   title VARCHAR(200) NOT NULL,
   content TEXT NOT NULL,
+  vote_o VARCHAR(100) DEFAULT '괜찮은데?',
+  vote_x VARCHAR(100) DEFAULT '난 싫어',
   review_content TEXT,
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
@@ -105,34 +116,32 @@ CREATE TABLE IF NOT EXISTS public.inquiries_feedback (
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
--- 12. post_reactions
-CREATE TABLE IF NOT EXISTS public.post_reactions (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  post_id UUID NOT NULL REFERENCES public.posts(id) ON DELETE CASCADE,
-  user_id UUID NOT NULL REFERENCES public.users(id) ON DELETE CASCADE,
-  type VARCHAR(10) NOT NULL CHECK (type IN ('FIRE', 'FACEPALM')),
-  created_at TIMESTAMPTZ DEFAULT NOW(),
-  UNIQUE(post_id, user_id, type)
-);
+
 
 -- ========================================================
 -- SQL View 1: post_details_view
 -- ========================================================
+DROP VIEW IF EXISTS public.post_details_view CASCADE;
 CREATE OR REPLACE VIEW public.post_details_view AS
 SELECT 
   p.id,
   p.user_id,
+  p.category_id,
+  cat.name AS category,
   p.title,
   p.content,
+  p.vote_o,
+  p.vote_x,
   p.review_content,
   p.created_at,
   COALESCE(v_o.count, 0) AS vote_o_count,
   COALESCE(v_x.count, 0) AS vote_x_count,
-  COALESCE(r_fire.count, 0) AS like_count,
-  COALESCE(r_facepalm.count, 0) AS rear_count,
   COALESCE(rr.count, 0) AS curious_count,
+  COALESCE(c_cnt.count, 0) AS comment_count,
+  COALESCE(img.image_urls, '') AS image_urls,
   (p.review_content IS NOT NULL AND p.review_content <> '') AS has_review
 FROM public.posts p
+LEFT JOIN public.categories cat ON p.category_id = cat.id
 LEFT JOIN (
   SELECT post_id, COUNT(*)::INT AS count FROM public.votes WHERE choice = 'O' GROUP BY post_id
 ) v_o ON p.id = v_o.post_id
@@ -140,18 +149,21 @@ LEFT JOIN (
   SELECT post_id, COUNT(*)::INT AS count FROM public.votes WHERE choice = 'X' GROUP BY post_id
 ) v_x ON p.id = v_x.post_id
 LEFT JOIN (
-  SELECT post_id, COUNT(*)::INT AS count FROM public.post_reactions WHERE type = 'FIRE' GROUP BY post_id
-) r_fire ON p.id = r_fire.post_id
-LEFT JOIN (
-  SELECT post_id, COUNT(*)::INT AS count FROM public.post_reactions WHERE type = 'FACEPALM' GROUP BY post_id
-) r_facepalm ON p.id = r_facepalm.post_id
-LEFT JOIN (
   SELECT post_id, COUNT(*)::INT AS count FROM public.review_requests GROUP BY post_id
-) rr ON p.id = rr.post_id;
+) rr ON p.id = rr.post_id
+LEFT JOIN (
+  SELECT post_id, COUNT(*)::INT AS count FROM public.comments GROUP BY post_id
+) c_cnt ON p.id = c_cnt.post_id
+LEFT JOIN (
+  SELECT post_id, STRING_AGG(image_url, ',' ORDER BY order_index) AS image_urls
+  FROM public.post_images
+  GROUP BY post_id
+) img ON p.id = img.post_id;
 
 -- ========================================================
 -- SQL View 2: comment_details_view
 -- ========================================================
+DROP VIEW IF EXISTS public.comment_details_view CASCADE;
 CREATE OR REPLACE VIEW public.comment_details_view AS
 SELECT 
   c.id,
@@ -169,6 +181,7 @@ LEFT JOIN (
 -- ========================================================
 -- RLS DISABLE COMMANDS (Run this to bypass RLS errors completely)
 -- ========================================================
+ALTER TABLE public.categories DISABLE ROW LEVEL SECURITY;
 ALTER TABLE public.users DISABLE ROW LEVEL SECURITY;
 ALTER TABLE public.posts DISABLE ROW LEVEL SECURITY;
 ALTER TABLE public.post_images DISABLE ROW LEVEL SECURITY;
@@ -180,7 +193,6 @@ ALTER TABLE public.notifications DISABLE ROW LEVEL SECURITY;
 ALTER TABLE public.user_blocks DISABLE ROW LEVEL SECURITY;
 ALTER TABLE public.user_reports DISABLE ROW LEVEL SECURITY;
 ALTER TABLE public.inquiries_feedback DISABLE ROW LEVEL SECURITY;
-ALTER TABLE public.post_reactions DISABLE ROW LEVEL SECURITY;
 
 -- ========================================================
 -- Seed Mock Test Users for Expo Go Testing
@@ -199,74 +211,10 @@ VALUES
   ('00000000-0000-0000-0000-000000000003', 'user3@datingnote.com', 'apple', 'male', 1995, false, NOW())
 ON CONFLICT (id) DO NOTHING;
 
--- ========================================================
--- Seed Sample Data for Posts, Votes, Comments & Reviews
--- ========================================================
-
--- 1. posts
-INSERT INTO public.posts (id, user_id, title, content, review_content, created_at)
+INSERT INTO public.categories (id, name, order_index)
 VALUES 
-  (
-    '11111111-1111-1111-1111-111111111111',
-    '00000000-0000-0000-0000-000000000001',
-    '생일선물 피엑스에서 사다준 남친 나만 짜쳐?',
-    '만난 지 1년 되었는데 이번 생일 선물로 군대 PX에서 파는 달팽이 크림이랑 닥터지 세트를 줬어요... 정성은 고마운데 조금 씁쓸한데 제가 이상한 걸까요?',
-    NULL,
-    NOW() - INTERVAL '2 days'
-  ),
-  (
-    '22222222-2222-2222-2222-222222222222',
-    '00000000-0000-0000-0000-000000000001',
-    '헤어진 전애인 인스타 스토리 매일 읽는 심리가 뭘까?',
-    '헤어진 지 3달 지났는데 매번 인스타 올릴 때마다 제일 먼저 스토리 확인하네요. 미련이 남아있는 걸까요 아님 그냥 습관일까요?',
-    '"결국 솔직하게 서운했던 부분 대화 나누고 서로 이해했어요! 다들 O 투표로 제 편을 들어주셔서 용기 얻고 대화할 수 있었습니다. 감사합니다!"',
-    NOW() - INTERVAL '5 days'
-  ),
-  (
-    '33333333-3333-3333-3333-333333333333',
-    '00000000-0000-0000-0000-000000000002',
-    '연락 끊긴 지 일주일째, 내가 먼저 연락해야 할까?',
-    '사소한 말다툼 끝에 서로 연락을 안 한 지 일주일이 지나가네요. 제가 먼저 사과하는 게 맞을까요?',
-    NULL,
-    NOW() - INTERVAL '1 day'
-  )
-ON CONFLICT (id) DO NOTHING;
-
--- 2. votes
-INSERT INTO public.votes (post_id, user_id, choice, created_at)
-VALUES 
-  ('11111111-1111-1111-1111-111111111111', '00000000-0000-0000-0000-000000000001', 'O', NOW()),
-  ('11111111-1111-1111-1111-111111111111', '00000000-0000-0000-0000-000000000002', 'O', NOW()),
-  ('11111111-1111-1111-1111-111111111111', '00000000-0000-0000-0000-000000000003', 'X', NOW()),
-  ('22222222-2222-2222-2222-222222222222', '00000000-0000-0000-0000-000000000001', 'X', NOW()),
-  ('22222222-2222-2222-2222-222222222222', '00000000-0000-0000-0000-000000000002', 'X', NOW()),
-  ('33333333-3333-3333-3333-333333333333', '00000000-0000-0000-0000-000000000001', 'O', NOW())
-ON CONFLICT (post_id, user_id) DO NOTHING;
-
--- 3. comments
-INSERT INTO public.comments (id, post_id, user_id, parent_id, content, created_at)
-VALUES 
-  ('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', '11111111-1111-1111-1111-111111111111', '00000000-0000-0000-0000-000000000002', NULL, '아무리 PX가 싸고 좋다지만 생일 선물인데 솔직히 서운할 만해요...', NOW()),
-  ('bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb', '11111111-1111-1111-1111-111111111111', '00000000-0000-0000-0000-000000000003', NULL, '남자친구 정성 생각해서 가볍게 이야기해보는 건 어떨까요?', NOW()),
-  ('cccccccc-cccc-cccc-cccc-cccccccccccc', '22222222-2222-2222-2222-222222222222', '00000000-0000-0000-0000-000000000002', NULL, '그냥 생각 없이 탐색 탭 넘기다 읽는 걸 수도 있어요!', NOW())
-ON CONFLICT (id) DO NOTHING;
-
--- 4. comment_likes
-INSERT INTO public.comment_likes (comment_id, user_id, created_at)
-VALUES 
-  ('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', '00000000-0000-0000-0000-000000000001', NOW()),
-  ('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', '00000000-0000-0000-0000-000000000003', NOW())
-ON CONFLICT (comment_id, user_id) DO NOTHING;
-
--- 5. review_requests
-INSERT INTO public.review_requests (post_id, user_id, created_at)
-VALUES 
-  ('11111111-1111-1111-1111-111111111111', '00000000-0000-0000-0000-000000000002', NOW()),
-  ('11111111-1111-1111-1111-111111111111', '00000000-0000-0000-0000-000000000003', NOW())
-ON CONFLICT (post_id, user_id) DO NOTHING;
-
--- 6. inquiries_feedback
-INSERT INTO public.inquiries_feedback (id, user_id, type, content, created_at)
-VALUES 
-  (gen_random_uuid(), '00000000-0000-0000-0000-000000000001', 'FEEDBACK', '앱 UI가 너무 깔끔하고 좋네요! 더 많은 연애 고민 카테고리가 생기면 좋겠습니다.', NOW())
+  ('11111111-0000-0000-0000-000000000001', '연애/썸', 1),
+  ('11111111-0000-0000-0000-000000000002', '이별/재회', 2),
+  ('11111111-0000-0000-0000-000000000003', '19/관계', 3),
+  ('11111111-0000-0000-0000-000000000004', '일상/고민', 4)
 ON CONFLICT (id) DO NOTHING;
