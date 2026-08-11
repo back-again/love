@@ -59,6 +59,7 @@ CREATE TABLE IF NOT EXISTS public.comments (
   user_id UUID NOT NULL REFERENCES public.users(id) ON DELETE CASCADE,
   parent_id UUID REFERENCES public.comments(id) ON DELETE CASCADE,
   content TEXT NOT NULL,
+  voted_choice VARCHAR(2) CHECK (voted_choice IN ('O', 'X')),
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
 

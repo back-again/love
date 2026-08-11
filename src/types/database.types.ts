@@ -58,6 +58,7 @@ export interface Comment {
   user_id: string;
   parent_id?: string | null;
   content: string;
+  voted_choice?: 'O' | 'X' | null;
   created_at: string;
 }
 

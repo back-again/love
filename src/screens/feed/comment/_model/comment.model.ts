@@ -16,13 +16,3 @@ export interface CommentItem {
   votedChoice?: 'O' | 'X';
   replies?: ReplyItem[];
 }
-
-export interface VoteInfo {
-  selectedVote?: 'O' | 'X' | null;
-  voteOText?: string;
-  voteXText?: string;
-  percentO?: number;
-  percentX?: number;
-  totalVotes?: number;
-  hasReview?: boolean;
-}

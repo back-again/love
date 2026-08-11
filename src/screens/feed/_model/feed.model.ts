@@ -19,6 +19,7 @@ export interface Post {
   voteX: string;
   topComments: CommentItem[];
   reviewStatus: string;
+  reviewContent?: string;
   hasReview?: boolean;
   fireCount: number;
   facepalmCount: number;

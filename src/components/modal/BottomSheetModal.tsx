@@ -1,9 +1,12 @@
+'use client';
+
 import React, { useRef, useEffect, useCallback, ReactNode } from 'react';
 import { StyleSheet, Modal, Platform } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import BottomSheet, {
   BottomSheetScrollView,
+  BottomSheetView,
   BottomSheetBackdrop,
 } from '@gorhom/bottom-sheet';
 
@@ -12,6 +15,11 @@ interface BottomSheetModalProps {
   onClose: () => void;
   snapPoints?: (string | number)[];
   children: ReactNode;
+  useScrollView?: boolean;
+  enableDynamicSizing?: boolean;
+  footerComponent?: React.FC<any>;
+  keyboardBehavior?: 'interactive' | 'extend' | 'fillParent';
+  enableContentPanningGesture?: boolean;
 }
 
 export function BottomSheetModal({
@@ -19,6 +27,11 @@ export function BottomSheetModal({
   onClose,
   snapPoints = ['85%'],
   children,
+  useScrollView = true,
+  enableDynamicSizing = true,
+  footerComponent,
+  keyboardBehavior,
+  enableContentPanningGesture = true,
 }: BottomSheetModalProps) {
   const insets = useSafeAreaInsets();
   const bottomSheetRef = useRef<BottomSheet>(null);
@@ -60,11 +73,17 @@ export function BottomSheetModal({
           ref={bottomSheetRef}
           snapPoints={snapPoints}
           topInset={insets.top}
+          enableDynamicSizing={enableDynamicSizing}
           enablePanDownToClose={true}
-          keyboardBehavior={Platform.OS === 'ios' ? 'interactive' : 'extend'}
+          keyboardBehavior={
+            keyboardBehavior ??
+            (Platform.OS === 'ios' ? 'interactive' : 'extend')
+          }
           keyboardBlurBehavior="restore"
           android_keyboardInputMode="adjustResize"
           backdropComponent={renderBackdrop}
+          footerComponent={footerComponent}
+          enableContentPanningGesture={enableContentPanningGesture}
           onChange={(index: number) => {
             if (index === -1) {
               onClose();
@@ -74,17 +93,23 @@ export function BottomSheetModal({
           backgroundStyle={styles.sheetBackground}
           handleIndicatorStyle={styles.handleIndicator}
         >
-          <BottomSheetScrollView
-            style={styles.scrollArea}
-            contentContainerStyle={[
-              styles.scrollContent,
-              { paddingBottom: Math.max(insets.bottom, 24) + 16 },
-            ]}
-            showsVerticalScrollIndicator={false}
-            keyboardShouldPersistTaps="handled"
-          >
-            {children}
-          </BottomSheetScrollView>
+          {useScrollView ? (
+            <BottomSheetScrollView
+              style={styles.scrollArea}
+              contentContainerStyle={[
+                styles.scrollContent,
+                { paddingBottom: Math.max(insets.bottom, 24) + 80 },
+              ]}
+              showsVerticalScrollIndicator={false}
+              keyboardShouldPersistTaps="handled"
+            >
+              {children}
+            </BottomSheetScrollView>
+          ) : (
+            <BottomSheetView style={styles.nonScrollContent}>
+              {children}
+            </BottomSheetView>
+          )}
         </BottomSheet>
       </GestureHandlerRootView>
     </Modal>
@@ -114,6 +139,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
   },
   scrollContent: {
+    paddingTop: 12,
+  },
+  nonScrollContent: {
+    flex: 1,
     paddingTop: 12,
   },
 });

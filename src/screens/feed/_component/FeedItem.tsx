@@ -16,7 +16,6 @@ import {
   getHasSeenFirstVoteGuide,
   setHasSeenFirstVoteGuideTrue,
 } from '../_state/useFeedState';
-import { VoteInfo } from '@/screens/feed/comment/_model/comment.model';
 import { VoteConfirmModal } from '@/components/modal/VoteConfirmModal';
 import { useImageModalStore } from '../_state/useImageModalStore';
 import { usePostOptionsStore } from '@/screens/postOptions/_state/usePostOptionsStore';
@@ -71,15 +70,7 @@ export function FeedItem({ post }: FeedItemProps) {
       return;
     }
 
-    openComments(post.title, {
-      selectedVote: selectedVote,
-      voteOText: post.voteO,
-      voteXText: post.voteX,
-      percentO: percentO,
-      percentX: percentX,
-      totalVotes: totalVotes,
-      hasReview: post.hasReview,
-    });
+    openComments(post);
   };
 
   const voteOText = post.voteO;

@@ -19,7 +19,6 @@ import { Layout, MainTabType } from '@/components/layout/Layout';
 
 import { User } from '@/types/database.types';
 import { useLoadApp } from '@/_state/useLoadApp';
-import { ToastProvider } from '@/_provider/ToastProvider';
 import FeedScreen from '@/screens/feed/FeedScreen';
 
 const queryClient = new QueryClient();
@@ -95,7 +94,7 @@ function MainAppLayout({ mainNavRef }: { mainNavRef: any }) {
       >
         <MainStack.Screen name="Feed" component={FeedScreen} />
         <MainStack.Screen name="Chat">
-          {(props) => (
+          {props => (
             <ChatScreen
               {...props}
               onGoToCreate={() => handleTabChange('create')}

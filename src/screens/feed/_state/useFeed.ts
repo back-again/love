@@ -75,6 +75,7 @@ export function useFeed(
                 voteX: item.vote_x || '',
                 topComments: [],
                 reviewStatus: item.has_review ? '후기 보기' : '후기 요청',
+                reviewContent: item.review_content || '',
                 hasReview: Boolean(item.has_review),
                 fireCount: 0,
                 facepalmCount: 0,
