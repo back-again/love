@@ -1,3 +1,4 @@
+// AI AGENT NOTICE: Always read AGENTS.md in project root before writing or modifying any code.
 import React, { useState } from 'react';
 import { StyleSheet, View, ActivityIndicator } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
