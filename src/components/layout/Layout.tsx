@@ -9,11 +9,11 @@ import {
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { BlurView } from 'expo-blur';
-import Svg, { Path } from 'react-native-svg';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { StatusBar } from 'expo-status-bar';
 import { NavItem } from './_component/NavItem';
+import { NotificationBellSvg } from './_svg/NotificationBellSvg';
 import { OpenSettingBottomSheetAction } from '@/screens/setting/_action/OpenSettingBottomSheet.action';
 import { useCreateForm } from '@/screens/create/_state/useCreateForm';
 import { ToastProvider } from '@/_provider/ToastProvider';
@@ -59,15 +59,50 @@ export function Layout({
   };
 
   const activeIndexAnim = useRef(new Animated.Value(tabIndexMap[activeTab])).current;
+  const stretchAnim = useRef(new Animated.Value(1)).current;
+  const scaleYAnim = useRef(new Animated.Value(1)).current;
 
   useEffect(() => {
     const targetIndex = tabIndexMap[activeTab];
-    Animated.spring(activeIndexAnim, {
-      toValue: targetIndex,
-      useNativeDriver: true,
-      tension: 100,
-      friction: 12,
-    }).start();
+
+    Animated.parallel([
+      Animated.spring(activeIndexAnim, {
+        toValue: targetIndex,
+        useNativeDriver: true,
+        tension: 130,
+        friction: 13,
+      }),
+      Animated.sequence([
+        // Phase 1: Water drop stretches horizontally as it moves
+        Animated.parallel([
+          Animated.timing(stretchAnim, {
+            toValue: 1.28,
+            duration: 110,
+            useNativeDriver: true,
+          }),
+          Animated.timing(scaleYAnim, {
+            toValue: 0.82,
+            duration: 110,
+            useNativeDriver: true,
+          }),
+        ]),
+        // Phase 2: Soft fluid spring bounce back to normal shape
+        Animated.parallel([
+          Animated.spring(stretchAnim, {
+            toValue: 1,
+            useNativeDriver: true,
+            friction: 5,
+            tension: 160,
+          }),
+          Animated.spring(scaleYAnim, {
+            toValue: 1,
+            useNativeDriver: true,
+            friction: 5,
+            tension: 160,
+          }),
+        ]),
+      ]),
+    ]).start();
   }, [activeTab]);
 
   useEffect(() => {
@@ -130,15 +165,7 @@ export function Layout({
                 onPress={() => setIsNotificationOpen(true)}
                 activeOpacity={0.7}
               >
-                <Svg width={24} height={24} viewBox="0 0 24 24" fill="none">
-                  <Path
-                    d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 01-3.46 0"
-                    stroke="#0F172A"
-                    strokeWidth={2.2}
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </Svg>
+                <NotificationBellSvg color="#0F172A" />
                 <View style={styles.unreadBadgeDot} />
               </TouchableOpacity>
             )}
@@ -193,6 +220,8 @@ export function Layout({
                           ],
                         }),
                       },
+                      { scaleX: stretchAnim },
+                      { scaleY: scaleYAnim },
                     ],
                   },
                 ]}
