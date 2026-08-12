@@ -35,14 +35,22 @@ export function BottomSheetModal({
 }: BottomSheetModalProps) {
   const insets = useSafeAreaInsets();
   const bottomSheetRef = useRef<BottomSheet>(null);
+  const [mounted, setMounted] = React.useState(visible);
 
   useEffect(() => {
     if (visible) {
-      bottomSheetRef.current?.snapToIndex(0);
+      setMounted(true);
+      requestAnimationFrame(() => {
+        bottomSheetRef.current?.snapToIndex(0);
+      });
     } else {
       bottomSheetRef.current?.close();
     }
   }, [visible]);
+
+  const handleCloseAnimation = useCallback(() => {
+    bottomSheetRef.current?.close();
+  }, []);
 
   const renderBackdrop = useCallback(
     (props: any) => (
@@ -52,20 +60,20 @@ export function BottomSheetModal({
         appearsOnIndex={0}
         opacity={0.45}
         pressBehavior="close"
-        onPress={onClose}
+        onPress={handleCloseAnimation}
       />
     ),
-    [onClose],
+    [handleCloseAnimation],
   );
 
-  if (!visible) return null;
+  if (!visible && !mounted) return null;
 
   return (
     <Modal
       transparent
-      visible={visible}
+      visible={mounted}
       animationType="none"
-      onRequestClose={onClose}
+      onRequestClose={handleCloseAnimation}
       statusBarTranslucent
     >
       <GestureHandlerRootView style={styles.flexOne}>
@@ -86,6 +94,7 @@ export function BottomSheetModal({
           enableContentPanningGesture={enableContentPanningGesture}
           onChange={(index: number) => {
             if (index === -1) {
+              setMounted(false);
               onClose();
             }
           }}

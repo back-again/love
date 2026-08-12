@@ -1,4 +1,4 @@
-import React, { ReactNode, useEffect } from 'react';
+import React, { ReactNode, useEffect, useState } from 'react';
 import {
   StyleSheet,
   View,
@@ -17,6 +17,9 @@ import { OpenSettingBottomSheetAction } from '@/screens/setting/_action/OpenSett
 import { useCreateForm } from '@/screens/create/_state/useCreateForm';
 import { ToastProvider } from '@/_provider/ToastProvider';
 import { PushNotificationProvider } from '@/_provider/PushNotificationProvider';
+import { NotificationItem, NotificationModal } from '@/components/modal/NotificationModal';
+import { useCommentStore } from '@/screens/feed/comment/_state/useCommentStore';
+import { Post } from '@/screens/feed/_model/feed.model';
 
 export type MainTabType = 'feed' | 'chat' | 'create' | 'my';
 
@@ -43,12 +46,45 @@ export function Layout({
   children,
 }: LayoutProps) {
   const insets = useSafeAreaInsets();
+  const [isNotificationOpen, setIsNotificationOpen] = useState(false);
 
   useEffect(() => {
     if (activeTab !== 'create') {
       useCreateForm.getState().reset();
     }
   }, [activeTab]);
+
+  const handleSelectNotification = (item: NotificationItem) => {
+    setIsNotificationOpen(false);
+
+    if (item.type === 'comment') {
+      const targetPost: Post = {
+        id: item.postId || '11111111-1111-1111-1111-111111111111',
+        title: item.postTitle,
+        category: '연애고민',
+        storySummary: item.postTitle,
+        fullStory: item.postTitle,
+        images: [],
+        voteO: '예민해요',
+        voteX: '안 예민해요',
+        topComments: [],
+        reviewStatus: 'none',
+        fireCount: 0,
+        facepalmCount: 0,
+        commentCount: 5,
+        voteOCount: 5,
+        voteXCount: 2,
+        totalVoteCount: 7,
+        percentO: 71,
+        percentX: 29,
+        myVote: null,
+        createdAt: new Date().toISOString(),
+      };
+      useCommentStore.getState().openComments(targetPost);
+    } else {
+      onTabChange('feed');
+    }
+  };
 
   return (
     <View style={styles.container}>
@@ -69,6 +105,7 @@ export function Layout({
             ) : (
               <TouchableOpacity
                 style={styles.notificationButton}
+                onPress={() => setIsNotificationOpen(true)}
                 activeOpacity={0.7}
               >
                 <Svg width={24} height={24} viewBox="0 0 24 24" fill="none">
@@ -132,6 +169,13 @@ export function Layout({
 
       <PushNotificationProvider />
       <ToastProvider />
+
+      {/* Notification Bottom Sheet Modal */}
+      <NotificationModal
+        visible={isNotificationOpen}
+        onClose={() => setIsNotificationOpen(false)}
+        onSelectNotification={handleSelectNotification}
+      />
     </View>
   );
 }

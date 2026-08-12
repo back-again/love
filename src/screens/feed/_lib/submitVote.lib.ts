@@ -16,6 +16,20 @@ export async function submitVoteLib(postId: string, choice: 'O' | 'X'): Promise<
 
     if (error) {
       console.warn('Supabase submitVote error:', error.message);
+    } else {
+      const { data: postData } = await supabase
+        .from('posts')
+        .select('user_id')
+        .eq('id', rawPostId)
+        .single();
+
+      if (postData?.user_id && postData.user_id !== userId) {
+        await supabase.from('notifications').insert({
+          user_id: postData.user_id,
+          type: `VOTE_${choice}`,
+          post_id: rawPostId,
+        });
+      }
     }
   } catch (err) {
     console.error('Unexpected error submitting vote:', err);
