@@ -7,6 +7,8 @@ import { createPost } from '../_lib/createPost.lib';
 import { updatePost } from '../_lib/updatePost.lib';
 import { useLocalPostsStore } from '@/screens/feed/_state/useLocalPostsStore';
 
+import { inspectPostQualityLib } from '../_lib/inspectPostQuality.lib';
+
 export function CreateSubmitAction() {
   const queryClient = useQueryClient();
   const {
@@ -120,8 +122,19 @@ export function CreateSubmitAction() {
     detailSituation.trim().length > 0;
   const isLoading = createMutation.isPending;
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!isFormValid || isLoading) return;
+
+    const inspection = await inspectPostQualityLib(questionTitle, detailSituation);
+    if (!inspection.isApproved) {
+      if (Platform.OS === 'web') {
+        alert(inspection.message || '등록할 수 없는 사연 내용입니다.');
+      } else {
+        Alert.alert('등록 제한', inspection.message || '등록할 수 없는 사연 내용입니다.');
+      }
+      return;
+    }
+
     createMutation.mutate();
   };
 
