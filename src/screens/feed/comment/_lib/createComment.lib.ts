@@ -42,6 +42,14 @@ export async function createCommentLib({
     .single();
 
   if (postData?.user_id && postData.user_id !== userId) {
+    const notiType = parentId ? 'COMMENT_REPLY' : 'COMMENT_LIKE';
+
+    await supabase.from('notifications').insert({
+      user_id: postData.user_id,
+      type: notiType,
+      post_id: postId,
+    });
+
     const { data: targetUser } = await supabase
       .from('users')
       .select('push_token, notification_allowed')
@@ -53,7 +61,7 @@ export async function createCommentLib({
         to: targetUser.push_token,
         title: parentId ? '새 답글 등록 💬' : '새 댓글 등록 💬',
         body: content,
-        data: { postId, type: parentId ? 'COMMENT_REPLY' : 'NEW_COMMENT' },
+        data: { postId, type: notiType },
       });
     }
   }
