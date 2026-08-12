@@ -58,51 +58,52 @@ export function Layout({
     my: 3,
   };
 
-  const activeIndexAnim = useRef(new Animated.Value(tabIndexMap[activeTab])).current;
-  const stretchAnim = useRef(new Animated.Value(1)).current;
-  const scaleYAnim = useRef(new Animated.Value(1)).current;
+  const leftEdgeAnim = useRef(new Animated.Value(tabIndexMap[activeTab])).current;
+  const rightEdgeAnim = useRef(new Animated.Value(tabIndexMap[activeTab] + 1)).current;
+  const prevTabRef = useRef<MainTabType>(activeTab);
 
   useEffect(() => {
+    const prevIndex = tabIndexMap[prevTabRef.current];
     const targetIndex = tabIndexMap[activeTab];
+    prevTabRef.current = activeTab;
 
-    Animated.parallel([
-      Animated.spring(activeIndexAnim, {
-        toValue: targetIndex,
-        useNativeDriver: true,
-        tension: 130,
-        friction: 13,
-      }),
-      Animated.sequence([
-        // Phase 1: Water drop stretches horizontally as it moves
-        Animated.parallel([
-          Animated.timing(stretchAnim, {
-            toValue: 1.28,
-            duration: 110,
-            useNativeDriver: true,
-          }),
-          Animated.timing(scaleYAnim, {
-            toValue: 0.82,
-            duration: 110,
-            useNativeDriver: true,
-          }),
-        ]),
-        // Phase 2: Soft fluid spring bounce back to normal shape
-        Animated.parallel([
-          Animated.spring(stretchAnim, {
-            toValue: 1,
-            useNativeDriver: true,
-            friction: 5,
-            tension: 160,
-          }),
-          Animated.spring(scaleYAnim, {
-            toValue: 1,
-            useNativeDriver: true,
-            friction: 5,
-            tension: 160,
-          }),
-        ]),
-      ]),
-    ]).start();
+    if (prevIndex === targetIndex) return;
+
+    const isMovingRight = targetIndex > prevIndex;
+
+    if (isMovingRight) {
+      // Moving Right: Leading right edge shoots forward first, trailing left edge follows behind
+      Animated.parallel([
+        Animated.spring(rightEdgeAnim, {
+          toValue: targetIndex + 1,
+          tension: 190,
+          friction: 14,
+          useNativeDriver: true,
+        }),
+        Animated.spring(leftEdgeAnim, {
+          toValue: targetIndex,
+          tension: 100,
+          friction: 13,
+          useNativeDriver: true,
+        }),
+      ]).start();
+    } else {
+      // Moving Left: Leading left edge shoots backward first, trailing right edge follows behind
+      Animated.parallel([
+        Animated.spring(leftEdgeAnim, {
+          toValue: targetIndex,
+          tension: 190,
+          friction: 14,
+          useNativeDriver: true,
+        }),
+        Animated.spring(rightEdgeAnim, {
+          toValue: targetIndex + 1,
+          tension: 100,
+          friction: 13,
+          useNativeDriver: true,
+        }),
+      ]).start();
+    }
   }, [activeTab]);
 
   useEffect(() => {
@@ -142,6 +143,12 @@ export function Layout({
       onTabChange('feed');
     }
   };
+
+  const centerAnim = Animated.multiply(
+    Animated.add(Animated.add(leftEdgeAnim, rightEdgeAnim), -1),
+    0.5
+  );
+  const scaleXAnim = Animated.subtract(rightEdgeAnim, leftEdgeAnim);
 
   return (
     <View style={styles.container}>
@@ -210,7 +217,7 @@ export function Layout({
                     width: (containerWidth - 16) / 4,
                     transform: [
                       {
-                        translateX: activeIndexAnim.interpolate({
+                        translateX: centerAnim.interpolate({
                           inputRange: [0, 1, 2, 3],
                           outputRange: [
                             0,
@@ -220,8 +227,7 @@ export function Layout({
                           ],
                         }),
                       },
-                      { scaleX: stretchAnim },
-                      { scaleY: scaleYAnim },
+                      { scaleX: scaleXAnim },
                     ],
                   },
                 ]}
