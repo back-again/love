@@ -130,7 +130,7 @@ export function WrittenPostCard({
             onPress={() => onOpenWriteReview && onOpenWriteReview(post)}
             activeOpacity={0.8}
           >
-            <Text style={styles.myPostReviewBtnText}>후기 남기기</Text>
+            <Text style={styles.myPostReviewBtnText}>작성하기</Text>
           </TouchableOpacity>
         )}
       </View>
