@@ -5,7 +5,6 @@ import { StatusBar } from 'expo-status-bar';
 import {
   NavigationContainer,
   DefaultTheme,
-  useNavigationContainerRef,
 } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -21,6 +20,7 @@ import { Layout, MainTabType } from '@/components/layout/Layout';
 import { User } from '@/types/database.types';
 import { useLoadApp } from '@/_state/useLoadApp';
 import FeedScreen from '@/screens/feed/FeedScreen';
+import { navigationRef } from '@/_lib/navigation';
 
 const queryClient = new QueryClient();
 
@@ -112,7 +112,6 @@ function MainAppLayout({ mainNavRef }: { mainNavRef: any }) {
 
 export default function App() {
   const { user, hasOnboarded, isLoading, handleLoginSuccess } = useLoadApp();
-  const navigationRef = useNavigationContainerRef();
 
   if (isLoading) {
     return (

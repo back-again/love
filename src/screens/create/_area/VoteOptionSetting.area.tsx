@@ -12,35 +12,8 @@ import {
 import { useShallow } from 'zustand/react/shallow';
 import { useCreateForm } from '../_state/useCreateForm';
 import { inspectPostQualityWithAi } from '../_lib/aiModeration.lib';
+import { getAiVoteOptionsLib } from '../_lib/aiVoteGenerator.lib';
 import { RetrySvg } from '../_svg/RetrySvg';
-
-function generateAiVoteOptions(title: string, detail: string): { oText: string; xText: string } {
-  const text = `${title} ${detail}`.toLowerCase();
-
-  if (text.includes('이별') || text.includes('헤어') || text.includes('끝')) {
-    return { oText: '헤어지는 게 맞아', xText: '한 번 더 대화해봐' };
-  }
-  if (text.includes('연락') || text.includes('카톡') || text.includes('전화') || text.includes('답장')) {
-    return { oText: '서운할 만해', xText: '이해해 줘야 해' };
-  }
-  if (text.includes('더치') || text.includes('돈') || text.includes('계산') || text.includes('비용')) {
-    return { oText: '정나미 떨어져', xText: '솔직해서 괜찮아' };
-  }
-  if (text.includes('고백') || text.includes('짝사랑') || text.includes('마음')) {
-    return { oText: '지금 고백해!', xText: '조금 더 지켜봐' };
-  }
-  if (text.includes('바람') || text.includes('여사친') || text.includes('남사친') || text.includes('클럽')) {
-    return { oText: '선 넘은 거지', xText: '믿어줘야 해' };
-  }
-  if (text.includes('선물') || text.includes('기념일') || text.includes('생일')) {
-    return { oText: '마음이 부족해', xText: '센스가 아쉬워' };
-  }
-  if (text.includes('결혼') || text.includes('시댁') || text.includes('부모')) {
-    return { oText: '신중히 고민해', xText: '대화로 맞춰가' };
-  }
-
-  return { oText: '괜찮은 것 같아', xText: '난 별로야' };
-}
 
 export function VoteOptionSettingArea() {
   const {
@@ -80,18 +53,23 @@ export function VoteOptionSettingArea() {
       toValue: 1,
       duration: 850,
       useNativeDriver: false,
-    }).start(() => {
-      setIsLoadingAi(false);
-
-      const inspection = inspectPostQualityWithAi(questionTitle, detailSituation);
+    }).start(async () => {
+      const inspection = await inspectPostQualityWithAi(questionTitle, detailSituation);
 
       if (!inspection.isValid) {
         setAiStatus('invalid');
+        setIsLoadingAi(false);
       } else {
         setAiStatus('idle');
-        const generated = generateAiVoteOptions(questionTitle, detailSituation);
-        setVoteO(generated.oText);
-        setVoteX(generated.xText);
+        try {
+          const generated = await getAiVoteOptionsLib(questionTitle, detailSituation);
+          setVoteO(generated.oText);
+          setVoteX(generated.xText);
+        } catch (err) {
+          console.warn('AI option generation failed:', err);
+        } finally {
+          setIsLoadingAi(false);
+        }
       }
     });
   };
@@ -155,9 +133,9 @@ export function VoteOptionSettingArea() {
             <TextInput
               style={[
                 styles.optionInput,
-                focusedField === 'O' && styles.optionInputActive,
+                focusedField === 'O' && styles.optionInputActiveO,
                 Platform.OS === 'web' && focusedField === 'O'
-                  ? ({ boxShadow: '0 0 0 3px rgba(255, 181, 197, 0.25)' } as any)
+                  ? ({ boxShadow: '0 0 0 3px rgba(139, 117, 249, 0.15)' } as any)
                   : {},
               ]}
               placeholder="O 선택지 직접 입력 (예: 괜찮은 것 같아)"
@@ -178,9 +156,9 @@ export function VoteOptionSettingArea() {
             <TextInput
               style={[
                 styles.optionInput,
-                focusedField === 'X' && styles.optionInputActive,
+                focusedField === 'X' && styles.optionInputActiveX,
                 Platform.OS === 'web' && focusedField === 'X'
-                  ? ({ boxShadow: '0 0 0 3px rgba(255, 181, 197, 0.25)' } as any)
+                  ? ({ boxShadow: '0 0 0 3px rgba(249, 117, 141, 0.15)' } as any)
                   : {},
               ]}
               placeholder="X 선택지 직접 입력 (예: 난 별로야)"
@@ -292,9 +270,9 @@ const styles = StyleSheet.create({
     width: 38,
     height: 48,
     borderRadius: 12,
-    backgroundColor: '#FFF2F4',
+    backgroundColor: '#F5F1FF',
     borderWidth: 1,
-    borderColor: '#FFD1DC',
+    borderColor: '#E8E3FF',
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: 8,
@@ -302,15 +280,15 @@ const styles = StyleSheet.create({
   badgeTextO: {
     fontSize: 16,
     fontWeight: '800',
-    color: '#FF5D7B',
+    color: '#8B75F9',
   },
   badgeX: {
     width: 38,
     height: 48,
     borderRadius: 12,
-    backgroundColor: '#F5F5F5',
+    backgroundColor: '#FFF3F4',
     borderWidth: 1,
-    borderColor: '#E8E8E8',
+    borderColor: '#FFE3E5',
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: 8,
@@ -318,7 +296,7 @@ const styles = StyleSheet.create({
   badgeTextX: {
     fontSize: 16,
     fontWeight: '800',
-    color: '#727272',
+    color: '#F9758D',
   },
   optionInput: {
     flex: 1,
@@ -331,8 +309,12 @@ const styles = StyleSheet.create({
     color: '#0F172A',
     backgroundColor: '#FFFFFF',
   },
-  optionInputActive: {
-    borderColor: '#FFB5C5',
+  optionInputActiveO: {
+    borderColor: '#8B75F9',
+    borderWidth: 1,
+  },
+  optionInputActiveX: {
+    borderColor: '#F9758D',
     borderWidth: 1,
   },
 });

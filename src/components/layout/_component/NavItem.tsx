@@ -11,13 +11,13 @@ interface NavItemProps {
 }
 
 export function NavItem({ type, label, isActive, onPress }: NavItemProps) {
-  const activeColor = '#F9758D';
+  const activeColor = '#0F172A';
   const inactiveColor = '#8F8F8F';
   const iconColor = isActive ? activeColor : inactiveColor;
 
   return (
     <TouchableOpacity
-      style={[styles.navItem, isActive && styles.navItemActiveCapsule]}
+      style={styles.navItem}
       onPress={onPress}
       activeOpacity={0.85}
     >
@@ -99,24 +99,20 @@ export function NavItem({ type, label, isActive, onPress }: NavItemProps) {
 const styles = StyleSheet.create({
   navItem: {
     flex: 1,
-    height: '100%',
+    height: 52,
+    borderRadius: 26,
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 6,
-  },
-  navItemActiveCapsule: {
-    height: 60,
-    borderRadius: 30,
-    backgroundColor: '#FEEBED',
+    gap: 3,
   },
   navText: {
-    fontSize: 13,
+    fontSize: 10,
     fontWeight: '600',
     color: '#8F8F8F',
-    letterSpacing: -0.3,
+    letterSpacing: -0.2,
   },
   navTextActive: {
-    color: '#F9758D',
-    fontWeight: '700',
+    color: '#0F172A',
+    fontWeight: '800',
   },
 });

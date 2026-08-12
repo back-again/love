@@ -1,10 +1,11 @@
-import React, { ReactNode, useEffect, useState } from 'react';
+import React, { ReactNode, useEffect, useState, useRef } from 'react';
 import {
   StyleSheet,
   View,
   TouchableOpacity,
   Image,
   Platform,
+  Animated,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { BlurView } from 'expo-blur';
@@ -26,8 +27,8 @@ export type MainTabType = 'feed' | 'chat' | 'create' | 'my';
 
 const NAV_TABS: { type: MainTabType; label: string }[] = [
   { type: 'feed', label: 'OX' },
-  { type: 'chat', label: 'AI' },
   { type: 'create', label: '작성' },
+  { type: 'chat', label: 'AI' },
   { type: 'my', label: '마이' },
 ];
 
@@ -48,6 +49,26 @@ export function Layout({
 }: LayoutProps) {
   const insets = useSafeAreaInsets();
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
+  const [containerWidth, setContainerWidth] = useState(0);
+
+  const tabIndexMap: Record<MainTabType, number> = {
+    feed: 0,
+    create: 1,
+    chat: 2,
+    my: 3,
+  };
+
+  const activeIndexAnim = useRef(new Animated.Value(tabIndexMap[activeTab])).current;
+
+  useEffect(() => {
+    const targetIndex = tabIndexMap[activeTab];
+    Animated.spring(activeIndexAnim, {
+      toValue: targetIndex,
+      useNativeDriver: true,
+      tension: 100,
+      friction: 12,
+    }).start();
+  }, [activeTab]);
 
   useEffect(() => {
     if (activeTab !== 'create') {
@@ -133,27 +154,55 @@ export function Layout({
         <View
           style={[
             styles.bottomNavOuterWrapper,
-            { bottom: Math.max(22, insets.bottom + 8) },
+            { bottom: Math.max(12, insets.bottom - 12) },
           ]}
         >
           <View style={styles.bottomNavInnerCapsule}>
             <BlurView
-              intensity={35}
+              intensity={80}
               tint="light"
               style={styles.glassBlurBackground}
             />
             <LinearGradient
               colors={[
-                'rgba(255, 255, 255, 0.75)',
                 'rgba(255, 255, 255, 0.35)',
-                'rgba(255, 255, 255, 0.15)',
+                'rgba(255, 255, 255, 0.12)',
+                'rgba(255, 255, 255, 0.04)',
               ]}
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 1 }}
               style={StyleSheet.absoluteFillObject}
             />
 
-            <View style={styles.bottomNavContainer}>
+            {/* Sliding Pill Background behind NavItems */}
+            {containerWidth > 0 && (
+              <Animated.View
+                style={[
+                  styles.activePillBackground,
+                  {
+                    width: (containerWidth - 16) / 4,
+                    transform: [
+                      {
+                        translateX: activeIndexAnim.interpolate({
+                          inputRange: [0, 1, 2, 3],
+                          outputRange: [
+                            0,
+                            (containerWidth - 16) / 4,
+                            ((containerWidth - 16) / 4) * 2,
+                            ((containerWidth - 16) / 4) * 3,
+                          ],
+                        }),
+                      },
+                    ],
+                  },
+                ]}
+              />
+            )}
+
+            <View
+              style={styles.bottomNavContainer}
+              onLayout={(e) => setContainerWidth(e.nativeEvent.layout.width)}
+            >
               {NAV_TABS.map(tab => (
                 <NavItem
                   key={tab.type}
@@ -233,10 +282,10 @@ const styles = StyleSheet.create({
     maxWidth: 420,
     height: 63,
     shadowColor: '#000000',
-    shadowOffset: { width: 0, height: -3 },
-    shadowOpacity: 0.05,
-    shadowRadius: 10,
-    elevation: 3,
+    shadowOffset: { width: 0, height: 12 },
+    shadowOpacity: 0.12,
+    shadowRadius: 20,
+    elevation: 8,
     backgroundColor: 'transparent',
   },
   bottomNavInnerCapsule: {
@@ -244,18 +293,18 @@ const styles = StyleSheet.create({
     height: '100%',
     borderRadius: 31.5,
     overflow: 'hidden',
-    borderWidth: 1.5,
-    borderColor: 'rgba(255, 255, 255, 0.85)',
+    borderWidth: 1.8,
+    borderColor: 'rgba(255, 255, 255, 0.65)',
     backgroundColor:
       Platform.OS === 'web'
-        ? 'rgba(255, 255, 255, 0.55)'
-        : 'rgba(255, 255, 255, 0.7)',
+        ? 'rgba(255, 255, 255, 0.15)'
+        : 'rgba(255, 255, 255, 0.22)',
     ...(Platform.OS === 'web'
       ? {
-          backdropFilter: 'blur(12px) saturate(180%)',
-          WebkitBackdropFilter: 'blur(12px) saturate(180%)',
+          backdropFilter: 'blur(30px) saturate(210%)',
+          WebkitBackdropFilter: 'blur(30px) saturate(210%)',
           boxShadow:
-            'inset 1.5px 1.5px 3px 0px rgba(255, 255, 255, 0.9), inset -1.5px -1.5px 3px 0px rgba(0, 0, 0, 0.04), 0 -3px 10px 0px rgba(0, 0, 0, 0.05)',
+            'inset 1px 1px 2px 0px rgba(255, 255, 255, 0.8), inset -1px -1px 2px 0px rgba(0, 0, 0, 0.03), 0 12px 20px 0px rgba(0, 0, 0, 0.12)',
         }
       : {}),
   },
@@ -268,5 +317,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: 8,
+  },
+  activePillBackground: {
+    position: 'absolute',
+    left: 8,
+    top: '50%',
+    height: 52,
+    marginTop: -26,
+    borderRadius: 26,
+    backgroundColor: 'rgba(0, 0, 0, 0.06)',
   },
 });

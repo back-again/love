@@ -451,7 +451,7 @@ export default function ChatScreen({
                     · <Text style={styles.bulletHighlightRed}>이별 권유 기준</Text>
                   </Text>
                   {profile.avoidPartners.map((item, idx) => (
-                    <Text key={idx} style={styles.bulletSubDescRed}>
+                    <Text key={idx} style={styles.bulletSubDesc}>
                       - {item.desc}
                     </Text>
                   ))}

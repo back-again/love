@@ -1,17 +1,19 @@
 'use client';
 
-import { useNavigation } from '@react-navigation/native';
+import { useShallow } from 'zustand/react/shallow';
 import { OptionItem } from '../_component/OptionItem';
 import { usePostOptionsStore } from '../_state/usePostOptionsStore';
 import { useCreateForm } from '@/screens/create/_state/useCreateForm';
 import { useToastStore } from '@/_state/useToastStore';
+import { navigationRef } from '@/_lib/navigation';
 
 export function EditOptionAction() {
-  const navigation = useNavigation<any>();
-  const { targetPost, closePostOptions } = usePostOptionsStore(state => ({
-    targetPost: state.targetPost,
-    closePostOptions: state.closePostOptions,
-  }));
+  const { targetPost, closePostOptions } = usePostOptionsStore(
+    useShallow(state => ({
+      targetPost: state.targetPost,
+      closePostOptions: state.closePostOptions,
+    }))
+  );
   const showToast = useToastStore(state => state.showToast);
 
   const handleEdit = () => {
@@ -32,7 +34,9 @@ export function EditOptionAction() {
     });
 
     showToast('사연 수정 모드로 전환되었습니다.');
-    navigation.navigate('Create');
+    if (navigationRef.isReady()) {
+      navigationRef.navigate('Create');
+    }
   };
 
   return (

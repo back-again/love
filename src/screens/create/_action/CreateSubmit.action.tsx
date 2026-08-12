@@ -130,11 +130,11 @@ export function CreateSubmitAction() {
     detailSituation.trim().length > 0;
   const isLoading = createMutation.isPending;
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!isFormValid || isLoading) return;
 
     // AI Post Quality Moderation Check
-    const inspection = inspectPostQualityWithAi(questionTitle, detailSituation);
+    const inspection = await inspectPostQualityWithAi(questionTitle, detailSituation);
     if (!inspection.isValid) {
       setAiModal({
         visible: true,
