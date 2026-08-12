@@ -1,4 +1,5 @@
 import { supabase } from '@/api/supabase';
+import { sendPushNotificationLib } from '@/_lib/sendPushNotification.lib';
 
 interface RequestReviewParams {
   postId: string;
@@ -38,5 +39,20 @@ export async function requestReviewLib({
       type: 'REVIEW_REQUEST',
       post_id: postId,
     });
+
+    const { data: targetUser } = await supabase
+      .from('users')
+      .select('push_token, notification_allowed')
+      .eq('id', postData.user_id)
+      .single();
+
+    if (targetUser?.push_token && targetUser.notification_allowed === true) {
+      sendPushNotificationLib({
+        to: targetUser.push_token,
+        title: '후기 작성 요청 💌',
+        body: '누군가가 내 고민의 후기를 궁금해하고 있어요!',
+        data: { postId, type: 'REVIEW_REQUEST' },
+      });
+    }
   }
 }

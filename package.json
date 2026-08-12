@@ -67,6 +67,7 @@
     "web": "EXPO_OFFLINE=1 expo start --web",
     "build:sim": "npx eas-cli build --platform ios --profile simulator --local",
     "build:testflight": "npx eas-cli build --platform ios --profile production --local",
+    "submit:ios": "npx eas-cli submit --platform ios --path $(ls -t *.ipa | head -n 1)",
     "build:apk": "ANDROID_HOME=$HOME/Library/Android/sdk npx eas-cli build --platform android --profile preview --local",
     "build:aab": "ANDROID_HOME=$HOME/Library/Android/sdk npx eas-cli build --platform android --profile production --local"
   },

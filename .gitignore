@@ -50,3 +50,6 @@ yarn-error.*
 .idea
 .env
 .npm-cache
+
+# Firebase Service Account Private Key (Do not commit to Git)
+fcm-service-account.json

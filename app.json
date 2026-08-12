@@ -16,6 +16,7 @@
     },
     "android": {
       "package": "app.ox.love",
+      "googleServicesFile": "./google-services.json",
       "adaptiveIcon": {
         "backgroundColor": "#FFFFFF",
         "foregroundImage": "./assets/logo.png"
@@ -27,6 +28,13 @@
     },
     "plugins": [
       "expo-web-browser",
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/logo.png",
+          "color": "#FF8E7A"
+        }
+      ],
       [
         "expo-build-properties",
         {

@@ -18,6 +18,7 @@ CREATE TABLE IF NOT EXISTS public.users (
   gender VARCHAR(10),
   birth_year INT,
   notification_allowed BOOLEAN DEFAULT FALSE,
+  push_token TEXT,
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
 

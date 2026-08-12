@@ -1,4 +1,5 @@
 import { supabase } from '@/api/supabase';
+import { sendPushNotificationLib } from '@/_lib/sendPushNotification.lib';
 
 export interface CreateCommentParams {
   postId: string;
@@ -32,6 +33,29 @@ export async function createCommentLib({
   if (error) {
     console.error('Error creating comment:', error.message);
     throw error;
+  }
+
+  const { data: postData } = await supabase
+    .from('posts')
+    .select('user_id')
+    .eq('id', postId)
+    .single();
+
+  if (postData?.user_id && postData.user_id !== userId) {
+    const { data: targetUser } = await supabase
+      .from('users')
+      .select('push_token, notification_allowed')
+      .eq('id', postData.user_id)
+      .single();
+
+    if (targetUser?.push_token && targetUser.notification_allowed === true) {
+      sendPushNotificationLib({
+        to: targetUser.push_token,
+        title: parentId ? '새 답글 등록 💬' : '새 댓글 등록 💬',
+        body: content,
+        data: { postId, type: parentId ? 'COMMENT_REPLY' : 'NEW_COMMENT' },
+      });
+    }
   }
 
   return data;

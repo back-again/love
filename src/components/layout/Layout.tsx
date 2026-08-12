@@ -16,6 +16,7 @@ import { NavItem } from './_component/NavItem';
 import { OpenSettingBottomSheetAction } from '@/screens/setting/_action/OpenSettingBottomSheet.action';
 import { useCreateForm } from '@/screens/create/_state/useCreateForm';
 import { ToastProvider } from '@/_provider/ToastProvider';
+import { PushNotificationProvider } from '@/_provider/PushNotificationProvider';
 
 export type MainTabType = 'feed' | 'chat' | 'create' | 'my';
 
@@ -129,6 +130,7 @@ export function Layout({
         </View>
       )}
 
+      <PushNotificationProvider />
       <ToastProvider />
     </View>
   );
