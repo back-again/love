@@ -5,6 +5,9 @@ export interface VoteOptionsResult {
   xText: string;
 }
 
+// In-Memory Cache Map to avoid duplicate AI API calls for identical title & detail
+const optionsCache = new Map<string, VoteOptionsResult>();
+
 // Local Fallback Rule Engine
 function getLocalFallbackOptions(title: string, detail: string): VoteOptionsResult {
   const text = `${title} ${detail}`.toLowerCase();
@@ -36,26 +39,37 @@ function getLocalFallbackOptions(title: string, detail: string): VoteOptionsResu
 
 /**
  * Generates O/X Vote Options by invoking Supabase Edge Function 'generate-vote-options'
- * (with fallback to local rule-based engine on network/server error).
+ * (Reuses cached result if title & detail are identical; falls back to local rules on error).
  */
 export async function generateAiVoteOptions(
   title: string,
   detail: string
 ): Promise<VoteOptionsResult> {
+  const cacheKey = `${title.trim()}:::${detail.trim()}`;
+
+  // Return cached result immediately if title & detail haven't changed
+  if (optionsCache.has(cacheKey)) {
+    return optionsCache.get(cacheKey)!;
+  }
+
   try {
     const { data, error } = await supabase.functions.invoke('generate-vote-options', {
       body: { title, detail },
     });
 
     if (!error && data && data.oText && data.xText) {
-      return {
+      const result = {
         oText: data.oText,
         xText: data.xText,
       };
+      optionsCache.set(cacheKey, result);
+      return result;
     }
   } catch (err) {
     console.warn('Edge Function invoke failed, using local rule fallback:', err);
   }
 
-  return getLocalFallbackOptions(title, detail);
+  const fallbackResult = getLocalFallbackOptions(title, detail);
+  optionsCache.set(cacheKey, fallbackResult);
+  return fallbackResult;
 }

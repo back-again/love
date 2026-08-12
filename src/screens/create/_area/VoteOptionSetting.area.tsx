@@ -38,9 +38,17 @@ export function VoteOptionSettingArea() {
   const [isLoadingAi, setIsLoadingAi] = useState<boolean>(false);
   const [focusedField, setFocusedField] = useState<'O' | 'X' | null>(null);
 
+  const lastAnalyzedKeyRef = useRef<string>('');
   const progressAnim = useRef(new Animated.Value(0)).current;
 
   const runAiAnalysis = () => {
+    const currentKey = `${questionTitle.trim()}:::${detailSituation.trim()}`;
+
+    // If options are already filled and title/detail haven't changed, don't call AI again!
+    if (lastAnalyzedKeyRef.current === currentKey && (voteO || voteX)) {
+      return;
+    }
+
     setIsLoadingAi(true);
     progressAnim.setValue(0);
 
@@ -50,6 +58,7 @@ export function VoteOptionSettingArea() {
       useNativeDriver: false,
     }).start(async () => {
       const generated = await generateAiVoteOptions(questionTitle, detailSituation);
+      lastAnalyzedKeyRef.current = currentKey;
       setVoteO(generated.oText);
       setVoteX(generated.xText);
       setIsLoadingAi(false);
