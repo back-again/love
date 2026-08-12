@@ -2,20 +2,26 @@ import { create } from 'zustand';
 
 export interface CreateFormState {
   questionTitle: string;
+  category: string;
   detailSituation: string;
   images: string[];
   voteO: string;
   voteX: string;
   isVoteEnabled: boolean;
+  isEditMode: boolean;
+  editPostId: string | null;
 }
 
 export interface CreateFormAction {
   setQuestionTitle: (title: string) => void;
+  setCategory: (category: string) => void;
   setDetailSituation: (detail: string) => void;
   setImages: (images: string[] | ((prev: string[]) => string[])) => void;
   setVoteO: (voteO: string) => void;
   setVoteX: (voteX: string) => void;
   setIsVoteEnabled: (enabled: boolean) => void;
+  setIsEditMode: (enabled: boolean) => void;
+  setEditPostId: (id: string | null) => void;
   addImage: (url: string) => void;
   removeImage: (index: number) => void;
   reset: () => void;
@@ -23,20 +29,26 @@ export interface CreateFormAction {
 
 const initialState: CreateFormState = {
   questionTitle: '',
+  category: '고민',
   detailSituation: '',
   images: [],
   voteO: '',
   voteX: '',
   isVoteEnabled: false,
+  isEditMode: false,
+  editPostId: null,
 };
 
 export const useCreateForm = create<CreateFormState & CreateFormAction>((set) => ({
   ...initialState,
   setQuestionTitle: (questionTitle) => set({ questionTitle }),
+  setCategory: (category) => set({ category }),
   setDetailSituation: (detailSituation) => set({ detailSituation }),
   setVoteO: (voteO) => set({ voteO }),
   setVoteX: (voteX) => set({ voteX }),
   setIsVoteEnabled: (isVoteEnabled) => set({ isVoteEnabled }),
+  setIsEditMode: (isEditMode) => set({ isEditMode }),
+  setEditPostId: (editPostId) => set({ editPostId }),
   setImages: (images) =>
     set((state) => ({
       images: typeof images === 'function' ? images(state.images) : images,

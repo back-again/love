@@ -14,6 +14,34 @@ import { useCreateForm } from '../_state/useCreateForm';
 import { inspectPostQualityWithAi } from '../_lib/aiModeration.lib';
 import { RetrySvg } from '../_svg/RetrySvg';
 
+function generateAiVoteOptions(title: string, detail: string): { oText: string; xText: string } {
+  const text = `${title} ${detail}`.toLowerCase();
+
+  if (text.includes('이별') || text.includes('헤어') || text.includes('끝')) {
+    return { oText: '헤어지는 게 맞아', xText: '한 번 더 대화해봐' };
+  }
+  if (text.includes('연락') || text.includes('카톡') || text.includes('전화') || text.includes('답장')) {
+    return { oText: '서운할 만해', xText: '이해해 줘야 해' };
+  }
+  if (text.includes('더치') || text.includes('돈') || text.includes('계산') || text.includes('비용')) {
+    return { oText: '정나미 떨어져', xText: '솔직해서 괜찮아' };
+  }
+  if (text.includes('고백') || text.includes('짝사랑') || text.includes('마음')) {
+    return { oText: '지금 고백해!', xText: '조금 더 지켜봐' };
+  }
+  if (text.includes('바람') || text.includes('여사친') || text.includes('남사친') || text.includes('클럽')) {
+    return { oText: '선 넘은 거지', xText: '믿어줘야 해' };
+  }
+  if (text.includes('선물') || text.includes('기념일') || text.includes('생일')) {
+    return { oText: '마음이 부족해', xText: '센스가 아쉬워' };
+  }
+  if (text.includes('결혼') || text.includes('시댁') || text.includes('부모')) {
+    return { oText: '신중히 고민해', xText: '대화로 맞춰가' };
+  }
+
+  return { oText: '괜찮은 것 같아', xText: '난 별로야' };
+}
+
 export function VoteOptionSettingArea() {
   const {
     questionTitle,
@@ -41,10 +69,8 @@ export function VoteOptionSettingArea() {
   const [aiStatus, setAiStatus] = useState<'idle' | 'invalid'>('idle');
   const [focusedField, setFocusedField] = useState<'O' | 'X' | null>(null);
 
-  // Animated Progress Gauge Value (0 to 1)
   const progressAnim = useRef(new Animated.Value(0)).current;
 
-  // Auto-analyze title and situation content with AI loading gauge
   const runAiAnalysis = () => {
     setIsLoadingAi(true);
     setAiStatus('idle');
@@ -63,8 +89,9 @@ export function VoteOptionSettingArea() {
         setAiStatus('invalid');
       } else {
         setAiStatus('idle');
-        setVoteO('');
-        setVoteX('');
+        const generated = generateAiVoteOptions(questionTitle, detailSituation);
+        setVoteO(generated.oText);
+        setVoteX(generated.xText);
       }
     });
   };
@@ -99,9 +126,9 @@ export function VoteOptionSettingArea() {
         <Switch
           value={isVoteEnabled}
           onValueChange={handleToggleVote}
-          trackColor={{ false: '#E2E8F0', true: '#FF5D7B' }}
+          trackColor={{ false: '#D6D6D6', true: '#FF5D7B' }}
           thumbColor="#FFFFFF"
-          ios_backgroundColor="#E2E8F0"
+          ios_backgroundColor="#D6D6D6"
         />
       </View>
 
@@ -231,7 +258,7 @@ const styles = StyleSheet.create({
     width: '100%',
     height: 4,
     borderRadius: 2,
-    backgroundColor: '#F1F5F9',
+    backgroundColor: '#F5F5F5',
     overflow: 'hidden',
   },
   progressBarFill: {
@@ -281,9 +308,9 @@ const styles = StyleSheet.create({
     width: 38,
     height: 48,
     borderRadius: 12,
-    backgroundColor: '#F8F9FA',
+    backgroundColor: '#F5F5F5',
     borderWidth: 1,
-    borderColor: '#E2E8F0',
+    borderColor: '#E8E8E8',
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: 8,
@@ -291,14 +318,14 @@ const styles = StyleSheet.create({
   badgeTextX: {
     fontSize: 16,
     fontWeight: '800',
-    color: '#64748B',
+    color: '#727272',
   },
   optionInput: {
     flex: 1,
     height: 48,
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: '#EBEBEB',
+    borderColor: '#E8E8E8',
     paddingHorizontal: 14,
     fontSize: 14,
     color: '#0F172A',

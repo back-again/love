@@ -67,7 +67,7 @@ const styles = StyleSheet.create({
   },
   introText: {
     fontSize: 15,
-    color: '#334155',
+    color: '#727272',
     lineHeight: 22,
     marginBottom: 8,
   },
@@ -79,12 +79,12 @@ const styles = StyleSheet.create({
   },
   articleBody: {
     fontSize: 14.5,
-    color: '#9C9C9C',
+    color: '#8F8F8F',
     lineHeight: 22,
   },
   dateStampText: {
     fontSize: 13,
-    color: '#9C9C9C',
+    color: '#8F8F8F',
     marginTop: 16,
     textAlign: 'center',
   },

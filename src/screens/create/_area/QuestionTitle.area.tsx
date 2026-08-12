@@ -5,7 +5,10 @@ import { QuestionTitleInputAction } from '../_action/QuestionTitleInput.action';
 export function QuestionTitleArea() {
   return (
     <View style={styles.createSection}>
-      <Text style={styles.createSectionTitle}>무엇을 물어볼까요?</Text>
+      <Text style={styles.createSectionTitle}>
+        무엇을 물어볼까요?
+        <Text style={styles.requiredAsterisk}> *</Text>
+      </Text>
       <QuestionTitleInputAction />
     </View>
   );
@@ -21,5 +24,9 @@ const styles = StyleSheet.create({
     color: '#0F172A',
     letterSpacing: -0.3,
     marginBottom: 6,
+  },
+  requiredAsterisk: {
+    color: '#FF5D7B',
+    fontWeight: '800',
   },
 });

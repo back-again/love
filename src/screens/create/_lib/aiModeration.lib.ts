@@ -5,8 +5,8 @@ export interface AiModerationResult {
 }
 
 /**
- * AI Content Inspection & Quality Moderation Engine
- * Evaluates whether a post has genuine substance, clarity, and context before submission.
+ * AI Content Moderation Engine
+ * Moderates only mindless consonant/keyboard mashing or promotional spam.
  */
 export function inspectPostQualityWithAi(
   title: string,
@@ -15,63 +15,57 @@ export function inspectPostQualityWithAi(
   const cleanTitle = title.trim();
   const cleanContent = content.trim();
 
-  // 1. Minimum character length check
-  if (cleanTitle.length < 3) {
+  if (cleanTitle.length === 0) {
     return {
       isValid: false,
-      reason: '제목이 너무 짧습니다.',
-      suggestion: '고민의 핵심 질문을 3자 이상으로 명확하게 작성해 주세요.',
+      reason: '제목을 입력해 주세요.',
+      suggestion: '고민의 질문 제목을 작성해 주세요.',
     };
   }
 
-  if (cleanContent.length < 8) {
+  if (cleanContent.length === 0) {
     return {
       isValid: false,
-      reason: '고민 설명이 너무 부족해요.',
-      suggestion: '어떤 고민 상황인지 8자 이상으로 조금만 더 구체적으로 적어주시면 유용한 투표 의견을 얻을 수 있어요!',
+      reason: '고민 내용을 입력해 주세요.',
+      suggestion: '고민 상황을 작성해 주세요.',
     };
   }
 
-  // 2. Meaningless keyboard mashing / Gibberish detection (e.g., asdfgh, zxcvbn, 123456, ㅋㅋㅋ)
-  const gibberishRegex = /(^[a-z]+$|^[0-9]+$|^[ㄱ-ㅎ]+$|^[ㅏ-ㅣ]+$)/i;
-  const isGibberishTitle = gibberishRegex.test(cleanTitle.replace(/\s+/g, ''));
-  const isGibberishContent = gibberishRegex.test(cleanContent.replace(/\s+/g, ''));
+  // 1. Mindless consonant & keyboard mashing check (e.g., ㄴㅇㄹㅁㄴㅇㄹ, ㅁㄴㅇㄹ, asdfghjkl)
+  const cleanMashTitle = cleanTitle.replace(/\s+/g, '');
+  const cleanMashContent = cleanContent.replace(/\s+/g, '');
+  const mashRegex = /(^[ㄱ-ㅎ]{3,}$|^[ㅏ-ㅣ]{3,}$|^[a-z]{6,}$|^[0-9]{8,}$)/i;
 
-  if (isGibberishTitle || isGibberishContent) {
+  if (mashRegex.test(cleanMashTitle) || mashRegex.test(cleanMashContent)) {
     return {
       isValid: false,
-      reason: '단순 자음/모음이나 무의미한 자판 입력으로 작성된 글이에요.',
-      suggestion: '다른 유저분들이 솔직하게 투표할 수 있도록 진정성 있는 고민 내용을 작성해 주세요.',
+      reason: '무지성 초성 남발이나 자판 도배글은 작성할 수 없어요.',
+      suggestion: '다른 유저분들이 이해할 수 있도록 사연 내용을 정돈해서 작성해 주세요.',
     };
   }
 
-  // 3. Excessive repetitive character detection (e.g., "ㅋㅋㅋㅋㅋㅋㅋ", "........", "?????")
-  const repetitiveRegex = /(.)\1{5,}/;
-  if (repetitiveRegex.test(cleanTitle) || repetitiveRegex.test(cleanContent)) {
+  // 2. Promotional & advertising spam check
+  const promoRegex = /(http:\/\/|https:\/\/|open\.kakao|텔레그램|대출|토토|바카라|성인사이트|카톡ID)/i;
+  if (promoRegex.test(cleanTitle) || promoRegex.test(cleanContent)) {
     return {
       isValid: false,
-      reason: '동일한 문자가 너무 많이 반복되어 있어요.',
-      suggestion: '반복되는 문자를 정리하고 고민의 본문 내용을 다듬어 주세요.',
+      reason: '광고성 또는 홍보 목적의 글은 등록할 수 없습니다.',
+      suggestion: '커뮤니티 가이드라인에 맞는 고민 사연을 작성해 주세요.',
     };
   }
 
-  // 4. Low-effort single word vague post check
-  const lowEffortKeywords = ['테스트', 'test', 'asdf', 'qwer', 'zxcv', '아무거나', 'ㅁㄴㅇㄹ', 'ㄱㄴㄷㄹ'];
-  const isLowEffort = lowEffortKeywords.some(
-    kw => cleanTitle.toLowerCase() === kw || cleanContent.toLowerCase() === kw
-  );
-
-  if (isLowEffort) {
+  // 3. Extreme repetition check
+  const extremeRepetition = /(.)\1{14,}/;
+  if (extremeRepetition.test(cleanTitle) || extremeRepetition.test(cleanContent)) {
     return {
       isValid: false,
-      reason: '성의 없이 작성되었거나 테스트용 글로 판단됩니다.',
-      suggestion: '실제 경험하신 고민이나 조언이 필요한 질문을 작성해 주시면 감사하겠습니다!',
+      reason: '동일한 문자가 너무 많이 반복되어 있습니다.',
+      suggestion: '반복되는 문자를 조금만 정돈해서 작성해 주세요.',
     };
   }
 
-  // Pass AI Moderation inspection
   return {
     isValid: true,
-    reason: '검토 완료. 등록 가능한 고품질 사연입니다.',
+    reason: '검토 완료. 등록 가능합니다.',
   };
 }

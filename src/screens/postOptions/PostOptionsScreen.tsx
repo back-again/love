@@ -19,13 +19,14 @@ export function PostOptionsScreen() {
     })),
   );
 
-  const isMyPost = targetPost?.isMyPost ?? false;
+  const isMyPost = targetPost?.isMyPost !== false;
 
   return (
     <BottomSheetModal
       visible={visible}
       onClose={closePostOptions}
-      snapPoints={['35%']}
+      enableDynamicSizing={true}
+      useScrollView={false}
     >
       <View style={styles.container}>
         <Text style={styles.sheetTitle}>더보기</Text>

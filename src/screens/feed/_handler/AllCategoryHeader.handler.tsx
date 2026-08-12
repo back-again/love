@@ -6,20 +6,7 @@ import { useCategoryStore } from '../_state/useCategoryStore';
 import { HotPostsListAction } from '../_action/FeedPosts/HotPostsList.action';
 
 export function AllCategoryHeaderHandler() {
-  const selectedCategory = useCategoryStore(state => state.selectedCategory);
-
-  if (selectedCategory !== '전체') {
-    return null;
-  }
-
-  return (
-    <>
-      <HotPostsListAction />
-      <View style={styles.generalSectionHeader}>
-        <Text style={styles.generalSectionTitle}>⚡️ 실시간 고민</Text>
-      </View>
-    </>
-  );
+  return null;
 }
 
 const styles = StyleSheet.create({

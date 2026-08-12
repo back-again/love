@@ -2,6 +2,7 @@ import React from 'react';
 import { StyleSheet, ScrollView } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { QuestionTitleArea } from './_area/QuestionTitle.area';
+import { CategorySelectArea } from './_area/CategorySelect.area';
 import { DetailSituationArea } from './_area/DetailSituation.area';
 import { ImageAttachmentArea } from './_area/ImageAttachment.area';
 import { VoteOptionSettingArea } from './_area/VoteOptionSetting.area';
@@ -17,6 +18,7 @@ export default function CreateScreen() {
           contentContainerStyle={styles.createContentContainer}
           showsVerticalScrollIndicator={false}
         >
+          <CategorySelectArea />
           <QuestionTitleArea />
           <DetailSituationArea />
           <ImageAttachmentArea />

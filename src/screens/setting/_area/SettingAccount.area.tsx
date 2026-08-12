@@ -44,13 +44,13 @@ const styles = StyleSheet.create({
     height: 50,
     borderRadius: 14,
     borderWidth: 1,
-    borderColor: '#EBEBEB',
+    borderColor: '#E8E8E8',
     alignItems: 'center',
     justifyContent: 'center',
   },
   logoutBtnText: {
     fontSize: 15,
     fontWeight: '600',
-    color: '#334155',
+    color: '#727272',
   },
 });

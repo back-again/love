@@ -29,12 +29,12 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   faqCard: {
-    backgroundColor: '#F8FAF9',
+    backgroundColor: '#F5F5F5',
     borderRadius: 16,
     padding: 16,
     marginBottom: 12,
     borderWidth: 1,
-    borderColor: '#E2E8F0',
+    borderColor: '#E8E8E8',
   },
   faqQ: {
     fontSize: 15,
@@ -45,7 +45,7 @@ const styles = StyleSheet.create({
   },
   faqA: {
     fontSize: 14,
-    color: '#475569',
+    color: '#727272',
     lineHeight: 20,
     letterSpacing: -0.3,
   },

@@ -36,7 +36,7 @@ export function PushNotificationToggleAction() {
       <Switch
         value={pushNoti}
         onValueChange={handleToggle}
-        trackColor={{ false: '#E2E8F0', true: '#FF8E7A' }}
+        trackColor={{ false: '#D6D6D6', true: '#F9758D' }}
         thumbColor="#FFFFFF"
       />
     </View>
@@ -51,7 +51,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     borderBottomWidth: 1,
-    borderBottomColor: '#F1F5F9',
+    borderBottomColor: '#E8E8E8',
   },
   settingRowTitle: {
     fontSize: 15,

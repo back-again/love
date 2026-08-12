@@ -60,7 +60,7 @@ export function WrittenPostCard({
               styles.myPostVoteBarO,
               {
                 flex: post.voteO,
-                backgroundColor: isODominant ? '#FFC8B3' : '#F1F5F9',
+                backgroundColor: isODominant ? '#E5DBFF' : '#F5F5F5',
               },
             ]}
           />
@@ -69,28 +69,38 @@ export function WrittenPostCard({
               styles.myPostVoteBarX,
               {
                 flex: post.voteX,
-                backgroundColor: isXDominant ? '#FFB4BB' : '#F1F5F9',
+                backgroundColor: isXDominant ? '#FFDFE2' : '#F5F5F5',
               },
             ]}
           />
         </View>
         <View style={styles.myPostVotePercentRow}>
-          <Text
-            style={[
-              styles.myPostVotePercentO,
-              !isODominant && { color: '#9C9C9C' },
-            ]}
-          >
-            괜찮은데? O {post.percentO}%
-          </Text>
-          <Text
-            style={[
-              styles.myPostVotePercentX,
-              !isXDominant && { color: '#9C9C9C' },
-            ]}
-          >
-            난 싫어 X {post.percentX}%
-          </Text>
+          <View style={styles.percentColO}>
+            <Text
+              style={[
+                styles.myPostVotePercentO,
+                !isODominant && { color: '#8F8F8F' },
+              ]}
+            >
+              O {post.percentO}%
+            </Text>
+            <Text style={[styles.percentOptionLabelText, !isODominant && { color: '#8F8F8F' }]}>
+              괜찮은데?
+            </Text>
+          </View>
+          <View style={styles.percentColX}>
+            <Text
+              style={[
+                styles.myPostVotePercentX,
+                !isXDominant && { color: '#8F8F8F' },
+              ]}
+            >
+              X {post.percentX}%
+            </Text>
+            <Text style={[styles.percentOptionLabelText, !isXDominant && { color: '#8F8F8F' }, styles.textAlignRight]}>
+              난 싫어
+            </Text>
+          </View>
         </View>
       </View>
 
@@ -171,11 +181,11 @@ const styles = StyleSheet.create({
     marginBottom: 6,
   },
   myPostVoteBarO: {
-    backgroundColor: '#FFC8B3',
+    backgroundColor: '#8B75F9',
     height: '100%',
   },
   myPostVoteBarX: {
-    backgroundColor: '#FFB4BB',
+    backgroundColor: '#F9758D',
     height: '100%',
   },
   myPostVotePercentRow: {
@@ -186,12 +196,12 @@ const styles = StyleSheet.create({
   myPostVotePercentO: {
     fontSize: 12.5,
     fontWeight: '600',
-    color: '#FF8E7A',
+    color: '#8B75F9',
   },
   myPostVotePercentX: {
     fontSize: 12.5,
     fontWeight: '600',
-    color: '#FF858F',
+    color: '#F9758D',
   },
   myPostCardBodyRow: {
     flexDirection: 'row',
@@ -225,9 +235,9 @@ const styles = StyleSheet.create({
   myPostReviewBtn: {
     width: 96,
     height: 38,
-    backgroundColor: '#FEEBED',
+    backgroundColor: 'transparent',
     borderWidth: 1,
-    borderColor: '#FEB5C9',
+    borderColor: '#F9758D',
     borderRadius: 12,
     alignItems: 'center',
     justifyContent: 'center',
@@ -249,5 +259,21 @@ const styles = StyleSheet.create({
     color: '#727272',
     fontSize: 14,
     fontWeight: '600',
+  },
+  percentColO: {
+    alignItems: 'flex-start',
+    gap: 2,
+  },
+  percentColX: {
+    alignItems: 'flex-end',
+    gap: 2,
+  },
+  percentOptionLabelText: {
+    fontSize: 12.5,
+    fontWeight: '500',
+    color: '#727272',
+  },
+  textAlignRight: {
+    textAlign: 'right',
   },
 });

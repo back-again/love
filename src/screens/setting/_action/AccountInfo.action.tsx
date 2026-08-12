@@ -20,7 +20,7 @@ const styles = StyleSheet.create({
   settingBox: {
     width: '100%',
     height: 56,
-    backgroundColor: '#F8F8F8',
+    backgroundColor: '#F5F5F5',
     borderRadius: 16,
     paddingHorizontal: 20,
     flexDirection: 'row',
@@ -30,7 +30,7 @@ const styles = StyleSheet.create({
   },
   settingLabel: {
     fontSize: 15,
-    color: '#9C9C9C',
+    color: '#8F8F8F',
   },
   settingVal: {
     fontSize: 15,

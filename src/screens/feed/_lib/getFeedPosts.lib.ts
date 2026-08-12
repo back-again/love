@@ -46,11 +46,14 @@ export async function getFeedPostsLib({
 
     let query = supabase.from('post_details_view').select('*');
 
-    if (category && category !== '전체') {
+    const isHotCategory = category === '🔥 인기' || category === '인기';
+    const effectiveType = isHotCategory ? 'hot' : type;
+
+    if (category && category !== '전체' && !isHotCategory) {
       query = query.eq('category', category);
     }
 
-    if (type === 'hot') {
+    if (effectiveType === 'hot') {
       query = query
         .order('vote_o_count', { ascending: false })
         .order('created_at', { ascending: false });
@@ -64,22 +67,26 @@ export async function getFeedPostsLib({
       console.error('Supabase fetch feed error:', error.message);
     }
 
-    if (!dbPosts || dbPosts.length === 0) {
+    let filteredDbPosts = dbPosts || [];
+    if (effectiveType === 'hot') {
+      filteredDbPosts = filteredDbPosts.filter(
+        (p: any) => ((p.vote_o_count ?? 0) + (p.vote_x_count ?? 0)) >= 20
+      );
+    }
+
+    if (!filteredDbPosts || filteredDbPosts.length === 0) {
       return { rawPosts: [], userVoteMap: {}, page, nextPage: null, hasMore: false };
     }
 
-    const postIds = dbPosts.map((p: any) => p.id);
+    const postIds = filteredDbPosts.map((p: any) => p.id);
     const { data: authData } = await supabase.auth.getUser();
-    const activeUserId =
-      authData.user?.id || '00000000-0000-0000-0000-000000000001';
-
     const userVoteMap: Record<string, 'O' | 'X'> = {};
 
-    if (activeUserId) {
+    if (authData.user?.id) {
       const { data: dbUserVotes } = await supabase
         .from('votes')
         .select('post_id, choice')
-        .eq('user_id', activeUserId)
+        .eq('user_id', authData.user.id)
         .in('post_id', postIds);
 
       if (dbUserVotes) {
@@ -89,11 +96,11 @@ export async function getFeedPostsLib({
       }
     }
 
-    const hasMore = dbPosts.length === pageSize;
+    const hasMore = filteredDbPosts.length === pageSize;
     const nextPage = hasMore ? page + 1 : null;
 
     return {
-      rawPosts: dbPosts as RawFeedPost[],
+      rawPosts: filteredDbPosts as RawFeedPost[],
       userVoteMap,
       page,
       nextPage,

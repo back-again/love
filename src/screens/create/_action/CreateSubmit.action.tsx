@@ -1,21 +1,38 @@
 import React, { useState } from 'react';
 import { StyleSheet, Text, TouchableOpacity, Platform, Alert, View } from 'react-native';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useShallow } from 'zustand/react/shallow';
 import { useCreateForm } from '../_state/useCreateForm';
 import { createPost } from '../_lib/createPost.lib';
+import { updatePost } from '../_lib/updatePost.lib';
 import { inspectPostQualityWithAi } from '../_lib/aiModeration.lib';
 import { AiInspectionModal } from '@/components/modal/AiInspectionModal';
+import { useLocalPostsStore } from '@/screens/feed/_state/useLocalPostsStore';
 
 export function CreateSubmitAction() {
-  const { questionTitle, detailSituation, images, voteO, voteX, isVoteEnabled, reset } = useCreateForm(
+  const queryClient = useQueryClient();
+  const {
+    questionTitle,
+    category,
+    detailSituation,
+    images,
+    voteO,
+    voteX,
+    isVoteEnabled,
+    isEditMode,
+    editPostId,
+    reset,
+  } = useCreateForm(
     useShallow((state) => ({
       questionTitle: state.questionTitle,
+      category: state.category,
       detailSituation: state.detailSituation,
       images: state.images,
       voteO: state.voteO,
       voteX: state.voteX,
       isVoteEnabled: state.isVoteEnabled,
+      isEditMode: state.isEditMode,
+      editPostId: state.editPostId,
       reset: state.reset,
     }))
   );
@@ -29,34 +46,88 @@ export function CreateSubmitAction() {
   });
 
   const createMutation = useMutation({
-    mutationFn: () =>
-      createPost({
+    mutationFn: () => {
+      if (isEditMode && editPostId) {
+        return updatePost({
+          id: editPostId,
+          title: questionTitle.trim(),
+          category,
+          content: detailSituation.trim(),
+          images,
+          voteO: isVoteEnabled ? voteO.trim() : '',
+          voteX: isVoteEnabled ? voteX.trim() : '',
+        });
+      }
+      return createPost({
         title: questionTitle.trim(),
+        category,
         content: detailSituation.trim(),
         images,
         voteO: isVoteEnabled ? voteO.trim() : '',
         voteX: isVoteEnabled ? voteX.trim() : '',
-      }),
-    onSuccess: () => {
+      });
+    },
+    onSuccess: (newPostData) => {
+      if (newPostData) {
+        useLocalPostsStore.getState().addPost({
+          id: newPostData.id || String(Date.now()),
+          category: category || '고민',
+          isHot: false,
+          title: questionTitle.trim(),
+          storySummary: detailSituation.trim(),
+          fullStory: detailSituation.trim(),
+          images: newPostData.images || images || [],
+          voteO: voteO.trim() || '괜찮은데?',
+          voteX: voteX.trim() || '난 싫어',
+          topComments: [],
+          reviewStatus: '후기 요청',
+          reviewContent: '',
+          hasReview: false,
+          fireCount: 0,
+          facepalmCount: 0,
+          commentCount: 0,
+          voteOCount: 0,
+          voteXCount: 0,
+          totalVoteCount: 0,
+          totalVotes: 0,
+          percentO: 50,
+          percentX: 50,
+          myVote: null,
+          createdAt: new Date().toISOString(),
+        });
+      }
+
+      queryClient.invalidateQueries({ queryKey: ['feedPosts'] });
       if (Platform.OS === 'web') {
-        alert('오답노트에 사연이 성공적으로 등록되었습니다!');
+        alert(
+          isEditMode
+            ? '오답노트에 사연이 성공적으로 수정되었습니다!'
+            : '오답노트에 사연이 성공적으로 등록되었습니다!'
+        );
       } else {
-        Alert.alert('완료', '오답노트에 사연이 성공적으로 등록되었습니다!');
+        Alert.alert(
+          '완료',
+          isEditMode
+            ? '오답노트에 사연이 성공적으로 수정되었습니다!'
+            : '오답노트에 사연이 성공적으로 등록되었습니다!'
+        );
       }
       reset();
     },
     onError: (error) => {
-      console.error('Create post error:', error);
+      console.error('Submit post error:', error);
       if (Platform.OS === 'web') {
-        alert('등록 중 오류가 발생했습니다.');
+        alert(isEditMode ? '수정 중 오류가 발생했습니다.' : '등록 중 오류가 발생했습니다.');
       } else {
-        Alert.alert('오류', '등록 중 오류가 발생했습니다.');
+        Alert.alert('오류', isEditMode ? '수정 중 오류가 발생했습니다.' : '등록 중 오류가 발생했습니다.');
       }
     },
   });
 
   const isFormValid =
-    questionTitle.trim().length > 0 && detailSituation.trim().length > 0;
+    questionTitle.trim().length > 0 &&
+    category.trim().length > 0 &&
+    detailSituation.trim().length > 0;
   const isLoading = createMutation.isPending;
 
   const handleSubmit = () => {
@@ -93,7 +164,7 @@ export function CreateSubmitAction() {
             (!isFormValid || isLoading) && styles.submitButtonTextDisabled,
           ]}
         >
-          {isLoading ? '등록 중...' : '작성 완료'}
+          {isLoading ? (isEditMode ? '수정 중...' : '등록 중...') : (isEditMode ? '수정 완료' : '작성 완료')}
         </Text>
       </TouchableOpacity>
 

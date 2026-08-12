@@ -79,7 +79,7 @@ export function BottomSheetModal({
       <GestureHandlerRootView style={styles.flexOne}>
         <BottomSheet
           ref={bottomSheetRef}
-          snapPoints={snapPoints}
+          snapPoints={enableDynamicSizing ? undefined : (snapPoints ?? ['85%'])}
           topInset={insets.top}
           enableDynamicSizing={enableDynamicSizing}
           enablePanDownToClose={true}
@@ -151,7 +151,8 @@ const styles = StyleSheet.create({
     paddingTop: 12,
   },
   nonScrollContent: {
-    flex: 1,
     paddingTop: 12,
+    paddingHorizontal: 24,
+    paddingBottom: 36,
   },
 });

@@ -90,10 +90,9 @@ export function NotificationModal({
           duration: 250,
           useNativeDriver: true,
         }),
-        Animated.spring(translateY, {
+        Animated.timing(translateY, {
           toValue: 0,
-          friction: 8,
-          tension: 65,
+          duration: 250,
           useNativeDriver: true,
         }),
       ]).start();

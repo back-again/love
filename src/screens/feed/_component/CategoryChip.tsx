@@ -35,12 +35,16 @@ export function CategoryChip({
 
 const styles = StyleSheet.create({
   categoryChip: {
-    paddingHorizontal: 14,
-    paddingVertical: 7,
-    borderRadius: 8,
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    height: 36,
+    minWidth: 56,
+    borderRadius: 10,
     backgroundColor: '#FFFFFF',
     borderWidth: 1,
-    borderColor: '#F5F5F5',
+    borderColor: '#E8E8E8',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   categoryChipActive: {
     backgroundColor: '#FFF8F8',
@@ -49,11 +53,12 @@ const styles = StyleSheet.create({
   },
   categoryChipText: {
     fontSize: 13,
-    fontWeight: '400',
+    fontWeight: '500',
     color: '#727272',
+    textAlign: 'center',
   },
   categoryChipTextActive: {
     color: '#FF5D7B',
-    fontWeight: '600',
+    fontWeight: '700',
   },
 });

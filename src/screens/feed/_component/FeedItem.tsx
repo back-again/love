@@ -73,16 +73,18 @@ export function FeedItem({ post }: FeedItemProps) {
     openComments(post);
   };
 
-  const voteOText = post.voteO;
-  const voteXText = post.voteX;
-  const fullText = post.fullStory || post.storySummary || '';
+  const rawVoteO = post.voteO || '괜찮은데?';
+  const rawVoteX = post.voteX || '난 싫어';
+  const cleanOptionO = rawVoteO.replace(/^(O\s*|O)/i, '');
+  const cleanOptionX = rawVoteX.replace(/^(X\s*|X)/i, '');
+  const fullText = (post.fullStory || post.storySummary || '').trim();
 
   return (
     <View style={styles.cardPageWrapper}>
       <View style={styles.cardContainer}>
         <View style={styles.topMetaRow}>
           <View style={styles.badgeChipsContainer}>
-            {post.isHot && (
+            {(post.isHot || totalVotes >= 20 || (post.totalVoteCount ?? 0) >= 20) && totalVotes >= 20 && (
               <View style={styles.hotBadgePill}>
                 <Text style={styles.hotBadgeText}>HOT</Text>
               </View>
@@ -113,7 +115,7 @@ export function FeedItem({ post }: FeedItemProps) {
           activeOpacity={0.9}
           style={styles.storyClickArea}
         >
-          <Text style={styles.questionTitle}>{post.title}</Text>
+          <Text style={styles.questionTitle}>{(post.title || '').trim()}</Text>
           {fullText ? (
             <Text
               style={styles.storyPreviewText}
@@ -157,14 +159,9 @@ export function FeedItem({ post }: FeedItemProps) {
               activeOpacity={0.88}
             >
               <View style={styles.votedBarTrack}>
-                <Text
-                  style={[
-                    styles.votedBarOptionText,
-                    styles.votedBarOptionTextUnselected,
-                  ]}
-                  numberOfLines={1}
-                >
-                  {voteOText}
+                <Text style={styles.votedBarOptionText} numberOfLines={1}>
+                  <Text style={styles.badgeOText}>O  </Text>
+                  <Text style={styles.optionContentText}>{cleanOptionO}</Text>
                 </Text>
               </View>
             </TouchableOpacity>
@@ -178,14 +175,9 @@ export function FeedItem({ post }: FeedItemProps) {
               activeOpacity={0.88}
             >
               <View style={styles.votedBarTrack}>
-                <Text
-                  style={[
-                    styles.votedBarOptionText,
-                    styles.votedBarOptionTextUnselected,
-                  ]}
-                  numberOfLines={1}
-                >
-                  {voteXText}
+                <Text style={styles.votedBarOptionText} numberOfLines={1}>
+                  <Text style={styles.badgeXText}>X  </Text>
+                  <Text style={styles.optionContentText}>{cleanOptionX}</Text>
                 </Text>
               </View>
             </TouchableOpacity>
@@ -205,27 +197,22 @@ export function FeedItem({ post }: FeedItemProps) {
                   style={[
                     styles.votedBarFill,
                     selectedVote === 'O'
-                      ? styles.votedBarFillSelected
+                      ? styles.votedBarFillOSelected
                       : styles.votedBarFillUnselected,
                     { width: `${percentO}%` },
                   ]}
                 />
-                <Text
-                  style={[
-                    styles.votedBarOptionText,
-                    selectedVote === 'O'
-                      ? styles.votedBarOptionTextSelected
-                      : styles.votedBarOptionTextUnselected,
-                  ]}
-                  numberOfLines={1}
-                >
-                  {voteOText}
+                <Text style={styles.votedBarOptionText} numberOfLines={1}>
+                  <Text style={selectedVote === 'O' ? styles.badgeOText : styles.badgeUnselectedText}>O  </Text>
+                  <Text style={selectedVote === 'O' ? styles.optionContentTextSelectedO : styles.optionContentTextUnselected}>
+                    {cleanOptionO}
+                  </Text>
                 </Text>
                 <Text
                   style={[
                     styles.votedPercentText,
                     selectedVote === 'O'
-                      ? styles.votedPercentTextSelected
+                      ? styles.votedPercentTextOSelected
                       : styles.votedPercentTextUnselected,
                   ]}
                 >
@@ -247,27 +234,22 @@ export function FeedItem({ post }: FeedItemProps) {
                   style={[
                     styles.votedBarFill,
                     selectedVote === 'X'
-                      ? styles.votedBarFillSelected
+                      ? styles.votedBarFillXSelected
                       : styles.votedBarFillUnselected,
                     { width: `${percentX}%` },
                   ]}
                 />
-                <Text
-                  style={[
-                    styles.votedBarOptionText,
-                    selectedVote === 'X'
-                      ? styles.votedBarOptionTextSelected
-                      : styles.votedBarOptionTextUnselected,
-                  ]}
-                  numberOfLines={1}
-                >
-                  {voteXText}
+                <Text style={styles.votedBarOptionText} numberOfLines={1}>
+                  <Text style={selectedVote === 'X' ? styles.badgeXText : styles.badgeUnselectedText}>X  </Text>
+                  <Text style={selectedVote === 'X' ? styles.optionContentTextSelectedX : styles.optionContentTextUnselected}>
+                    {cleanOptionX}
+                  </Text>
                 </Text>
                 <Text
                   style={[
                     styles.votedPercentText,
                     selectedVote === 'X'
-                      ? styles.votedPercentTextSelected
+                      ? styles.votedPercentTextXSelected
                       : styles.votedPercentTextUnselected,
                   ]}
                 >
@@ -305,9 +287,9 @@ export function FeedItem({ post }: FeedItemProps) {
           onConfirm={handleConfirmVote}
           choiceText={
             pendingVoteChoice === 'O'
-              ? voteOText
+              ? `O  ${cleanOptionO}`
               : pendingVoteChoice === 'X'
-                ? voteXText
+                ? `X  ${cleanOptionX}`
                 : ''
           }
         />
@@ -397,13 +379,13 @@ const styles = StyleSheet.create({
     textAlign: 'left',
     lineHeight: 25,
     letterSpacing: -0.4,
-    marginBottom: 8,
+    marginBottom: 6,
   },
   storyPreviewText: {
     fontSize: 14,
     color: '#727272',
     lineHeight: 20,
-    marginBottom: 14,
+    marginBottom: 10,
   },
   imageListRow: {
     flexDirection: 'row',
@@ -485,25 +467,55 @@ const styles = StyleSheet.create({
     bottom: 0,
     borderRadius: 15,
   },
-  votedBarFillSelected: {
-    backgroundColor: '#FEEBED',
-  },
-  votedBarFillUnselected: {
-    backgroundColor: '#F5F5F5',
-  },
   votedBarOptionText: {
     position: 'absolute',
     left: 16,
     fontSize: 15,
     zIndex: 2,
   },
-  votedBarOptionTextSelected: {
+  badgeOText: {
+    color: '#8B75F9',
+    fontWeight: '900',
+    fontSize: 16,
+  },
+  badgeXText: {
+    color: '#F9758D',
+    fontWeight: '900',
+    fontSize: 16,
+  },
+  badgeUnselectedText: {
+    color: '#8F8F8F',
+    fontWeight: '700',
+    fontSize: 16,
+  },
+  optionContentText: {
+    color: '#0F172A',
+    fontWeight: '600',
+    fontSize: 14.5,
+  },
+  optionContentTextSelectedO: {
+    color: '#8B75F9',
+    fontWeight: '800',
+    fontSize: 14.5,
+  },
+  optionContentTextSelectedX: {
     color: '#F9758D',
     fontWeight: '800',
+    fontSize: 14.5,
   },
-  votedBarOptionTextUnselected: {
-    color: '#727272',
-    fontWeight: '700',
+  optionContentTextUnselected: {
+    color: '#8F8F8F',
+    fontWeight: '600',
+    fontSize: 14.5,
+  },
+  votedBarFillOSelected: {
+    backgroundColor: '#F5F1FF',
+  },
+  votedBarFillXSelected: {
+    backgroundColor: '#FFF3F4',
+  },
+  votedBarFillUnselected: {
+    backgroundColor: '#F5F5F5',
   },
   votedPercentText: {
     position: 'absolute',
@@ -512,11 +524,14 @@ const styles = StyleSheet.create({
     fontWeight: '800',
     zIndex: 2,
   },
-  votedPercentTextSelected: {
+  votedPercentTextOSelected: {
+    color: '#8B75F9',
+  },
+  votedPercentTextXSelected: {
     color: '#F9758D',
   },
   votedPercentTextUnselected: {
-    color: '#727272',
+    color: '#8F8F8F',
   },
   bottomStatsRow: {
     width: '100%',
@@ -546,6 +561,6 @@ const styles = StyleSheet.create({
   statRightText: {
     fontSize: 13,
     fontWeight: '600',
-    color: '#64748B',
+    color: '#727272',
   },
 });

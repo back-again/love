@@ -15,18 +15,18 @@ export function InquiryContactArea() {
 
 const styles = StyleSheet.create({
   inquiryContactBox: {
-    backgroundColor: '#FFF7F5',
+    backgroundColor: '#FFF3F4',
     borderRadius: 16,
     padding: 18,
     marginTop: 8,
     borderWidth: 1,
-    borderColor: '#FFC8B3',
+    borderColor: '#E8E8E8',
     alignItems: 'center',
   },
   inquiryContactTitle: {
     fontSize: 14,
     fontWeight: '700',
-    color: '#FF8E7A',
+    color: '#F9758D',
     marginBottom: 4,
     letterSpacing: -0.3,
   },
@@ -39,7 +39,7 @@ const styles = StyleSheet.create({
   },
   inquiryContactSub: {
     fontSize: 12.5,
-    color: '#9C9C9C',
+    color: '#8F8F8F',
     letterSpacing: -0.3,
   },
 });

@@ -39,7 +39,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#F5F5F5',
     borderRadius: 16,
     borderWidth: 1,
-    borderColor: '#E8E8E8',
+    borderColor: '#D6D6D6',
     padding: 16,
     fontSize: 14.5,
     color: '#0F172A',
@@ -47,7 +47,7 @@ const styles = StyleSheet.create({
     letterSpacing: -0.3,
   },
   feedbackInputFocused: {
-    borderColor: '#FF5D7B',
+    borderColor: '#F9758D',
     backgroundColor: '#FFFFFF',
   },
 });

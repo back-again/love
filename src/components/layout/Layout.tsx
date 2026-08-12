@@ -20,12 +20,13 @@ import { PushNotificationProvider } from '@/_provider/PushNotificationProvider';
 import { NotificationItem, NotificationModal } from '@/components/modal/NotificationModal';
 import { useCommentStore } from '@/screens/feed/comment/_state/useCommentStore';
 import { Post } from '@/screens/feed/_model/feed.model';
+import { PostOptionsScreen } from '@/screens/postOptions/PostOptionsScreen';
 
 export type MainTabType = 'feed' | 'chat' | 'create' | 'my';
 
 const NAV_TABS: { type: MainTabType; label: string }[] = [
   { type: 'feed', label: 'OX' },
-  { type: 'chat', label: 'AI 상담' },
+  { type: 'chat', label: 'AI' },
   { type: 'create', label: '작성' },
   { type: 'my', label: '마이' },
 ];
@@ -167,8 +168,13 @@ export function Layout({
         </View>
       )}
 
-      <PushNotificationProvider />
+      <PushNotificationProvider
+        onNavigate={(tab) => {
+          onTabChange(tab);
+        }}
+      />
       <ToastProvider />
+      <PostOptionsScreen />
 
       {/* Notification Bottom Sheet Modal */}
       <NotificationModal
@@ -201,8 +207,8 @@ const styles = StyleSheet.create({
     width: 32,
   },
   logoImage: {
-    height: 28,
-    width: 88,
+    height: 32,
+    width: 104,
   },
   notificationButton: {
     position: 'relative',

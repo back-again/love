@@ -12,6 +12,9 @@ import {
 } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
 import { supabase } from '@/api/supabase';
+import { useRelationshipProfileStore } from './_state/useRelationshipProfileStore';
+import { RelationshipQuizModal } from './_component/RelationshipQuizModal';
+import { getRelationshipProfileLib } from './_lib/relationshipProfile.lib';
 
 interface Message {
   id: string;
@@ -20,6 +23,19 @@ interface Message {
   timestamp: string;
   isPostSelectorPrompt?: boolean;
 }
+
+const ARCHETYPE_IMAGES: Record<string, any> = {
+  '말랑말랑 리트리버 인형': require('../../assets/archetypes/archetype_01_retriever.png'),
+  '폭신폭신 수면베개': require('../../assets/archetypes/archetype_02_pillow.png'),
+  '착착 스위스 아미 칼': require('../../assets/archetypes/archetype_03_swiss_knife.png'),
+  '단단한 압력밥솥': require('../../assets/archetypes/archetype_04_rice_cooker.png'),
+  '톡 쏘는 탄산음료 캔': require('../../assets/archetypes/archetype_05_soda_can.png'),
+  '잠금장치 다이어리': require('../../assets/archetypes/archetype_06_diary.png'),
+  '바스락 쿠쿠다스 과자': require('../../assets/archetypes/archetype_07_cookie.png'),
+  '반짝이는 도자기 선인장': require('../../assets/archetypes/archetype_08_cactus.png'),
+  '동글동글 몽돌 돌멩이': require('../../assets/archetypes/archetype_09_stone.png'),
+  '쫀득쫀득 딱풀': require('../../assets/archetypes/archetype_10_glue.png'),
+};
 
 export interface PostItemData {
   id: string;
@@ -38,36 +54,18 @@ export interface PostItemData {
 const SAMPLE_MY_POSTS: PostItemData[] = [
   {
     id: 'post-1',
-    title: '최애 유튜버',
-    fullStory: '익명의 화해님이 하나 골라달래요. 여러분 최애 유튜버 있으신가요?',
-    voteO: '있다',
-    voteX: '없다',
-    percentO: 67,
-    percentX: 33,
-    totalVotes: 12,
-    category: '솔로',
-    topComments: [
-      { nickname: '익명1', text: '침착맨 유튜브가 역시 짱이지!!' },
-      { nickname: '익명2', text: '요즘 숏박스 재밌음' },
-    ],
-  },
-  {
-    id: 'post-2',
-    title: '하트시그널',
-    fullStory: '익명의 화해님이 하나 골라달래요. 하트시그널 정주행 하시나요?',
-    voteO: '본다',
-    voteX: '안본다',
-    percentO: 50,
-    percentX: 50,
-    totalVotes: 8,
-    category: '연애',
-    topComments: [
-      { nickname: '익명3', text: '시즌4 너무 재밌어요 ㅋㅋㅋ' },
-    ],
+    title: '카톡 텀 3시간 고민',
+    fullStory: '남친 카톡 텀이 3시간 이상인데 솔직하게 말해야 할까요?',
+    voteO: '말한다',
+    voteX: '참는다',
+    percentO: 71,
+    percentX: 29,
+    totalVotes: 14,
+    category: '연애고민',
+    topComments: [{ nickname: '익명1', text: '서운한 점은 솔직히 말하는 게 답!' }],
   },
 ];
 
-// Recommended Topics for Comprehensive Counseling inside chat
 const COMPREHENSIVE_TOPICS = [
   '이 사람과 미래를 그려도 괜찮은 사람일까?',
   '그 사람과 나의 성향 차이 종합 분석하기',
@@ -83,10 +81,14 @@ export default function ChatScreen({
   onGoToCreate?: () => void;
   onActiveChatStateChange?: (active: boolean) => void;
 }) {
+  const profile = useRelationshipProfileStore(state => state.profile);
+  const setProfile = useRelationshipProfileStore(state => state.setProfile);
+  const resetProfile = useRelationshipProfileStore(state => state.resetProfile);
+  const [isQuizModalVisible, setIsQuizModalVisible] = useState(false);
+
   const [selectedPost, setSelectedPost] = useState<PostItemData | 'general' | null>(null);
   const [userPosts, setUserPosts] = useState<PostItemData[]>(SAMPLE_MY_POSTS);
 
-  // Selected post IDs for inline chat relationship diagnosis
   const [selectedPostIdsForDiagnosis, setSelectedPostIdsForDiagnosis] = useState<string[]>([]);
   const [hasDiagnosedPosts, setHasDiagnosedPosts] = useState<boolean>(false);
 
@@ -94,9 +96,17 @@ export default function ChatScreen({
   const [inputText, setInputText] = useState('');
   const [isTyping, setIsTyping] = useState(false);
 
-  // Fetch written posts from Supabase DB
   useEffect(() => {
-    const fetchPosts = async () => {
+    const initProfileAndPosts = async () => {
+      try {
+        const savedProfile = await getRelationshipProfileLib();
+        if (savedProfile) {
+          setProfile(savedProfile);
+        }
+      } catch (err) {
+        console.warn('Failed to load relationship profile from DB:', err);
+      }
+
       try {
         const { data, error } = await supabase
           .from('posts')
@@ -128,7 +138,8 @@ export default function ChatScreen({
         console.warn('Failed to fetch user posts for chat list:', e);
       }
     };
-    fetchPosts();
+
+    initProfileAndPosts();
   }, []);
 
   const togglePostSelectionForDiagnosis = (postId: string) => {
@@ -137,15 +148,14 @@ export default function ChatScreen({
     );
   };
 
-  // Enter a specific Chat Room (Immediate Entry)
   const handleEnterChatRoom = (target: PostItemData | 'general') => {
     setSelectedPost(target);
     if (onActiveChatStateChange) onActiveChatStateChange(true);
 
     if (target === 'general') {
-      const greetingText =
-        `안녕하세요 두두님! 연애 상담원 두림이입니다.\n\n` +
-        `두두님이 작성하신 고민 사연들과 연애 인사이트를 토대로 자유롭게 대화를 나누실 수 있습니다. 추천 주제를 선택하거나 궁금한 점을 이야기해주세요.`;
+      const greetingText = profile
+        ? `안녕하세요 두두님! 연애 상담원 두림이입니다. 💖\n\n두두님의 연애 추구미인 '${profile.typeTitle}' 성향과 갈등 해결 방식('${profile.conflictHeadline}')을 기억하고 있어요.\n\n두두님의 피해야 할 상대 기준을 바탕으로 단호하고 명확한 솔루션을 들려드릴게요. 오늘 어떤 이야기가 나누고 싶으신가요?`
+        : `안녕하세요 두두님! 연애 상담원 두림이입니다. 💖\n\n연애 고민, 감정 토로, 한풀이 대화 등 무엇이든 이야기해주세요. 상단에서 '내 연애 추구미'를 진단받으시면 더욱 정밀한 맞춤 솔루션을 받아보실 수 있습니다.`;
 
       setMessages([
         {
@@ -161,13 +171,12 @@ export default function ChatScreen({
       const topComment = target.topComments?.[0]?.text ? `"${target.topComments[0].text}"` : '솔직한 생각들이';
 
       const initialText =
-        `두두님이 작성하신 사연 '${target.title}' 심층 대화를 시작합니다.\n\n` +
+        `두두님이 작성하신 사연 '${target.title}' 맞춤 상담을 시작합니다.\n\n` +
         `[사연 주제]\n` +
         `"${target.fullStory || target.title}"\n\n` +
         `[유저 반응 분석]\n` +
         `커뮤니티 유저분들은 ${percentO >= percentX ? `'${target.voteO || '찬성'}'` : `'${target.voteX || '반대'}'`} 쪽 의견에 많이 공감해주셨고, ${topComment} 라는 조언도 모였습니다.\n\n` +
-        `[맞춤 솔루션]\n` +
-        `이 고민 상황에 대해 두두님의 마음과 유저들의 반응을 함께 파헤쳐볼게요. 어떤 부분이 가장 걱정되시나요?`;
+        (profile ? `[추구미 기반 맞춤 솔루션]\n두두님의 '${profile.typeTitle}' 성향을 토대로 볼 때, 이 상황에서는 서운함을 가슴에 담기보다 솔직히 정돈해서 말하는 것이 마음이 가장 편하실 거예요. 어떤 점이 가장 걱정되시나요?` : `[맞춤 솔루션]\n이 고민 상황에 대해 두두님의 마음과 유저들의 반응을 함께 파헤쳐볼게요. 어떤 부분이 가장 걱정되시나요?`);
 
       setMessages([
         {
@@ -186,7 +195,6 @@ export default function ChatScreen({
     if (onActiveChatStateChange) onActiveChatStateChange(false);
   };
 
-  // Submit selected posts inside chat stream for relationship diagnosis
   const handleConfirmPostSelectionInChat = () => {
     setHasDiagnosedPosts(true);
     const chosenPosts = userPosts.filter(p => selectedPostIdsForDiagnosis.includes(p.id));
@@ -209,7 +217,7 @@ export default function ChatScreen({
         `• 선택 사연: ${titlesText}\n` +
         `• 유저 공감도: 다수 유저들은 신중한 대화와 가치관 일치 여부를 중요하게 보았습니다.\n\n` +
         `[관계 건강도 진단 결과]\n` +
-        `상대방과의 고민 패턴을 보면, 감정적 응어리가 반복되지 않도록 대화의 규칙을 세우시는 것이 매우 중요합니다. 미래를 함께 그려가기 위해 더 논의해보고 싶은 부분이 있으신가요?`;
+        (profile ? `두두님의 연애 추구미 '${profile.typeTitle}' 기준에서 볼 때, 상대방과의 고민 패턴이 반복되지 않으려면 대화의 기준을 명확히 설정해야 합니다. 더 깊이 논의해보고 싶은 부분이 있으신가요?` : `상대방과의 고민 패턴을 보면, 감정적 응어리가 반복되지 않도록 대화의 규칙을 세우시는 것이 매우 중요합니다. 더 논의해보고 싶은 부분이 있으신가요?`);
 
       const counselorMsg: Message = {
         id: `c_${Date.now()}`,
@@ -238,7 +246,6 @@ export default function ChatScreen({
     if (!customText) setInputText('');
     setIsTyping(true);
 
-    // If user clicks a topic related to partner diagnosis, trigger inline post selection prompt!
     if (
       (textToSend.includes('미래') || textToSend.includes('건강도') || textToSend.includes('성향')) &&
       !hasDiagnosedPosts &&
@@ -259,12 +266,33 @@ export default function ChatScreen({
     }
 
     setTimeout(() => {
-      let responseText = '두두님이 말씀하신 내용에 진심으로 공감이 돼요. 상대방의 입장을 한 번 헤아려보시되, 두두님이 느끼는 솔직한 감정을 전해보는 걸 추천해요.';
+      const isRuleViolation =
+        textToSend.includes('거짓말') ||
+        textToSend.includes('속임') ||
+        textToSend.includes('잠수') ||
+        textToSend.includes('회피') ||
+        textToSend.includes('스킨십') ||
+        textToSend.includes('강제') ||
+        textToSend.includes('조급') ||
+        textToSend.includes('개선') ||
+        textToSend.includes('반복') ||
+        textToSend.includes('넘어가') ||
+        textToSend.includes('또') ||
+        textToSend.includes('헤어') ||
+        textToSend.includes('이별');
 
-      if (textToSend.includes('연락')) {
-        responseText = '연락 문제는 연애에서 서운함이 가장 자주 쌓이는 부분이에요. 무조건 억누르기보다는 "바쁠 땐 미리 알려주기"처럼 서로 지킬 수 있는 가벼운 약속을 만들어보세요.';
-      } else if (textToSend.includes('헤어') || textToSend.includes('이별')) {
-        responseText = '이별이나 헤어짐을 고민할 때는 두두님 마음속의 본질을 봐야 해요. 대화로 풀릴 수 있는 문제인지, 아니면 상처만 반복되는 관계인지 신중하게 돌아보시는 것이 중요합니다.';
+      let responseText = '';
+
+      if (isRuleViolation && profile) {
+        const avoidReason = profile.avoidPartners?.[0]?.desc || '회피와 개선 의지 부족 행동';
+        responseText =
+          `두두님, 대화를 나누어보아도 ${avoidReason} 태도가 반복된다면 무조건 이별을 고민하셔야 할 때입니다.\n\n` +
+          `두두님의 연애 성향(${profile.typeTitle})을 파악해본 바, 상대방의 변화 없는 행동을 끌어안고 참으시면 두두님의 마음 상처만 깊어집니다.\n\n` +
+          `두두님 자신을 소중히 지키기 위해 이 관계는 단호하게 정돈하시고 이별을 선택하시는 것을 권유해 드려요.`;
+      } else {
+        responseText = profile
+          ? `두두님의 연애 추구미인 '${profile.typeTitle}' 성향을 고려하면, ${profile.conflictHeadline}처럼 마음에 묵혀두기보다 솔직하게 대화로 풀어내는 편이 두두님 마음 건강에 가장 좋습니다.`
+          : '두두님이 말씀하신 내용에 진심으로 공감이 돼요. 상대방의 입장을 한 번 헤아려보시되, 두두님이 느끼는 솔직한 감정을 전해보는 걸 추천해요.';
       }
 
       const counselorMsg: Message = {
@@ -288,116 +316,193 @@ export default function ChatScreen({
           contentContainerStyle={styles.hubContentContainer}
           showsVerticalScrollIndicator={false}
         >
-          {/* Header Section */}
-          <View style={styles.hubHeaderWrap}>
-            <Text style={styles.hubTitle}>연애 고민 상담해두림</Text>
-            <Text style={styles.hubSub}>
-              내 연애 데이터를 모두 아는 두림이와 속마음을 나눠보세요.
-            </Text>
+          {/* Main Section: 나의 연애 성향 Card */}
+          <View style={[styles.sectionHeaderRow, { marginTop: 8 }]}>
+            <Text style={styles.sectionTitle}>나의 연애 성향</Text>
           </View>
 
-          {/* Doorimi KakaoTalk Profile Card */}
-          <TouchableOpacity
-            style={styles.generalRoomCard}
-            onPress={() => handleEnterChatRoom('general')}
-            activeOpacity={0.85}
-          >
-            <Image
-              source={require('../../assets/counselor_momo.png')}
-              style={styles.counselorAvatarImg}
-              resizeMode="contain"
-            />
+          {profile ? (
+            <View style={styles.singleProfileCard}>
+              {/* Retry Icon Top Right */}
+              <TouchableOpacity
+                style={styles.cardRetryTopBtn}
+                onPress={() => setIsQuizModalVisible(true)}
+                activeOpacity={0.6}
+                hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+              >
+                <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
+                  <Path
+                    d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"
+                    stroke="#8F8F8F"
+                    strokeWidth={2}
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                  <Path
+                    d="M3 3v5h5"
+                    stroke="#8F8F8F"
+                    strokeWidth={2}
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                  <Path
+                    d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"
+                    stroke="#8F8F8F"
+                    strokeWidth={2}
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                  <Path
+                    d="M21 21v-5h-5"
+                    stroke="#8F8F8F"
+                    strokeWidth={2}
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </Svg>
+              </TouchableOpacity>
 
-            <View style={styles.roomTextWrap}>
-              <View style={styles.roomTitleRow}>
-                <Text style={styles.roomTitleText}>두림이</Text>
-              </View>
-              <Text style={styles.roomStatusText} numberOfLines={2}>
-                시간 상관없이 언제든 연락해!
+              {/* 1. Large Coral Main Archetype Title */}
+              <Text style={styles.archetypeMainTitle}>
+                {profile.typeTitle.replace(/[🛡️🌸🌿]/g, '').trim()}
               </Text>
-            </View>
 
-            <View style={styles.startChatBtnPill}>
-              <Text style={styles.startChatBtnPillText}>채팅 시작</Text>
-            </View>
-          </TouchableOpacity>
+              {/* 2. Sub-title / Catchphrase */}
+              <Text style={styles.archetypeSubText}>{profile.typeOneLiner}</Text>
 
-          {/* Section Divider Title */}
-          <View style={styles.sectionHeaderRow}>
-            <Text style={styles.sectionTitle}>고민별 심층 대화</Text>
-            <Text style={styles.sectionSubTitle}>
-              대화를 통해 내 연애성향을 발견하고 맞춤 솔루션을 얻을 수 있어요.
-            </Text>
-          </View>
-
-          {/* Room Items List: User's Written Posts */}
-          {userPosts.length > 0 ? (
-            <View style={styles.postsListWrap}>
-              {userPosts.map(post => (
-                <TouchableOpacity
-                  key={post.id}
-                  style={styles.postRoomCard}
-                  onPress={() => handleEnterChatRoom(post)}
-                  activeOpacity={0.85}
-                >
-                  <View style={styles.postRoomHeaderRow}>
-                    <Text style={styles.postRoomTitle} numberOfLines={1}>
-                      {post.title}
-                    </Text>
-                  </View>
-
-                  <Text style={styles.postRoomSummary} numberOfLines={2}>
-                    {post.fullStory || post.storySummary}
-                  </Text>
-
-                  <View style={styles.postRoomFooterRow}>
-                    <View />
-                    <View style={styles.enterActionWrap}>
-                      <Text style={styles.enterActionText}>심층 대화하기</Text>
-                      <Svg width={14} height={14} viewBox="0 0 24 24" fill="none">
-                        <Path d="M9 18l6-6-6-6" stroke="#FF5D7B" strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round" />
-                      </Svg>
-                    </View>
-                  </View>
-                </TouchableOpacity>
-              ))}
-            </View>
-          ) : (
-            /* Empty State Card */
-            <View style={styles.emptyStateCard}>
-              <View style={styles.emptyIconCircle}>
+              {/* 3. Center Graphic Illustration */}
+              <View style={styles.archetypeGraphicWrap}>
                 <Image
-                  source={require('../../assets/counselor_momo.png')}
-                  style={{ width: '100%', height: '100%' }}
-                  resizeMode="cover"
+                  source={
+                    ARCHETYPE_IMAGES[profile.typeTitle] ||
+                    require('../../assets/counselor_momo.png')
+                  }
+                  style={styles.archetypeGraphicImg}
+                  resizeMode="contain"
                 />
               </View>
 
-              <Text style={styles.emptyTitle}>아직 작성하신 고민 사연이 없어요</Text>
-              <Text style={styles.emptySub}>
-                사연을 등록하면 유저 반응을 반영한 맞춤 상담을 받을 수 있습니다.
-              </Text>
+              {/* 4. Tendency Segmented Progress Bars */}
+              <View style={styles.statsContainer}>
+                {(
+                  profile.stats || [
+                    { label: '표현 솔직도', level: 5 },
+                    { label: '애정 집착도', level: 2 },
+                    { label: '감정 포용력', level: 4 },
+                    { label: '갈등 해결력', level: 5 },
+                  ]
+                ).map((stat, idx) => (
+                  <View key={idx} style={styles.statRow}>
+                    <Text style={styles.statLabelText}>{stat.label}</Text>
+                    <View style={styles.segmentBarWrap}>
+                      {[1, 2, 3, 4, 5].map(seg => {
+                        const colors = ['#FFE0E6', '#FFBFCB', '#FF9EB0', '#FF7D96', '#FF5D7B'];
+                        const segColor = colors[seg - 1] || '#FF5D7B';
+                        return (
+                          <View
+                            key={seg}
+                            style={[
+                              styles.segmentPill,
+                              seg <= stat.level
+                                ? { backgroundColor: segColor }
+                                : styles.segmentPillEmpty,
+                            ]}
+                          />
+                        );
+                      })}
+                    </View>
+                  </View>
+                ))}
+              </View>
 
+              <View style={styles.profileDividerLight} />
+
+              {/* 5. Clean Bullet List */}
+              <View style={styles.bulletListWrap}>
+                <View style={styles.bulletBlock}>
+                  <Text style={styles.bulletHeaderTitle}>
+                    · <Text style={styles.bulletHighlight}>갈등 해결 방식</Text>
+                  </Text>
+                  <Text style={styles.bulletDesc}>
+                    {profile.conflictHeadline}
+                  </Text>
+                </View>
+
+                <View style={styles.bulletBlock}>
+                  <Text style={styles.bulletHeaderTitle}>
+                    · <Text style={styles.bulletHighlight}>잘 맞는 상대</Text>
+                  </Text>
+                  <Text style={styles.bulletDesc}>
+                    {profile.matchPartnerHeadline}
+                  </Text>
+                </View>
+
+                <View style={styles.bulletBlock}>
+                  <Text style={styles.bulletHeaderTitle}>
+                    · <Text style={styles.bulletHighlight}>취약점</Text>
+                  </Text>
+                  <Text style={styles.bulletDesc}>
+                    {profile.vulnerabilityHeadline}
+                  </Text>
+                </View>
+
+                <View style={styles.bulletBlockWarning}>
+                  <Text style={styles.bulletHeaderTitleRed}>
+                    · <Text style={styles.bulletHighlightRed}>이별 권유 기준</Text>
+                  </Text>
+                  {profile.avoidPartners.map((item, idx) => (
+                    <Text key={idx} style={styles.bulletSubDescRed}>
+                      - {item.desc}
+                    </Text>
+                  ))}
+                </View>
+              </View>
+            </View>
+          ) : (
+            <View style={styles.profileCardEmpty}>
+              <Text style={styles.emptyProfileTitle}>
+                아직 분석된 연애 성향이 없어요
+              </Text>
+              <Text style={styles.emptyProfileSub}>
+                내 연애 성향을 바탕으로, 두림이가 더 나에게 맞는 건강한 연애 가이드를 알려드려요.
+              </Text>
               <TouchableOpacity
-                style={styles.createPostBtn}
-                onPress={() => {
-                  if (onGoToCreate) onGoToCreate();
-                }}
+                style={styles.startQuizBtn}
+                onPress={() => setIsQuizModalVisible(true)}
                 activeOpacity={0.85}
               >
-                <Text style={styles.createPostBtnText}>고민 사연 작성하고 맞춤 상담받기</Text>
+                <Text style={styles.startQuizBtnText}>나의 연애 성향 분석하기</Text>
               </TouchableOpacity>
-
-              <View style={styles.valuePropBox}>
-                <Text style={styles.valuePropTitle}>고민을 작성하면 왜 더 좋을까요?</Text>
-                <Text style={styles.valuePropText}>
-                  • 유저들의 실제 투표 수치와 댓글 반응을 함께 참고해요.{'\n'}
-                  • 사연을 바탕으로 훨씬 명확하고 솔직한 솔루션을 얻을 수 있습니다.
-                </Text>
-              </View>
             </View>
           )}
         </ScrollView>
+
+        {/* Doorimi Floating Chatbot Button (Matching Reference Design) */}
+        <TouchableOpacity
+          style={styles.floatingDoorimiFab}
+          onPress={() => handleEnterChatRoom('general')}
+          activeOpacity={0.85}
+        >
+          {/* Top Speech Bubble Badge */}
+          <View style={styles.fabSpeechBubbleWrap}>
+            <View style={styles.fabSpeechBubble}>
+              <Text style={styles.fabSpeechBubbleText}>상담해두림</Text>
+            </View>
+            <View style={styles.fabSpeechTail} />
+          </View>
+
+          {/* Bottom Large Avatar Image (No Frame) */}
+          <Image
+            source={require('../../assets/counselor_momo.png')}
+            style={styles.fabDirectAvatarImg}
+            resizeMode="contain"
+          />
+        </TouchableOpacity>
+
+        <RelationshipQuizModal
+          visible={isQuizModalVisible}
+          onClose={() => setIsQuizModalVisible(false)}
+        />
       </View>
     );
   }
@@ -551,7 +656,7 @@ export default function ChatScreen({
           <TextInput
             style={styles.input}
             placeholder="상담하실 내용을 자유롭게 입력하세요..."
-            placeholderTextColor="#94A3B8"
+            placeholderTextColor="#8F8F8F"
             value={inputText}
             onChangeText={setInputText}
             onSubmitEditing={() => handleSend()}
@@ -566,7 +671,7 @@ export default function ChatScreen({
             <Svg width={20} height={20} viewBox="0 0 24 24" fill="none">
               <Path
                 d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"
-                stroke={inputText.trim() ? '#FFFFFF' : '#CBD5E1'}
+                stroke={inputText.trim() ? '#FFFFFF' : '#C0C0C0'}
                 strokeWidth={2}
                 strokeLinecap="round"
                 strokeLinejoin="round"
@@ -582,11 +687,11 @@ export default function ChatScreen({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FAFAFA',
+    backgroundColor: '#F5F5F5',
   },
   hubContainer: {
     flex: 1,
-    backgroundColor: '#FAFAFA',
+    backgroundColor: '#F5F5F5',
   },
   hubScrollView: {
     flex: 1,
@@ -594,7 +699,54 @@ const styles = StyleSheet.create({
   hubContentContainer: {
     paddingHorizontal: 20,
     paddingTop: 20,
-    paddingBottom: 40,
+    paddingBottom: 140,
+  },
+  floatingDoorimiFab: {
+    position: 'absolute',
+    bottom: 110,
+    right: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+    zIndex: 999,
+  },
+  fabSpeechBubbleWrap: {
+    alignItems: 'center',
+    marginBottom: -4,
+    zIndex: 2,
+  },
+  fabSpeechBubble: {
+    backgroundColor: '#FF5D7B',
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 12,
+    shadowColor: '#FF5D7B',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 4,
+  },
+  fabSpeechBubbleText: {
+    fontSize: 11.5,
+    fontWeight: '800',
+    color: '#FFFFFF',
+    letterSpacing: -0.3,
+  },
+  fabSpeechTail: {
+    width: 0,
+    height: 0,
+    backgroundColor: 'transparent',
+    borderStyle: 'solid',
+    borderLeftWidth: 4,
+    borderRightWidth: 4,
+    borderTopWidth: 5,
+    borderLeftColor: 'transparent',
+    borderRightColor: 'transparent',
+    borderTopColor: '#FF5D7B',
+    marginTop: -1,
+  },
+  fabDirectAvatarImg: {
+    width: 76,
+    height: 76,
   },
   hubHeaderWrap: {
     marginBottom: 20,
@@ -678,6 +830,264 @@ const styles = StyleSheet.create({
     color: '#8F8F8F',
     lineHeight: 18,
     marginTop: 4,
+  },
+  profileCardEmpty: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 24,
+    padding: 24,
+    borderWidth: 1.5,
+    borderColor: '#E8E8E8',
+    alignItems: 'center',
+    marginTop: 4,
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.04,
+    shadowRadius: 10,
+    elevation: 2,
+  },
+  sparkleCircle: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: '#FFF2F4',
+    borderWidth: 1,
+    borderColor: '#FFD1DC',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 12,
+  },
+  sparkleIcon: {
+    fontSize: 22,
+  },
+  emptyProfileTitle: {
+    fontSize: 16,
+    fontWeight: '800',
+    color: '#0F172A',
+    marginBottom: 6,
+    textAlign: 'center',
+  },
+  emptyProfileSub: {
+    fontSize: 13,
+    color: '#727272',
+    textAlign: 'center',
+    lineHeight: 19,
+    marginBottom: 20,
+  },
+  startQuizBtn: {
+    width: '100%',
+    height: 50,
+    borderRadius: 16,
+    backgroundColor: '#FF5D7B',
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#FF5D7B',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.25,
+    shadowRadius: 8,
+    elevation: 3,
+  },
+  startQuizBtnText: {
+    fontSize: 15,
+    fontWeight: '800',
+    color: '#FFFFFF',
+  },
+  singleProfileCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 24,
+    paddingHorizontal: 20,
+    paddingVertical: 22,
+    borderWidth: 1,
+    borderColor: '#E8E8E8',
+    marginTop: 4,
+    position: 'relative',
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.04,
+    shadowRadius: 10,
+    elevation: 2,
+  },
+  cardRetryTopBtn: {
+    position: 'absolute',
+    top: 16,
+    right: 16,
+    padding: 6,
+    zIndex: 5,
+  },
+  archetypeMainTitle: {
+    fontSize: 28,
+    fontWeight: '900',
+    color: '#FF5D7B',
+    textAlign: 'center',
+    marginTop: 6,
+    letterSpacing: -0.5,
+  },
+  archetypeSubText: {
+    fontSize: 15,
+    fontWeight: '700',
+    color: '#8F8F8F',
+    textAlign: 'center',
+    marginTop: 6,
+    marginBottom: 12,
+  },
+  archetypeGraphicWrap: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginVertical: 8,
+  },
+  archetypeGraphicImg: {
+    width: 150,
+    height: 150,
+  },
+  statsContainer: {
+    marginTop: 14,
+    marginBottom: 12,
+    gap: 10,
+  },
+  statRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  statLabelText: {
+    fontSize: 13.5,
+    fontWeight: '700',
+    color: '#727272',
+    width: 76,
+  },
+  segmentBarWrap: {
+    flex: 1,
+    flexDirection: 'row',
+    gap: 5,
+    alignItems: 'center',
+  },
+  segmentPill: {
+    flex: 1,
+    height: 14,
+    borderRadius: 7,
+  },
+  segmentPillFilled: {
+    backgroundColor: '#FF5D7B',
+  },
+  segmentPillEmpty: {
+    backgroundColor: '#F5F5F5',
+  },
+  bulletListWrap: {
+    marginTop: 12,
+    gap: 12,
+  },
+  bulletBlock: {
+    gap: 3,
+  },
+  bulletHeaderTitle: {
+    fontSize: 13.5,
+    color: '#727272',
+    lineHeight: 19,
+  },
+  bulletDesc: {
+    fontSize: 13,
+    color: '#8F8F8F',
+    paddingLeft: 10,
+    lineHeight: 18,
+  },
+  bulletHighlight: {
+    fontWeight: '800',
+    color: '#0F172A',
+  },
+  bulletSubDesc: {
+    fontSize: 12.5,
+    color: '#8F8F8F',
+    paddingLeft: 12,
+    lineHeight: 18,
+  },
+  bulletBlockWarning: {
+    gap: 3,
+  },
+  bulletHeaderTitleRed: {
+    fontSize: 13.5,
+    color: '#FF5D7B',
+    lineHeight: 19,
+  },
+  bulletHighlightRed: {
+    fontWeight: '800',
+    color: '#FF5D7B',
+  },
+  bulletSubDescRed: {
+    fontSize: 12.5,
+    color: '#FF5D7B',
+    paddingLeft: 12,
+    lineHeight: 18,
+  },
+  profileHeaderRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    justifyContent: 'space-between',
+    marginBottom: 4,
+  },
+  typeBadgeWrap: {
+    flex: 1,
+    paddingRight: 10,
+  },
+  profileTypeTitle: {
+    fontSize: 20,
+    fontWeight: '900',
+    color: '#0F172A',
+    marginBottom: 4,
+  },
+  typeOneLinerText: {
+    fontSize: 13.5,
+    fontWeight: '800',
+    color: '#FF5D7B',
+    lineHeight: 18,
+  },
+  retryIconBtn: {
+    padding: 6,
+    borderRadius: 20,
+  },
+  profileDividerLight: {
+    height: 1,
+    backgroundColor: '#F1F5F9',
+    marginVertical: 10,
+  },
+  sectionBlock: {
+    gap: 4,
+  },
+  sectionTitleLabel: {
+    fontSize: 13,
+    fontWeight: '800',
+    color: '#727272',
+    marginBottom: 2,
+  },
+  sectionTitleLabelAmber: {
+    fontSize: 13,
+    fontWeight: '800',
+    color: '#B45309',
+    marginBottom: 2,
+  },
+  sectionTitleLabelRed: {
+    fontSize: 13.5,
+    fontWeight: '800',
+    color: '#E11D48',
+    marginBottom: 6,
+  },
+  headlineMainText: {
+    fontSize: 15.5,
+    fontWeight: '800',
+    color: '#0F172A',
+    lineHeight: 22,
+    letterSpacing: -0.3,
+  },
+  subDetailText: {
+    fontSize: 13,
+    fontWeight: '400',
+    color: '#727272',
+    lineHeight: 19,
+  },
+  avoidFlatWrap: {
+    gap: 12,
+    marginTop: 2,
+  },
+  avoidFlatRow: {
+    gap: 2,
   },
   postsListWrap: {
     gap: 12,

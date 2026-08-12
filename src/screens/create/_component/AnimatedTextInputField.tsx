@@ -49,7 +49,7 @@ export function AnimatedTextInputField({
 
   const animatedBorderColor = focusAnim.interpolate({
     inputRange: [0, 1],
-    outputRange: ['#EBEBEB', '#FFB5C5'],
+    outputRange: ['#E8E8E8', '#FFB5C5'],
   });
 
   return (
@@ -94,7 +94,7 @@ const styles = StyleSheet.create({
     width: '100%',
     borderRadius: 16,
     borderWidth: 1,
-    borderColor: '#D6D6D6',
+    borderColor: '#E8E8E8',
     paddingHorizontal: 16,
     fontSize: 14,
     color: '#727272',

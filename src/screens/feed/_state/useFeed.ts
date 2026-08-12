@@ -4,6 +4,8 @@ import { Post } from '../_model/feed.model';
 import { getFeedPostsLib, FetchFeedResponse, RawFeedPost } from '../_lib/getFeedPosts.lib';
 import { useCategoryStore } from './useCategoryStore';
 
+import { useLocalPostsStore } from './useLocalPostsStore';
+
 export const getFeedQueryKey = (
   type: 'hot' | 'recent' = 'recent',
   category: string = '전체',
@@ -15,6 +17,7 @@ export function useFeed(
   pageSize: number = 5
 ) {
   const selectedCategory = useCategoryStore(state => state.selectedCategory);
+  const localPosts = useLocalPostsStore(state => state.localPosts);
 
   const {
     data,
@@ -65,8 +68,10 @@ export function useFeed(
 
               return {
                 id: item.id,
+                userId: item.user_id,
+                isMyPost: true,
                 category: item.category || '',
-                isHot: type === 'hot' || index < 3,
+                isHot: totalVoteCount >= 20,
                 title: item.title,
                 storySummary: item.content,
                 fullStory: item.content,
@@ -101,13 +106,31 @@ export function useFeed(
       )
     : [];
 
+  const isHotTab = selectedCategory === '인기' || selectedCategory === '🔥 인기';
+
+  const filteredLocalPosts = localPosts.filter(p => {
+    if (isHotTab) {
+      return ((p.totalVotes ?? 0) >= 20 || (p.totalVoteCount ?? 0) >= 20);
+    }
+    return selectedCategory === '전체' || p.category === selectedCategory;
+  });
+
+  const mergedPosts = Array.from(
+    [...filteredLocalPosts, ...posts].reduce((map, item) => {
+      if (!map.has(item.id)) {
+        map.set(item.id, item);
+      }
+      return map;
+    }, new Map<string, Post>()).values()
+  );
+
   const loadMore = useCallback(async () => {
     if (isFetchingNextPage || !hasNextPage) return;
     await fetchNextPage();
   }, [isFetchingNextPage, hasNextPage, fetchNextPage]);
 
   return {
-    posts,
+    posts: mergedPosts,
     isLoading: isLoading || isPending,
     isFetchingNextPage,
     hasNextPage,

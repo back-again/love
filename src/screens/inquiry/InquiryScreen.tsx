@@ -46,7 +46,7 @@ const styles = StyleSheet.create({
   },
   sectionDesc: {
     fontSize: 14.5,
-    color: '#475569',
+    color: '#727272',
     lineHeight: 22,
     marginBottom: 16,
     letterSpacing: -0.3,

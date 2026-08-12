@@ -7,6 +7,7 @@ export interface CommentItem {
 
 export interface Post {
   id: string;
+  userId?: string;
   category?: string;
   isHot?: boolean;
   isMyPost?: boolean;

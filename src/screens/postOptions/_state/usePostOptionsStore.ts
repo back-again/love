@@ -15,6 +15,15 @@ const initialState = {
 
 export const usePostOptionsStore = create<PostOptionsState>(set => ({
   ...initialState,
-  openPostOptions: (post: Post) => set({ visible: true, targetPost: post }),
+  openPostOptions: (post: Post) => {
+    const isMy = post.isMyPost !== undefined ? post.isMyPost : true;
+    set({
+      visible: true,
+      targetPost: {
+        ...post,
+        isMyPost: isMy,
+      },
+    });
+  },
   closePostOptions: () => set(initialState),
 }));

@@ -70,7 +70,7 @@ const styles = StyleSheet.create({
   },
   withdrawBtnText: {
     fontSize: 14,
-    color: '#9C9C9C',
+    color: '#8F8F8F',
     textDecorationLine: 'underline',
   },
 });

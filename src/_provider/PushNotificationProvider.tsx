@@ -3,12 +3,18 @@
 import React, { useEffect } from 'react';
 import * as Notifications from 'expo-notifications';
 import { registerPushTokenLib } from '@/_lib/registerPushToken.lib';
+import { useCommentStore } from '@/screens/feed/comment/_state/useCommentStore';
+import { MainTabType } from '@/components/layout/Layout';
+
+interface PushNotificationProviderProps {
+  children?: React.ReactNode;
+  onNavigate?: (tab: MainTabType, postId?: string) => void;
+}
 
 export function PushNotificationProvider({
   children,
-}: {
-  children?: React.ReactNode;
-}) {
+  onNavigate,
+}: PushNotificationProviderProps) {
   useEffect(() => {
     registerPushTokenLib();
 
@@ -19,14 +25,48 @@ export function PushNotificationProvider({
 
     const responseListener =
       Notifications.addNotificationResponseReceivedListener(response => {
-        console.log('Push notification response:', response);
+        console.log('Push notification response received:', response);
+        const data = response.notification.request.content.data;
+        const targetScreen = (data?.screen || data?.tab || 'feed') as MainTabType;
+        const postIdStr = data?.postId ? String(data.postId) : undefined;
+        const postTitleStr = data?.postTitle ? String(data.postTitle) : '알림 사연';
+
+        if (onNavigate) {
+          onNavigate(targetScreen, postIdStr);
+        }
+
+        if (postIdStr) {
+          useCommentStore.getState().openComments({
+            id: postIdStr,
+            title: postTitleStr,
+            category: '고민',
+            storySummary: postTitleStr,
+            fullStory: postTitleStr,
+            images: [],
+            voteO: '괜찮은데?',
+            voteX: '난 싫어',
+            topComments: [],
+            reviewStatus: 'none',
+            fireCount: 0,
+            facepalmCount: 0,
+            commentCount: 0,
+            voteOCount: 0,
+            voteXCount: 0,
+            totalVoteCount: 0,
+            totalVotes: 0,
+            percentO: 50,
+            percentX: 50,
+            myVote: null,
+            createdAt: new Date().toISOString(),
+          });
+        }
       });
 
     return () => {
       notificationListener.remove();
       responseListener.remove();
     };
-  }, []);
+  }, [onNavigate]);
 
   return <>{children}</>;
 }

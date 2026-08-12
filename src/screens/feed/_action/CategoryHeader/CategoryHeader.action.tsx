@@ -11,7 +11,11 @@ export function CategoryHeaderAction() {
   const selectedCategory = useCategoryStore(state => state.selectedCategory);
   const setSelectedCategory = useCategoryStore(state => state.setSelectedCategory);
 
-  const categories = ['전체', ...categoryData.map(c => c.name)];
+  const categories = [
+    '전체',
+    '인기',
+    ...categoryData.map(c => c.name).filter(c => c !== '🔥 인기' && c !== '인기'),
+  ];
 
   return (
     <>
