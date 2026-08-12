@@ -4,16 +4,13 @@ import {
   View,
   Text,
   TextInput,
-  TouchableOpacity,
   Platform,
   Switch,
   Animated,
 } from 'react-native';
 import { useShallow } from 'zustand/react/shallow';
 import { useCreateForm } from '../_state/useCreateForm';
-import { inspectPostQualityWithAi } from '../_lib/aiModeration.lib';
-import { getAiVoteOptionsLib } from '../_lib/aiVoteGenerator.lib';
-import { RetrySvg } from '../_svg/RetrySvg';
+import { generateAiVoteOptions } from '../_lib/generateVoteOptions.lib';
 
 export function VoteOptionSettingArea() {
   const {
@@ -39,14 +36,12 @@ export function VoteOptionSettingArea() {
   );
 
   const [isLoadingAi, setIsLoadingAi] = useState<boolean>(false);
-  const [aiStatus, setAiStatus] = useState<'idle' | 'invalid'>('idle');
   const [focusedField, setFocusedField] = useState<'O' | 'X' | null>(null);
 
   const progressAnim = useRef(new Animated.Value(0)).current;
 
   const runAiAnalysis = () => {
     setIsLoadingAi(true);
-    setAiStatus('idle');
     progressAnim.setValue(0);
 
     Animated.timing(progressAnim, {
@@ -54,23 +49,10 @@ export function VoteOptionSettingArea() {
       duration: 850,
       useNativeDriver: false,
     }).start(async () => {
-      const inspection = await inspectPostQualityWithAi(questionTitle, detailSituation);
-
-      if (!inspection.isValid) {
-        setAiStatus('invalid');
-        setIsLoadingAi(false);
-      } else {
-        setAiStatus('idle');
-        try {
-          const generated = await getAiVoteOptionsLib(questionTitle, detailSituation);
-          setVoteO(generated.oText);
-          setVoteX(generated.xText);
-        } catch (err) {
-          console.warn('AI option generation failed:', err);
-        } finally {
-          setIsLoadingAi(false);
-        }
-      }
+      const generated = await generateAiVoteOptions(questionTitle, detailSituation);
+      setVoteO(generated.oText);
+      setVoteX(generated.xText);
+      setIsLoadingAi(false);
     });
   };
 
@@ -80,7 +62,6 @@ export function VoteOptionSettingArea() {
       runAiAnalysis();
     } else {
       setIsLoadingAi(false);
-      setAiStatus('idle');
     }
   };
 
@@ -170,20 +151,6 @@ export function VoteOptionSettingArea() {
               maxLength={20}
             />
           </View>
-
-          {/* Insufficient Content Warning & Retry Icon Button BELOW Option Inputs */}
-          {!isLoadingAi && aiStatus === 'invalid' && (
-            <View style={styles.warningRowBelow}>
-              <Text style={styles.warningTitleText}>분석할 내용이 부족합니다.</Text>
-              <TouchableOpacity
-                style={styles.retryIconBtn}
-                onPress={runAiAnalysis}
-                activeOpacity={0.7}
-              >
-                <RetrySvg />
-              </TouchableOpacity>
-            </View>
-          )}
         </View>
       )}
     </View>
@@ -243,23 +210,6 @@ const styles = StyleSheet.create({
     height: '100%',
     borderRadius: 2,
     backgroundColor: '#FF5D7B',
-  },
-  warningRowBelow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginTop: 2,
-    paddingHorizontal: 2,
-  },
-  warningTitleText: {
-    fontSize: 12.5,
-    fontWeight: '600',
-    color: '#E11D48',
-  },
-  retryIconBtn: {
-    padding: 4,
-    alignItems: 'center',
-    justifyContent: 'center',
   },
   inputRow: {
     flexDirection: 'row',

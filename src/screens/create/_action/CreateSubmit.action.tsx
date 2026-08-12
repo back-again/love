@@ -5,8 +5,6 @@ import { useShallow } from 'zustand/react/shallow';
 import { useCreateForm } from '../_state/useCreateForm';
 import { createPost } from '../_lib/createPost.lib';
 import { updatePost } from '../_lib/updatePost.lib';
-import { inspectPostQualityWithAi } from '../_lib/aiModeration.lib';
-import { AiInspectionModal } from '@/components/modal/AiInspectionModal';
 import { useLocalPostsStore } from '@/screens/feed/_state/useLocalPostsStore';
 
 export function CreateSubmitAction() {
@@ -36,14 +34,6 @@ export function CreateSubmitAction() {
       reset: state.reset,
     }))
   );
-
-  const [aiModal, setAiModal] = useState<{
-    visible: boolean;
-    reason?: string;
-    suggestion?: string;
-  }>({
-    visible: false,
-  });
 
   const createMutation = useMutation({
     mutationFn: () => {
@@ -130,51 +120,30 @@ export function CreateSubmitAction() {
     detailSituation.trim().length > 0;
   const isLoading = createMutation.isPending;
 
-  const handleSubmit = async () => {
+  const handleSubmit = () => {
     if (!isFormValid || isLoading) return;
-
-    // AI Post Quality Moderation Check
-    const inspection = await inspectPostQualityWithAi(questionTitle, detailSituation);
-    if (!inspection.isValid) {
-      setAiModal({
-        visible: true,
-        reason: inspection.reason,
-        suggestion: inspection.suggestion,
-      });
-      return;
-    }
-
     createMutation.mutate();
   };
 
   return (
-    <>
-      <TouchableOpacity
+    <TouchableOpacity
+      style={[
+        styles.submitButton,
+        (!isFormValid || isLoading) && styles.submitButtonDisabled,
+      ]}
+      onPress={handleSubmit}
+      disabled={!isFormValid || isLoading}
+      activeOpacity={0.8}
+    >
+      <Text
         style={[
-          styles.submitButton,
-          (!isFormValid || isLoading) && styles.submitButtonDisabled,
+          styles.submitButtonText,
+          (!isFormValid || isLoading) && styles.submitButtonTextDisabled,
         ]}
-        onPress={handleSubmit}
-        disabled={!isFormValid || isLoading}
-        activeOpacity={0.8}
       >
-        <Text
-          style={[
-            styles.submitButtonText,
-            (!isFormValid || isLoading) && styles.submitButtonTextDisabled,
-          ]}
-        >
-          {isLoading ? (isEditMode ? '수정 중...' : '등록 중...') : (isEditMode ? '수정 완료' : '작성 완료')}
-        </Text>
-      </TouchableOpacity>
-
-      <AiInspectionModal
-        visible={aiModal.visible}
-        reason={aiModal.reason}
-        suggestion={aiModal.suggestion}
-        onClose={() => setAiModal(prev => ({ ...prev, visible: false }))}
-      />
-    </>
+        {isLoading ? (isEditMode ? '수정 중...' : '등록 중...') : (isEditMode ? '수정 완료' : '작성 완료')}
+      </Text>
+    </TouchableOpacity>
   );
 }
 
