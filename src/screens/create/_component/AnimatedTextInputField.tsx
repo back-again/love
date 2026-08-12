@@ -61,7 +61,7 @@ export function AnimatedTextInputField({
             height,
             borderColor: animatedBorderColor,
             borderWidth: 1,
-            paddingRight: charCounter ? 60 : 16,
+            paddingRight: charCounter ? 50 : 16,
           },
           Platform.OS === 'web' && isFocused
             ? ({
@@ -70,6 +70,8 @@ export function AnimatedTextInputField({
             : {},
           style,
         ]}
+        multiline={props.multiline ?? false}
+        numberOfLines={props.numberOfLines ?? 1}
         onFocus={handleFocus}
         onBlur={handleBlur}
         {...props}
@@ -94,10 +96,12 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#D6D6D6',
     paddingHorizontal: 16,
-    fontSize: 15,
+    fontSize: 14,
     color: '#727272',
     backgroundColor: '#FFFFFF',
     letterSpacing: -0.3,
+    textAlignVertical: 'center',
+    ...(Platform.OS === 'android' ? { includeFontPadding: false } : {}),
     ...(Platform.OS === 'web'
       ? ({
           outlineStyle: 'none',

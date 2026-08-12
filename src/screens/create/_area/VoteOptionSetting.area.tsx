@@ -12,7 +12,7 @@ import {
 import { useShallow } from 'zustand/react/shallow';
 import { useCreateForm } from '../_state/useCreateForm';
 import { inspectPostQualityWithAi } from '../_lib/aiModeration.lib';
-import Svg, { Path } from 'react-native-svg';
+import { RetrySvg } from '../_svg/RetrySvg';
 
 export function VoteOptionSettingArea() {
   const {
@@ -175,15 +175,7 @@ export function VoteOptionSettingArea() {
                 onPress={runAiAnalysis}
                 activeOpacity={0.7}
               >
-                <Svg width={16} height={16} viewBox="0 0 24 24" fill="none">
-                  <Path
-                    d="M21 12a9 9 0 1 1-9-9c2.52 0 4.85.99 6.57 2.57L21 8M21 3v5h-5"
-                    stroke="#FF5D7B"
-                    strokeWidth={2.2}
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </Svg>
+                <RetrySvg />
               </TouchableOpacity>
             </View>
           )}

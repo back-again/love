@@ -11,7 +11,7 @@ import {
   Platform,
   Alert,
 } from 'react-native';
-import Svg, { Path } from 'react-native-svg';
+import { PlusSvg } from '../_svg/PlusSvg';
 import * as ImagePicker from 'expo-image-picker';
 import { useShallow } from 'zustand/react/shallow';
 import { useCreateForm } from '../_state/useCreateForm';
@@ -48,19 +48,26 @@ export function ImageAttachmentPickerAction() {
         return;
       }
 
+      const remainingSlots = 3 - images.length;
+
       const pickerResult = await ImagePicker.launchImageLibraryAsync({
         mediaTypes: ['images'],
         quality: 0.8,
-        allowsEditing: true,
+        allowsEditing: false,
+        allowsMultipleSelection: true,
+        selectionLimit: remainingSlots,
       });
 
-      if (pickerResult.canceled || !pickerResult.assets?.[0]?.uri) {
+      if (pickerResult.canceled || !pickerResult.assets?.length) {
         return;
       }
 
-      const selectedAsset = pickerResult.assets[0];
-
-      addImage(selectedAsset.uri);
+      const selectedAssets = pickerResult.assets.slice(0, remainingSlots);
+      selectedAssets.forEach(asset => {
+        if (asset.uri) {
+          addImage(asset.uri);
+        }
+      });
     } catch (error) {
       console.error('Image picker error:', error);
     }
@@ -78,15 +85,7 @@ export function ImageAttachmentPickerAction() {
           onPress={handleAddImage}
           activeOpacity={0.7}
         >
-          <Svg width={28} height={28} viewBox="0 0 24 24" fill="none">
-            <Path
-              d="M12 5v14M5 12h14"
-              stroke="#8F8F8F"
-              strokeWidth={2.2}
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </Svg>
+          <PlusSvg />
         </TouchableOpacity>
       )}
 
