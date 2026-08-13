@@ -1,6 +1,7 @@
 import React from 'react';
 import { StyleSheet, View, Text, TouchableOpacity } from 'react-native';
 import Svg, { Circle } from 'react-native-svg';
+import { useUserStore } from '@/_state/useUserStore';
 
 export interface WrittenPost {
   id: string;
@@ -13,6 +14,7 @@ export interface WrittenPost {
   curiousCount?: number;
   hasReview: boolean;
   reviewContent?: string;
+  created_at?: string;
 }
 
 interface WrittenPostCardProps {
@@ -28,11 +30,33 @@ export function WrittenPostCard({
   onOpenWriteReview,
   onOpenOptions,
 }: WrittenPostCardProps) {
+  const user = useUserStore(state => state.user);
   const isODominant = post.voteO >= post.voteX;
   const isXDominant = post.voteX > post.voteO;
 
+  let ddayLabel = '';
+  if (user?.dating_started_at && post.created_at) {
+    try {
+      const startDate = new Date(user.dating_started_at);
+      const postDate = new Date(post.created_at);
+      startDate.setHours(0, 0, 0, 0);
+      postDate.setHours(0, 0, 0, 0);
+
+      const diffTime = postDate.getTime() - startDate.getTime();
+      const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24)) + 1;
+      if (diffDays >= 0) {
+        ddayLabel = `D+${diffDays}`;
+      }
+    } catch (e) {
+      console.warn('Failed to calculate post D-day:', e);
+    }
+  }
+
   return (
     <View style={styles.myPostCard}>
+      {ddayLabel ? (
+        <Text style={styles.ddayLabelText}>{ddayLabel}</Text>
+      ) : null}
       {/* Title & Three Dots More Options Menu */}
       <View style={styles.myPostTitleRow}>
         <Text style={styles.myPostTitle} numberOfLines={2}>
@@ -233,31 +257,31 @@ const styles = StyleSheet.create({
     fontWeight: '700',
   },
   myPostReviewBtn: {
-    width: 96,
-    height: 38,
+    width: 78,
+    height: 30,
     backgroundColor: 'transparent',
     borderWidth: 1,
     borderColor: '#F9758D',
-    borderRadius: 12,
+    borderRadius: 8,
     alignItems: 'center',
     justifyContent: 'center',
   },
   myPostReviewBtnText: {
     color: '#F9758D',
-    fontSize: 14,
+    fontSize: 12.5,
     fontWeight: '700',
   },
   myPostReviewedBtn: {
-    width: 96,
-    height: 38,
+    width: 78,
+    height: 30,
     backgroundColor: '#F5F5F5',
-    borderRadius: 12,
+    borderRadius: 8,
     alignItems: 'center',
     justifyContent: 'center',
   },
   myPostReviewedBtnText: {
     color: '#727272',
-    fontSize: 14,
+    fontSize: 12.5,
     fontWeight: '600',
   },
   percentColO: {
@@ -275,5 +299,12 @@ const styles = StyleSheet.create({
   },
   textAlignRight: {
     textAlign: 'right',
+  },
+  ddayLabelText: {
+    fontSize: 12,
+    color: '#8F8F8F',
+    fontWeight: '600',
+    marginBottom: 6,
+    letterSpacing: -0.2,
   },
 });

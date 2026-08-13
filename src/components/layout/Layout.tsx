@@ -1,7 +1,8 @@
-import React, { ReactNode, useEffect, useState, useRef } from 'react';
+import React, { ReactNode, useEffect, useState, useRef, Suspense } from 'react';
 import {
   StyleSheet,
   View,
+  Text,
   TouchableOpacity,
   Image,
   Platform,
@@ -13,6 +14,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { StatusBar } from 'expo-status-bar';
 import { NavItem } from './_component/NavItem';
+import { useUserStore } from '@/_state/useUserStore';
 import { NotificationBellSvg } from './_svg/NotificationBellSvg';
 import { OpenSettingBottomSheetAction } from '@/screens/setting/_action/OpenSettingBottomSheet.action';
 import { useCreateForm } from '@/screens/create/_state/useCreateForm';
@@ -22,13 +24,16 @@ import { NotificationItem, NotificationModal } from '@/components/modal/Notifica
 import { useCommentStore } from '@/screens/feed/comment/_state/useCommentStore';
 import { Post } from '@/screens/feed/_model/feed.model';
 import { PostOptionsScreen } from '@/screens/postOptions/PostOptionsScreen';
+import { CategoryHeaderArea } from '@/screens/feed/_area/CategoryHeader.area';
+import { CategoryHydration } from '@/screens/feed/_component/CategoryHydration';
+import { CategoryHeaderFallback } from '@/screens/feed/_component/CategoryHeaderFallback';
 
 export type MainTabType = 'feed' | 'chat' | 'create' | 'my';
 
 const NAV_TABS: { type: MainTabType; label: string }[] = [
-  { type: 'feed', label: 'OX' },
+  { type: 'feed', label: '커뮤니티' },
   { type: 'create', label: '작성' },
-  { type: 'chat', label: 'AI' },
+  { type: 'chat', label: '상담' },
   { type: 'my', label: '마이' },
 ];
 
@@ -37,6 +42,7 @@ interface LayoutProps {
   onTabChange: (tab: MainTabType) => void;
   onSettingsPress?: () => void;
   hideBottomNav?: boolean;
+  hideHeader?: boolean;
   children: ReactNode;
 }
 
@@ -45,9 +51,11 @@ export function Layout({
   onTabChange,
   onSettingsPress,
   hideBottomNav = false,
+  hideHeader = false,
   children,
 }: LayoutProps) {
   const insets = useSafeAreaInsets();
+  const user = useUserStore(state => state.user);
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
   const [containerWidth, setContainerWidth] = useState(0);
 
@@ -154,31 +162,79 @@ export function Layout({
     <View style={styles.container}>
       <StatusBar style="dark" />
 
-      {activeTab !== 'chat' ? (
-        <View style={[styles.topWhiteArea, { paddingTop: insets.top }]}>
-          <View style={styles.header}>
-            <View style={styles.headerLeftSpacer} />
-            <Image
-              source={require('../../assets/xoxo_logo.png')}
-              style={styles.logoImage}
-              resizeMode="contain"
-            />
+      {!hideHeader ? (() => {
+        let ddayText = 'D+1';
+        if (user?.dating_started_at) {
+          try {
+            const startDate = new Date(user.dating_started_at);
+            const today = new Date();
+            startDate.setHours(0, 0, 0, 0);
+            today.setHours(0, 0, 0, 0);
+            const diffTime = today.getTime() - startDate.getTime();
+            const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24)) + 1;
+            if (diffDays >= 0) {
+              ddayText = `D+${diffDays}`;
+            } else {
+              ddayText = `D${diffDays}`;
+            }
+          } catch (e) {
+            console.warn('Failed to calculate D-day:', e);
+          }
+        } else {
+          ddayText = 'D+365';
+        }
 
-            {activeTab === 'my' ? (
-              <OpenSettingBottomSheetAction onSettingsPress={onSettingsPress} />
-            ) : (
-              <TouchableOpacity
-                style={styles.notificationButton}
-                onPress={() => setIsNotificationOpen(true)}
-                activeOpacity={0.7}
-              >
-                <NotificationBellSvg color="#0F172A" />
-                <View style={styles.unreadBadgeDot} />
-              </TouchableOpacity>
+        return (
+          <View style={[styles.topGlassHeaderWrapper, { paddingTop: insets.top }]}>
+            <BlurView
+              intensity={80}
+              tint="light"
+              style={StyleSheet.absoluteFillObject}
+            />
+            <LinearGradient
+              colors={[
+                'rgba(255, 255, 255, 0.45)',
+                'rgba(255, 255, 255, 0.15)',
+                'rgba(255, 255, 255, 0.05)',
+              ]}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 0, y: 1 }}
+              style={StyleSheet.absoluteFillObject}
+            />
+            <View style={styles.header}>
+              <Text style={[
+                styles.headerTitle,
+                activeTab === 'feed' && styles.feedHeaderTitle
+              ]}>
+                {activeTab === 'feed' && ddayText}
+                {activeTab === 'create' && '작성'}
+                {activeTab === 'chat' && '상담'}
+                {activeTab === 'my' && '마이'}
+              </Text>
+
+              {activeTab === 'my' ? (
+                <OpenSettingBottomSheetAction onSettingsPress={onSettingsPress} />
+              ) : (activeTab === 'create' || activeTab === 'chat') ? null : (
+                <TouchableOpacity
+                  style={styles.notificationButton}
+                  onPress={() => setIsNotificationOpen(true)}
+                  activeOpacity={0.7}
+                >
+                  <NotificationBellSvg color="#0F172A" />
+                  <View style={styles.unreadBadgeDot} />
+                </TouchableOpacity>
+              )}
+            </View>
+            {activeTab === 'feed' && (
+              <CategoryHydration>
+                <Suspense fallback={<CategoryHeaderFallback />}>
+                  <CategoryHeaderArea />
+                </Suspense>
+              </CategoryHydration>
             )}
           </View>
-        </View>
-      ) : (
+        );
+      })() : (
         <View style={{ paddingTop: insets.top, backgroundColor: '#FFFFFF' }} />
       )}
 
@@ -275,24 +331,47 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#FAFAFA',
   },
-  topWhiteArea: {
-    width: '100%',
-    backgroundColor: '#FFFFFF',
+  topGlassHeaderWrapper: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    zIndex: 100,
+    borderBottomWidth: 1.5,
+    borderBottomColor: 'rgba(255, 255, 255, 0.45)',
+    backgroundColor: Platform.OS === 'web' ? 'rgba(255, 255, 255, 0.35)' : 'rgba(255, 255, 255, 0.45)',
+    ...(Platform.OS === 'web'
+      ? {
+          backdropFilter: 'blur(30px) saturate(210%)',
+          WebkitBackdropFilter: 'blur(30px) saturate(210%)',
+        }
+      : {}),
   },
   header: {
-    height: 52,
+    height: 60,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: 24,
-    backgroundColor: '#FFFFFF',
+    paddingTop: 6,
+    backgroundColor: 'transparent',
   },
   headerLeftSpacer: {
     width: 32,
   },
-  logoImage: {
-    height: 32,
-    width: 104,
+  headerRightSpacer: {
+    width: 32,
+  },
+  headerTitle: {
+    fontSize: 32,
+    fontWeight: '800',
+    color: '#0F172A',
+    letterSpacing: -0.5,
+    transform: [{ scaleX: 1.05 }],
+  },
+  feedHeaderTitle: {
+    fontWeight: '700',
+    transform: undefined,
   },
   notificationButton: {
     position: 'relative',

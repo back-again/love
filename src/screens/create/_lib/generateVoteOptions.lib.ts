@@ -57,13 +57,20 @@ export async function generateAiVoteOptions(
       body: { title, detail },
     });
 
-    if (!error && data && data.oText && data.xText) {
-      const result = {
-        oText: data.oText,
-        xText: data.xText,
-      };
-      optionsCache.set(cacheKey, result);
-      return result;
+    if (!error && data) {
+      if (data.oText === '' || data.xText === '') {
+        const result = { oText: '', xText: '' };
+        optionsCache.set(cacheKey, result);
+        return result;
+      }
+      if (data.oText && data.xText) {
+        const result = {
+          oText: data.oText,
+          xText: data.xText,
+        };
+        optionsCache.set(cacheKey, result);
+        return result;
+      }
     }
   } catch (err) {
     console.warn('Edge Function invoke failed, using local rule fallback:', err);

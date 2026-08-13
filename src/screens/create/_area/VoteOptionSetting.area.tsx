@@ -36,6 +36,7 @@ export function VoteOptionSettingArea() {
   );
 
   const [isLoadingAi, setIsLoadingAi] = useState<boolean>(false);
+  const [isAiAnalysisFailed, setIsAiAnalysisFailed] = useState<boolean>(false);
   const [focusedField, setFocusedField] = useState<'O' | 'X' | null>(null);
 
   const lastAnalyzedKeyRef = useRef<string>('');
@@ -50,6 +51,7 @@ export function VoteOptionSettingArea() {
     }
 
     setIsLoadingAi(true);
+    setIsAiAnalysisFailed(false);
     progressAnim.setValue(0);
 
     Animated.timing(progressAnim, {
@@ -59,6 +61,10 @@ export function VoteOptionSettingArea() {
     }).start(async () => {
       const generated = await generateAiVoteOptions(questionTitle, detailSituation);
       lastAnalyzedKeyRef.current = currentKey;
+      
+      const failed = generated.oText === '' && generated.xText === '';
+      setIsAiAnalysisFailed(failed);
+
       setVoteO(generated.oText);
       setVoteX(generated.xText);
       setIsLoadingAi(false);
@@ -71,6 +77,7 @@ export function VoteOptionSettingArea() {
       runAiAnalysis();
     } else {
       setIsLoadingAi(false);
+      setIsAiAnalysisFailed(false);
     }
   };
 
@@ -160,6 +167,12 @@ export function VoteOptionSettingArea() {
               maxLength={20}
             />
           </View>
+
+          {isAiAnalysisFailed && (
+            <Text style={styles.warningText}>
+              분석할 내용이 부족합니다. 직접 입력해주세요.
+            </Text>
+          )}
         </View>
       )}
     </View>
@@ -275,5 +288,14 @@ const styles = StyleSheet.create({
   optionInputActiveX: {
     borderColor: '#F9758D',
     borderWidth: 1,
+  },
+  warningText: {
+    fontSize: 11.5,
+    color: '#F9758D',
+    marginTop: 6,
+    marginLeft: 4,
+    fontWeight: '500',
+    lineHeight: 16,
+    letterSpacing: -0.2,
   },
 });

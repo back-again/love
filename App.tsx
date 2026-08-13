@@ -72,6 +72,7 @@ function MainAppLayout({ mainNavRef }: { mainNavRef: any }) {
       activeTab={activeTab}
       onTabChange={handleTabChange}
       hideBottomNav={activeTab === 'chat' && isChatActive}
+      hideHeader={activeTab === 'chat' && isChatActive}
     >
       <MainStack.Navigator
         screenOptions={{

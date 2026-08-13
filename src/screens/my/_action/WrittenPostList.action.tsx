@@ -1,7 +1,10 @@
 'use client';
 
 import React, { useState } from 'react';
+import { StyleSheet, View, Text, TouchableOpacity } from 'react-native';
 import { useSuspenseQuery } from '@tanstack/react-query';
+import Svg, { Path, Circle } from 'react-native-svg';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useUserStore } from '@/_state/useUserStore';
 import { WrittenPostCard, WrittenPost } from '../_component/WrittenPostCard';
 import { getWrittenPosts } from '../_lib/getWrittenPosts.lib';
@@ -9,6 +12,7 @@ import ReviewScreen, { ReviewMode } from '@/screens/review/ReviewScreen';
 import { useReviewModalStore } from '@/screens/review/_state/useReviewModalStore';
 import { PostOptionsScreen } from '@/screens/postOptions/PostOptionsScreen';
 import { usePostOptionsStore } from '@/screens/postOptions/_state/usePostOptionsStore';
+import { navigationRef } from '@/_lib/navigation';
 
 export function WrittenPostListAction() {
   const user = useUserStore(state => state.user);
@@ -41,31 +45,58 @@ export function WrittenPostListAction() {
 
   return (
     <>
-      {activePosts.map((post: WrittenPost) => (
-        <WrittenPostCard
-          key={post.id}
-          post={post}
-          onOpenViewReview={handleOpenReview('view')}
-          onOpenWriteReview={handleOpenReview('write')}
-          onOpenOptions={targetPost => {
-            setSelectedPost(targetPost);
-            openPostOptions({
-              ...targetPost,
-              storySummary: targetPost.title || '',
-              fullStory: targetPost.title || '',
-              images: [],
-              voteO: '',
-              voteX: '',
-              topComments: [],
-              reviewStatus: '',
-              fireCount: 0,
-              facepalmCount: 0,
-              commentCount: 0,
-              isMyPost: true,
-            });
-          }}
-        />
-      ))}
+      {activePosts.length === 0 ? (
+        <View style={styles.emptyContainer}>
+          <Text style={styles.emptyTitle}>아직 작성한 글이 없어요</Text>
+          <Text style={styles.emptySubtitle}>
+            혼자만 끙끙 앓던 고민{"\n"}유저들의 의견으로 도움을 받아보세요
+          </Text>
+          <TouchableOpacity
+            style={styles.emptyBtnWrapper}
+            onPress={() => {
+              if (navigationRef.isReady()) {
+                navigationRef.navigate('Create');
+              }
+            }}
+            activeOpacity={0.8}
+          >
+            <LinearGradient
+              colors={['#FF5D7B', '#FE92AC']}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={styles.emptyBtnGradient}
+            >
+              <Text style={styles.emptyBtnText}>글 작성하기 &gt;</Text>
+            </LinearGradient>
+          </TouchableOpacity>
+        </View>
+      ) : (
+        activePosts.map((post: WrittenPost) => (
+          <WrittenPostCard
+            key={post.id}
+            post={post}
+            onOpenViewReview={handleOpenReview('view')}
+            onOpenWriteReview={handleOpenReview('write')}
+            onOpenOptions={targetPost => {
+              setSelectedPost(targetPost);
+              openPostOptions({
+                ...targetPost,
+                storySummary: targetPost.title || '',
+                fullStory: targetPost.title || '',
+                images: [],
+                voteO: '',
+                voteX: '',
+                topComments: [],
+                reviewStatus: '',
+                fireCount: 0,
+                facepalmCount: 0,
+                commentCount: 0,
+                isMyPost: true,
+              });
+            }}
+          />
+        ))
+      )}
 
       <ReviewScreen />
 
@@ -73,3 +104,48 @@ export function WrittenPostListAction() {
     </>
   );
 }
+
+const styles = StyleSheet.create({
+  emptyContainer: {
+    width: '100%',
+    paddingVertical: 64,
+    paddingHorizontal: 24,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'transparent',
+  },
+  emptyIllustrationWrap: {
+    marginBottom: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  emptyTitle: {
+    fontSize: 17,
+    fontWeight: '800',
+    color: '#0F172A',
+    marginBottom: 8,
+    textAlign: 'center',
+  },
+  emptySubtitle: {
+    fontSize: 13,
+    color: '#727272',
+    textAlign: 'center',
+    lineHeight: 19,
+    marginBottom: 24,
+  },
+  emptyBtnWrapper: {
+    alignSelf: 'center',
+  },
+  emptyBtnGradient: {
+    paddingHorizontal: 24,
+    height: 40,
+    borderRadius: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  emptyBtnText: {
+    fontSize: 13.5,
+    fontWeight: '700',
+    color: '#FFFFFF',
+  },
+});

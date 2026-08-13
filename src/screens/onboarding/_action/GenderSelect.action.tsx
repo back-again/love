@@ -71,9 +71,9 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   genderButtonSelected: {
-    backgroundColor: '#FFF7F5',
-    borderColor: '#FFC8B3',
-    borderWidth: 1.5,
+    backgroundColor: '#FFF8F8',
+    borderColor: '#FFD1DC',
+    borderWidth: 1,
   },
   genderButtonText: {
     fontSize: 16,
@@ -81,7 +81,7 @@ const styles = StyleSheet.create({
     color: '#334155',
   },
   genderButtonTextSelected: {
-    color: '#FF8E7A',
+    color: '#FF5D7B',
     fontWeight: '700',
   },
 });

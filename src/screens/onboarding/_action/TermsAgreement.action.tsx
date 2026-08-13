@@ -80,8 +80,8 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
   checkboxChecked: {
-    backgroundColor: '#FF8E7A',
-    borderColor: '#FF8E7A',
+    backgroundColor: '#FF5D7B',
+    borderColor: '#FF5D7B',
   },
   termsTextContainer: {
     flex: 1,

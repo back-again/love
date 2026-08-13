@@ -54,21 +54,34 @@ serve(async (req) => {
     - X 옵션: 부정적인 평가 (짜친다, 별로다, 센스없다 등)
     - 예시: "남친이 PX에서 생선 사다 줬는데 어떰?" ➔ [O: 솔직히 귀여움/감동] / [X: 와 그건 좀 짜친다]
 
+[예외 처리: 분류 불가 / 투표 불가 게시글]
+- 단순 인사말("안녕하세요 반가워요"), 맥락 없는 일상/일기글, 투표의 의도가 전혀 없는 글, 내용이 너무 부족하여 분석이 불가능한 경우
+- O/X나 A/B 형태의 선택지로 나눌 수 없다고 판단되면 아래와 같이 모든 필드에 null을 반환하세요.
+
 [출력 형식 (JSON)]
 반드시 다른 설명 없이 아래 JSON 형식으로만 응답하세요.
 
+(정상 분류 시)
 {
-"category": "유형 A(판단)" 또는 "유형 B(선택)" 또는 "유형 C(공감)" 또는 "유형 D(액션)" 또는 "유형 E(평가)",
+"category": "유형 A(판단)" | "유형 B(선택)" | "유형 C(공감)" | "유형 D(액션)" | "유형 E(평가)",
 "reasoning": "상황과 질문 분석 요약 (1문장)",
 "option_1": "옵션 1 문구 (15자 이내)",
 "option_2": "옵션 2 문구 (15자 이내)"
+}
+
+(분류 불가 / 예외 발생 시)
+{
+"category": null,
+"reasoning": null,
+"option_1": null,
+"option_2": null
 }
 `;
 
     const promptText = `제목: "${title}"\n내용: "${detail}"`;
 
     const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent?key=${GEMINI_API_KEY}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`,
       {
         method: 'POST',
         headers: {
@@ -109,7 +122,14 @@ serve(async (req) => {
     try {
       const cleanJsonStr = rawText.replace(/```json/g, '').replace(/```/g, '').trim();
       const jsonObj = JSON.parse(cleanJsonStr);
-      if (jsonObj.option_1 && jsonObj.option_2) {
+      if (jsonObj.option_1 === null || jsonObj.option_2 === null) {
+        parsedResult = {
+          category: '분석 불가',
+          reasoning: '분석하기에 정보가 부족하여 기본 예시 표시',
+          oText: '',
+          xText: '',
+        };
+      } else if (jsonObj.option_1 && jsonObj.option_2) {
         parsedResult = {
           category: jsonObj.category || '유형 A(판단)',
           reasoning: jsonObj.reasoning || '',

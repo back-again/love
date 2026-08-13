@@ -192,7 +192,10 @@ export function FeedItem({ post }: FeedItemProps) {
               }}
               activeOpacity={0.9}
             >
-              <View style={styles.votedBarTrack}>
+              <View style={[
+                styles.votedBarTrack,
+                selectedVote === 'O' ? styles.votedBarTrackOSelected : styles.votedBarTrackUnselected
+              ]}>
                 <View
                   style={[
                     styles.votedBarFill,
@@ -229,7 +232,10 @@ export function FeedItem({ post }: FeedItemProps) {
               }}
               activeOpacity={0.9}
             >
-              <View style={styles.votedBarTrack}>
+              <View style={[
+                styles.votedBarTrack,
+                selectedVote === 'X' ? styles.votedBarTrackXSelected : styles.votedBarTrackUnselected
+              ]}>
                 <View
                   style={[
                     styles.votedBarFill,
@@ -349,17 +355,17 @@ const styles = StyleSheet.create({
     letterSpacing: -0.2,
   },
   categoryBadgePill: {
-    backgroundColor: '#FFF8F8',
+    backgroundColor: '#FFF0F2',
     paddingHorizontal: 8,
     paddingVertical: 3,
     borderRadius: 4,
     borderWidth: 1,
-    borderColor: '#FFF8F8',
+    borderColor: '#FFF0F2',
   },
   categoryBadgeText: {
     fontSize: 11,
-    fontWeight: '400',
-    color: '#F9758D',
+    fontWeight: '700',
+    color: '#FF5D7B',
     letterSpacing: -0.2,
   },
   categoryTimeText: {
@@ -455,10 +461,19 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
     borderRadius: 16,
     borderWidth: 1,
-    borderColor: '#F5F5F5',
+    borderColor: '#E8E8E8',
     position: 'relative',
     justifyContent: 'center',
     overflow: 'hidden',
+  },
+  votedBarTrackOSelected: {
+    borderColor: '#E8E3FF',
+  },
+  votedBarTrackXSelected: {
+    borderColor: '#FFE3E5',
+  },
+  votedBarTrackUnselected: {
+    borderColor: '#E8E8E8',
   },
   votedBarFill: {
     position: 'absolute',
@@ -479,7 +494,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   badgeXText: {
-    color: '#F9758D',
+    color: '#FF5D7B',
     fontWeight: '900',
     fontSize: 16,
   },
@@ -499,7 +514,7 @@ const styles = StyleSheet.create({
     fontSize: 14.5,
   },
   optionContentTextSelectedX: {
-    color: '#F9758D',
+    color: '#FF5D7B',
     fontWeight: '800',
     fontSize: 14.5,
   },
@@ -528,7 +543,7 @@ const styles = StyleSheet.create({
     color: '#8B75F9',
   },
   votedPercentTextXSelected: {
-    color: '#F9758D',
+    color: '#FF5D7B',
   },
   votedPercentTextUnselected: {
     color: '#8F8F8F',

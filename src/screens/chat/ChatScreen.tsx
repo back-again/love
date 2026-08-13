@@ -10,8 +10,11 @@ import {
   Platform,
   Image,
 } from 'react-native';
-import Svg, { Path } from 'react-native-svg';
+import Svg, { Path, Circle, Text as SvgText } from 'react-native-svg';
+import { LinearGradient } from 'expo-linear-gradient';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { supabase } from '@/api/supabase';
+import { useUserStore } from '@/_state/useUserStore';
 import { useRelationshipProfileStore } from './_state/useRelationshipProfileStore';
 import { RelationshipQuizModal } from './_component/RelationshipQuizModal';
 import { getRelationshipProfileLib } from './_lib/relationshipProfile.lib';
@@ -81,6 +84,7 @@ export default function ChatScreen({
   onGoToCreate?: () => void;
   onActiveChatStateChange?: (active: boolean) => void;
 }) {
+  const insets = useSafeAreaInsets();
   const profile = useRelationshipProfileStore(state => state.profile);
   const setProfile = useRelationshipProfileStore(state => state.setProfile);
   const resetProfile = useRelationshipProfileStore(state => state.resetProfile);
@@ -231,6 +235,28 @@ export default function ChatScreen({
     }, 1000);
   };
 
+  const getDdayCounselingText = (days: number, query: string): string => {
+    const isEarlyDating = days <= 150;
+    const isLongDating = days >= 700;
+
+    if (isEarlyDating) {
+      if (query.includes('거짓말') || query.includes('바람') || query.includes('남사친') || query.includes('여사친') || query.includes('싸움')) {
+        return `현재 연애 ${days}일 차로 연애 초반이신데 벌써 이와 같은 신뢰나 가치관 갈등이 발생하고 있군요. 연애 초기에는 서로 맞춰가는 단계이지만, 반복되는 신뢰 문제나 갈등은 이 시기 연애로는 적합하지 않은 경고 신호(Red Flag)일 수 있습니다. 상대방을 지나치게 배려하기보다, 단호히 대화해 보세요.`;
+      }
+      return `현재 연애 ${days}일 차로 서로를 한창 알아가며 맞춰가는 연애 초반이시네요. 이 시기에는 작은 서운함도 마음속에 쌓아두기보다, 그때그때 정중하고 예쁘게 대화의 기준을 세워 나가는 편이 장기 연애로 가는 튼튼한 다리가 되어줍니다.`;
+    } else if (isLongDating) {
+      if (query.includes('권태') || query.includes('식었') || query.includes('재미') || query.includes('지루') || query.includes('헤어') || query.includes('이별')) {
+        return `벌써 연애를 시작한 지 ${days}일(${Math.floor(days/365)}년 이상)이 지난 깊고 소중한 장기 연애를 이어오고 계시네요. 오래 연애하신 만큼 서로 익숙해져 설렘이 무뎌지는 권태감이나 결혼/미래에 대한 진지한 고민이 깊어질 수 있는 시기입니다. 이 고민을 외면하기보다, 단둘이 깊은 미래에 대한 로드맵을 맞춰보는 시간을 제안드려요.`;
+      }
+      return `현재 연애 ${days}일 차의 깊고 두터운 관계를 맺어오고 계시네요. 서로를 가장 잘 아는 시기인 만큼, 가벼운 섭섭함이 해묵은 갈등으로 번지지 않도록 대화를 통해 서로의 감정을 점검해 주시는 것을 추천합니다.`;
+    } else {
+      if (query.includes('결혼') || query.includes('가족') || query.includes('돈') || query.includes('미래')) {
+        return `현재 연애 ${days}일 차로, 점차 연애 안정기에 들어서며 미래나 현실적인 문제(결혼, 가치관, 경제적 부분)가 슬슬 수면 위로 올라오는 시기입니다. 이 시기에는 막연한 연애 감정만으로 타협하기 어렵기 때문에 서로의 구체적인 기준을 맞춰보는 진지한 조율이 반드시 필요해요.`;
+      }
+      return `현재 연애 ${days}일 차의 서로에 대한 신뢰와 안정감이 한창 두터워지는 시기를 지나고 계시네요. 사소하게 거슬리거나 맞지 않는 조각들이 있다면, 묵히지 말고 상대방에게 편안한 분위기 속에서 털어놓아 보세요.`;
+    }
+  };
+
   const handleSend = (customText?: string) => {
     const textToSend = (customText || inputText).trim();
     if (!textToSend) return;
@@ -282,17 +308,39 @@ export default function ChatScreen({
         textToSend.includes('이별');
 
       let responseText = '';
+      
+      const currentUser = useUserStore.getState().user;
+      let diffDays = 0;
+      if (currentUser?.dating_started_at) {
+        try {
+          const startDate = new Date(currentUser.dating_started_at);
+          const today = new Date();
+          startDate.setHours(0, 0, 0, 0);
+          today.setHours(0, 0, 0, 0);
+          const diffTime = today.getTime() - startDate.getTime();
+          diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24)) + 1;
+        } catch (e) {
+          console.warn('Failed to calculate diffDays:', e);
+        }
+      }
+
+      const ddayDurationText = diffDays > 0 ? getDdayCounselingText(diffDays, textToSend) : '';
 
       if (isRuleViolation && profile) {
         const avoidReason = profile.avoidPartners?.[0]?.desc || '회피와 개선 의지 부족 행동';
         responseText =
           `두두님, 대화를 나누어보아도 ${avoidReason} 태도가 반복된다면 무조건 이별을 고민하셔야 할 때입니다.\n\n` +
+          (ddayDurationText ? `[연애 기간 분석]\n${ddayDurationText}\n\n` : '') +
           `두두님의 연애 성향(${profile.typeTitle})을 파악해본 바, 상대방의 변화 없는 행동을 끌어안고 참으시면 두두님의 마음 상처만 깊어집니다.\n\n` +
           `두두님 자신을 소중히 지키기 위해 이 관계는 단호하게 정돈하시고 이별을 선택하시는 것을 권유해 드려요.`;
       } else {
         responseText = profile
           ? `두두님의 연애 추구미인 '${profile.typeTitle}' 성향을 고려하면, ${profile.conflictHeadline}처럼 마음에 묵혀두기보다 솔직하게 대화로 풀어내는 편이 두두님 마음 건강에 가장 좋습니다.`
           : '두두님이 말씀하신 내용에 진심으로 공감이 돼요. 상대방의 입장을 한 번 헤아려보시되, 두두님이 느끼는 솔직한 감정을 전해보는 걸 추천해요.';
+
+        if (ddayDurationText) {
+          responseText = `[연애 기간 분석]\n${ddayDurationText}\n\n` + responseText;
+        }
       }
 
       const counselorMsg: Message = {
@@ -313,7 +361,10 @@ export default function ChatScreen({
       <View style={styles.hubContainer}>
         <ScrollView
           style={styles.hubScrollView}
-          contentContainerStyle={styles.hubContentContainer}
+          contentContainerStyle={[
+            styles.hubContentContainer,
+            { paddingTop: insets.top + 52 + 16 },
+          ]}
           showsVerticalScrollIndicator={false}
         >
           {/* Main Section: 나의 연애 성향 Card */}
@@ -459,19 +510,63 @@ export default function ChatScreen({
               </View>
             </View>
           ) : (
-            <View style={styles.profileCardEmpty}>
-              <Text style={styles.emptyProfileTitle}>
+            <View style={styles.singleProfileCard}>
+              {/* 1. Large Coral Main Archetype Title */}
+              <Text style={[styles.archetypeMainTitle, { color: '#8F8F8F', textAlign: 'center' }]}>
+                나의 연애 유형
+              </Text>
+
+              {/* 2. Catchphrase */}
+              <Text style={[styles.archetypeSubText, { textAlign: 'center' }]}>
                 아직 분석된 연애 성향이 없어요
               </Text>
-              <Text style={styles.emptyProfileSub}>
-                내 연애 성향을 바탕으로, 두림이가 더 나에게 맞는 건강한 연애 가이드를 알려드려요.
-              </Text>
+
+              {/* 3. Center Graphic Illustration: Heart with question mark */}
+              <View style={[styles.archetypeGraphicWrap, { marginVertical: 12, alignItems: 'center' }]}>
+                <Svg width={90} height={90} viewBox="0 0 100 100" fill="none">
+                  <Path d="M50 85C50 85 15 55 15 32C15 18 26 8 40 8C47 8 50 14 50 14C50 14 53 8 60 8C74 8 85 18 85 32C85 55 50 85 50 85Z" fill="#FBFBFB" stroke="#E8E8E8" strokeWidth={3} />
+                  <SvgText fontSize="32" fontWeight="bold" fill="#FF5D7B" x="50" y="60" textAnchor="middle">?</SvgText>
+                </Svg>
+              </View>
+
+              {/* 4. Grayed Out Tendency Segmented Progress Bars */}
+              <View style={[styles.statsContainer, { marginBottom: 20 }]}>
+                {[
+                  { label: '표현 솔직도' },
+                  { label: '애정 집착도' },
+                  { label: '감정 포용력' },
+                  { label: '갈등 해결력' },
+                ].map((stat, idx) => (
+                  <View key={idx} style={styles.statRow}>
+                    <Text style={styles.statLabelText}>{stat.label}</Text>
+                    <View style={styles.segmentBarWrap}>
+                      {[1, 2, 3, 4, 5].map(seg => (
+                        <View
+                          key={seg}
+                          style={[styles.segmentPill, styles.segmentPillEmpty]}
+                        />
+                      ))}
+                    </View>
+                  </View>
+                ))}
+              </View>
+
+              <View style={[styles.profileDividerLight, { marginVertical: 16 }]} />
+
+              {/* 5. Start Quiz Button */}
               <TouchableOpacity
-                style={styles.startQuizBtn}
+                style={styles.startQuizBtnWrapper}
                 onPress={() => setIsQuizModalVisible(true)}
                 activeOpacity={0.85}
               >
-                <Text style={styles.startQuizBtnText}>나의 연애 성향 분석하기</Text>
+                <LinearGradient
+                  colors={['#FF5D7B', '#FE92AC']}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 1 }}
+                  style={styles.startQuizBtnGradient}
+                >
+                  <Text style={styles.startQuizBtnText}>나의 연애 성향 분석하기</Text>
+                </LinearGradient>
               </TouchableOpacity>
             </View>
           )}
@@ -591,7 +686,7 @@ export default function ChatScreen({
                             {isChecked && <View style={styles.radioButtonInner} />}
                           </View>
                           <View style={styles.radioTextWrap}>
-                            <Text style={styles.radioPostTitle} numberOfLines={1}>
+                            <Text style={[styles.radioPostTitle, isChecked && styles.radioPostTitleChecked]} numberOfLines={1}>
                               {post.title}
                             </Text>
                             <Text style={styles.radioPostSummary} numberOfLines={1}>
@@ -687,11 +782,11 @@ export default function ChatScreen({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F5F5F5',
+    backgroundColor: '#FFFFFF',
   },
   hubContainer: {
     flex: 1,
-    backgroundColor: '#F5F5F5',
+    backgroundColor: '#FFFFFF',
   },
   hubScrollView: {
     flex: 1,
@@ -837,19 +932,18 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   profileCardEmpty: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 24,
-    padding: 24,
-    borderWidth: 1.5,
-    borderColor: '#E8E8E8',
+    width: '100%',
+    paddingVertical: 48,
+    paddingHorizontal: 24,
     alignItems: 'center',
     marginTop: 4,
     marginBottom: 28,
-    shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.04,
-    shadowRadius: 10,
-    elevation: 2,
+    backgroundColor: 'transparent',
+  },
+  emptyIllustrationWrap: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 16,
   },
   sparkleCircle: {
     width: 48,
@@ -879,22 +973,19 @@ const styles = StyleSheet.create({
     lineHeight: 19,
     marginBottom: 20,
   },
-  startQuizBtn: {
-    width: '100%',
-    height: 50,
-    borderRadius: 16,
-    backgroundColor: '#FF5D7B',
+  startQuizBtnWrapper: {
+    alignSelf: 'center',
+  },
+  startQuizBtnGradient: {
+    paddingHorizontal: 24,
+    height: 40,
+    borderRadius: 20,
     alignItems: 'center',
     justifyContent: 'center',
-    shadowColor: '#FF5D7B',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.25,
-    shadowRadius: 8,
-    elevation: 3,
   },
   startQuizBtnText: {
-    fontSize: 15,
-    fontWeight: '800',
+    fontSize: 13.5,
+    fontWeight: '700',
     color: '#FFFFFF',
   },
   singleProfileCard: {
@@ -1189,14 +1280,14 @@ const styles = StyleSheet.create({
   radioCardItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#F5F5F5',
+    backgroundColor: '#FFFFFF',
     borderRadius: 12,
     padding: 10,
     borderWidth: 1,
     borderColor: '#E8E8E8',
   },
   radioCardItemChecked: {
-    backgroundColor: '#FFF5F7',
+    backgroundColor: '#FFF8F8',
     borderColor: '#FFD1DC',
   },
   radioButton: {
@@ -1226,6 +1317,9 @@ const styles = StyleSheet.create({
     fontSize: 13.5,
     fontWeight: '700',
     color: '#0F172A',
+  },
+  radioPostTitleChecked: {
+    color: '#FF5D7B',
   },
   radioPostSummary: {
     fontSize: 12,

@@ -19,6 +19,7 @@ CREATE TABLE IF NOT EXISTS public.users (
   birth_year INT,
   notification_allowed BOOLEAN DEFAULT FALSE,
   push_token TEXT,
+  dating_started_at DATE,
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
@@ -206,11 +207,11 @@ VALUES
   ('00000000-0000-0000-0000-000000000003', 'user3@datingnote.com')
 ON CONFLICT (id) DO NOTHING;
 
-INSERT INTO public.users (id, email, provider, gender, birth_year, notification_allowed, created_at)
+INSERT INTO public.users (id, email, provider, gender, birth_year, notification_allowed, dating_started_at, created_at)
 VALUES 
-  ('00000000-0000-0000-0000-000000000001', 'expo-test@datingnote.com', 'google', 'male', 1996, true, NOW()),
-  ('00000000-0000-0000-0000-000000000002', 'user2@datingnote.com', 'google', 'female', 1998, true, NOW()),
-  ('00000000-0000-0000-0000-000000000003', 'user3@datingnote.com', 'apple', 'male', 1995, false, NOW())
+  ('00000000-0000-0000-0000-000000000001', 'expo-test@datingnote.com', 'google', 'male', 1996, true, '2025-08-13', NOW()),
+  ('00000000-0000-0000-0000-000000000002', 'user2@datingnote.com', 'google', 'female', 1998, true, '2025-08-13', NOW()),
+  ('00000000-0000-0000-0000-000000000003', 'user3@datingnote.com', 'apple', 'male', 1995, false, '2025-08-13', NOW())
 ON CONFLICT (id) DO NOTHING;
 
 INSERT INTO public.categories (id, name, order_index)

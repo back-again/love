@@ -2,6 +2,7 @@ import React from 'react';
 import { StyleSheet, View, Text } from 'react-native';
 import { GenderSelectAction } from '../_action/GenderSelect.action';
 import { BirthYearInputAction } from '../_action/BirthYearInput.action';
+import { DatingStartDateInputAction } from '../_action/DatingStartDateInput.action';
 import { NotificationAllowAction } from '../_action/NotificationAllow.action';
 import { TermsAgreementAction } from '../_action/TermsAgreement.action';
 
@@ -21,6 +22,11 @@ export function FormArea({ onOpenTerms, onOpenPrivacy }: FormAreaProps) {
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>출생년도</Text>
         <BirthYearInputAction />
+      </View>
+
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>연애 시작일</Text>
+        <DatingStartDateInputAction />
       </View>
 
       <View style={styles.section}>

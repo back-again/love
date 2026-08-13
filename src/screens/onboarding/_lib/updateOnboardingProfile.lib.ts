@@ -5,6 +5,7 @@ interface UpdateOnboardingProfileParams {
   userId: string;
   gender: 'male' | 'female';
   birthYear: string;
+  datingStartedAt: string;
   notificationAllowed: boolean;
 }
 
@@ -12,11 +13,13 @@ export async function updateOnboardingProfile({
   userId,
   gender,
   birthYear,
+  datingStartedAt,
   notificationAllowed,
 }: UpdateOnboardingProfileParams): Promise<User> {
   const payload = {
     gender,
     birth_year: birthYear ? parseInt(birthYear, 10) : null,
+    dating_started_at: datingStartedAt || null,
     notification_allowed: notificationAllowed,
   };
 
@@ -54,6 +57,7 @@ export async function updateOnboardingProfile({
       gender,
       birth_year: birthYear ? parseInt(birthYear, 10) : undefined,
       notification_allowed: notificationAllowed,
+      dating_started_at: datingStartedAt || undefined,
       provider: 'google',
       created_at: new Date().toISOString(),
     };

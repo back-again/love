@@ -13,34 +13,57 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useShallow } from 'zustand/react/shallow';
 import { useUserStore } from '@/_state/useUserStore';
 import { useOnboardingForm } from '../_state/useOnboardingForm';
-import { isFormComplete } from '../_model/onboardingValidation';
+import {
+  isFormComplete,
+  getBirthYearErrorMessage,
+  getDatingDateErrorMessage,
+} from '../_model/onboardingValidation';
 import { updateOnboardingProfile } from '../_lib/updateOnboardingProfile.lib';
 
 export function OnboardingSubmitAction() {
   const { user, setUser } = useUserStore();
-  const { gender, birthYear, notificationAllowed, termsAgreed } =
+  const { gender, birthYear, datingStartedAt, notificationAllowed, termsAgreed } =
     useOnboardingForm(
       useShallow(state => ({
         gender: state.gender,
         birthYear: state.birthYear,
+        datingStartedAt: state.datingStartedAt,
         notificationAllowed: state.notificationAllowed,
         termsAgreed: state.termsAgreed,
       })),
     );
 
-  const isComplete = isFormComplete(birthYear, termsAgreed);
+  const isComplete = isFormComplete(birthYear, datingStartedAt, termsAgreed);
 
   const handlePress = async () => {
-    if (!isComplete) {
-      if (Platform.OS === 'web') {
-        alert('필수 입력란을 확인해주세요');
-      } else {
-        Alert.alert('안내', '필수 입력란을 확인해주세요');
-      }
+    if (!gender) {
+      Alert.alert('안내', '성별을 선택해 주세요.');
+      return;
+    }
+    if (!birthYear) {
+      Alert.alert('안내', '출생년도를 입력해 주세요.');
+      return;
+    }
+    const birthYearErr = getBirthYearErrorMessage(birthYear);
+    if (birthYearErr) {
+      Alert.alert('안내', birthYearErr);
+      return;
+    }
+    if (!datingStartedAt) {
+      Alert.alert('안내', '연애 시작일을 입력해 주세요.');
+      return;
+    }
+    const datingDateErr = getDatingDateErrorMessage(datingStartedAt, birthYear);
+    if (datingDateErr) {
+      Alert.alert('안내', datingDateErr);
+      return;
+    }
+    if (!termsAgreed) {
+      Alert.alert('안내', '필수 동의 항목에 동의해 주세요.');
       return;
     }
 
-    console.log(user, gender, birthYear);
+    console.log(user, gender, birthYear, datingStartedAt);
 
     try {
       if (user?.id) {
@@ -48,6 +71,7 @@ export function OnboardingSubmitAction() {
           userId: user.id,
           gender,
           birthYear,
+          datingStartedAt,
           notificationAllowed,
         });
 
@@ -112,9 +136,9 @@ const styles = StyleSheet.create({
     letterSpacing: -0.3,
   },
   startButtonActive: {
-    backgroundColor: '#FF8E7A',
+    backgroundColor: '#FF5D7B',
     borderWidth: 0,
-    shadowColor: '#FF8E7A',
+    shadowColor: '#FF5D7B',
     shadowOffset: { width: 0, height: 0 },
     shadowOpacity: 0.22,
     shadowRadius: 6,

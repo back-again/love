@@ -1,7 +1,5 @@
 import React from 'react';
-import { StyleSheet, View, Text, Image, Platform } from 'react-native';
-import MaskedView from '@react-native-masked-view/masked-view';
-import { LinearGradient } from 'expo-linear-gradient';
+import { StyleSheet, View, Text, Image } from 'react-native';
 import GoogleLoginAction from '@/screens/login/_action/GoogleLogin.action';
 import { AppleLoginAction } from '@/screens/login/_action/AppleLogin.action';
 
@@ -14,40 +12,39 @@ export default function LoginScreen({ onLoginSuccess }: LoginScreenProps) {
     <View style={styles.contentWrapper}>
       <View style={styles.topSection}>
         <Image
-          source={require('@assets/logo.png')}
+          source={require('@assets/xoxo_logo.png')}
           style={styles.logo}
           resizeMode="contain"
         />
 
-        {Platform.OS === 'web' ? (
-          <Text style={styles.brandNameWeb}>집단지성 오답노트</Text>
-        ) : (
-          <MaskedView
-            maskElement={
-              <Text
-                style={[styles.brandName, { backgroundColor: 'transparent' }]}
-              >
-                집단지성 오답노트
-              </Text>
-            }
-          >
-            <LinearGradient
-              colors={['#FFA1A9', '#FFC880']}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 0 }}
-            >
-              <Text style={[styles.brandName, { opacity: 0 }]}>
-                집단지성 오답노트
-              </Text>
-            </LinearGradient>
-          </MaskedView>
-        )}
-
-        {/* Slogan Description */}
-        <Text style={styles.slogan}>
-          정답은 없어도 오답은 있다{'\n'}
-          건강한 연애를 위한 집단 연애 지성
+        <Text style={styles.brandName}>
+          건강한 연애를 위한{'\n'}연애 커뮤니티
         </Text>
+      </View>
+
+      {/* Staggered Chat Bubbles Section */}
+      <View style={styles.bubbleSection}>
+        <View style={styles.bubbleContainer}>
+          <View style={[styles.bubbleQuestion, styles.bubbleCommon]}>
+            <Text style={styles.bubbleText}>...내가 예민한걸까?</Text>
+          </View>
+        </View>
+
+        <View style={styles.bubbleContainer}>
+          <View style={[styles.bubbleO, styles.bubbleCommon]}>
+            <Text style={styles.bubbleText}>
+              <Text style={styles.purpleText}>O</Text> 그 정도는 봐줄 수 있지
+            </Text>
+          </View>
+        </View>
+
+        <View style={styles.bubbleContainer}>
+          <View style={[styles.bubbleX, styles.bubbleCommon]}>
+            <Text style={styles.bubbleText}>
+              <Text style={styles.pinkText}>X</Text> 나같아도 서운해
+            </Text>
+          </View>
+        </View>
       </View>
 
       {/* Bottom Section: Buttons & Notices */}
@@ -70,49 +67,103 @@ export default function LoginScreen({ onLoginSuccess }: LoginScreenProps) {
 const styles = StyleSheet.create({
   contentWrapper: {
     flex: 1,
-    justifyContent: 'space-between',
+    justifyContent: 'center',
     paddingHorizontal: 24,
-    paddingTop: 80,
-    paddingBottom: 40,
+    backgroundColor: '#FFFFFF',
   },
   topSection: {
     alignItems: 'center',
     width: '100%',
+    marginTop: 72,
+    marginBottom: 48,
+  },
+  subLogoText: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#475569',
+    marginBottom: 16,
+    letterSpacing: -0.3,
   },
   logo: {
-    width: 122,
-    height: 122,
-    marginBottom: 24,
+    width: 280,
+    height: 100,
+    marginBottom: 16,
   },
   brandName: {
     fontSize: 28,
     fontWeight: '800',
     textAlign: 'center',
+    color: '#0F172A',
+    lineHeight: 36,
     letterSpacing: -0.5,
-  },
-  brandNameWeb: {
-    fontSize: 28,
-    fontWeight: '800',
-    textAlign: 'center',
-    letterSpacing: -0.5,
-    color: '#FF8E7A',
-  },
-  slogan: {
-    fontSize: 16,
-    color: '#475569',
-    textAlign: 'center',
-    marginTop: 12,
-    lineHeight: 24,
-    letterSpacing: -0.3,
+    marginTop: 24,
   },
   bottomSection: {
     width: '100%',
     alignItems: 'center',
+    marginTop: 48,
   },
   termsText: {
     fontSize: 13,
-    color: '#94A3B8',
+    color: '#8F8F8F',
     textAlign: 'center',
-    marginTop: 12,
+    marginTop: 16,
+  },
+  purpleText: {
+    color: '#8B75F9',
+    fontWeight: '800',
+  },
+  pinkText: {
+    color: '#FF5D7B',
+    fontWeight: '800',
+  },
+  bubbleCommon: {
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.04,
+    shadowRadius: 6,
+    elevation: 1.5,
+  },
+  bubbleSection: {
+    width: '100%',
+    marginVertical: 28,
+    gap: 16,
+  },
+  bubbleContainer: {
+    width: '100%',
+  },
+  bubbleQuestion: {
+    alignSelf: 'flex-start',
+    backgroundColor: '#F5F5F5',
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    borderRadius: 24,
+    borderTopLeftRadius: 4,
+    maxWidth: '85%',
+  },
+  bubbleO: {
+    alignSelf: 'flex-end',
+    backgroundColor: '#F5F1FF',
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    borderRadius: 24,
+    borderTopRightRadius: 4,
+    maxWidth: '85%',
+  },
+  bubbleX: {
+    alignSelf: 'flex-end',
+    backgroundColor: '#FFF3F4',
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    borderRadius: 24,
+    borderTopRightRadius: 4,
+    maxWidth: '85%',
+  },
+  bubbleText: {
+    fontSize: 15.5,
+    color: '#0F172A',
+    fontWeight: '600',
+    lineHeight: 20,
+    letterSpacing: -0.3,
   },
 });

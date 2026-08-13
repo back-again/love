@@ -25,19 +25,17 @@ export function InquiryOpenAction() {
 const styles = StyleSheet.create({
   myMenuTileCard: {
     flex: 1,
-    height: 54,
+    height: 46,
     backgroundColor: '#F5F5F5',
-    borderRadius: 14,
+    borderRadius: 12,
     paddingHorizontal: 16,
     alignItems: 'center',
     justifyContent: 'center',
-    borderWidth: 1,
-    borderColor: '#E8E8E8',
   },
   myMenuTileTitle: {
-    fontSize: 15,
-    fontWeight: '600',
-    color: '#727272',
+    fontSize: 14,
+    fontWeight: '500',
+    color: '#8F8F8F',
     letterSpacing: -0.3,
   },
 });

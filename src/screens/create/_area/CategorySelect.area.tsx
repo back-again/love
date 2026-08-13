@@ -50,6 +50,7 @@ export function CategorySelectArea() {
             category={item}
             isSelected={category === item}
             onPress={() => setCategory(item)}
+            variant="pink"
           />
         ))}
       </ScrollView>

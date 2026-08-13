@@ -3,6 +3,7 @@ import { create } from 'zustand';
 interface OnboardingFormState {
   gender: 'male' | 'female';
   birthYear: string;
+  datingStartedAt: string;
   notificationAllowed: boolean;
   termsAgreed: boolean;
 }
@@ -10,6 +11,7 @@ interface OnboardingFormState {
 interface OnboardingFormAction {
   setGender: (gender: 'male' | 'female') => void;
   setBirthYear: (year: string) => void;
+  setDatingStartedAt: (date: string) => void;
   setNotificationAllowed: (allowed: boolean) => void;
   toggleNotificationAllowed: () => void;
   setTermsAgreed: (agreed: boolean) => void;
@@ -22,11 +24,13 @@ type OnboardingFormStore = OnboardingFormState & OnboardingFormAction;
 export const useOnboardingForm = create<OnboardingFormStore>(set => ({
   gender: 'male',
   birthYear: '',
+  datingStartedAt: '',
   notificationAllowed: false,
   termsAgreed: false,
 
   setGender: gender => set({ gender }),
   setBirthYear: birthYear => set({ birthYear }),
+  setDatingStartedAt: datingStartedAt => set({ datingStartedAt }),
   setNotificationAllowed: notificationAllowed => set({ notificationAllowed }),
   toggleNotificationAllowed: () =>
     set(state => ({ notificationAllowed: !state.notificationAllowed })),
@@ -36,6 +40,7 @@ export const useOnboardingForm = create<OnboardingFormStore>(set => ({
     set({
       gender: 'male',
       birthYear: '',
+      datingStartedAt: '',
       notificationAllowed: false,
       termsAgreed: false,
     }),

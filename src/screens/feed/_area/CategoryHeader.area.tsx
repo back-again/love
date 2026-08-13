@@ -21,9 +21,7 @@ const styles = StyleSheet.create({
     width: '100%',
     paddingVertical: 10,
     paddingHorizontal: 16,
-    backgroundColor: '#FFFFFF',
-    borderBottomWidth: 1,
-    borderBottomColor: '#F5F5F5',
+    backgroundColor: 'transparent',
   },
   categoryScrollContent: {
     flexDirection: 'row',

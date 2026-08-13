@@ -5,6 +5,7 @@ export interface User {
   gender?: 'male' | 'female';
   birth_year?: number;
   notification_allowed?: boolean;
+  dating_started_at?: string;
   created_at: string;
 }
 

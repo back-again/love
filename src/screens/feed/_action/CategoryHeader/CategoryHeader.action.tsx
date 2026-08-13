@@ -25,6 +25,7 @@ export function CategoryHeaderAction() {
           category={category}
           isSelected={selectedCategory === category}
           onPress={() => setSelectedCategory(category)}
+          variant="communityGlass"
         />
       ))}
     </>

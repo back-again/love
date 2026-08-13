@@ -4,19 +4,31 @@ import React, { useState } from 'react';
 import { StyleSheet, View, Text, TextInput } from 'react-native';
 import { useShallow } from 'zustand/react/shallow';
 import { useOnboardingForm } from '../_state/useOnboardingForm';
-import { getBirthYearErrorMessage } from '../_model/onboardingValidation';
+import { getDatingDateErrorMessage } from '../_model/onboardingValidation';
 
-export function BirthYearInputAction() {
+export function DatingStartDateInputAction() {
   const [isInputFocused, setIsInputFocused] = useState(false);
 
-  const { birthYear, setBirthYear } = useOnboardingForm(
+  const { birthYear, datingStartedAt, setDatingStartedAt } = useOnboardingForm(
     useShallow((state) => ({
       birthYear: state.birthYear,
-      setBirthYear: state.setBirthYear,
+      datingStartedAt: state.datingStartedAt,
+      setDatingStartedAt: state.setDatingStartedAt,
     }))
   );
 
-  const birthYearErrorMessage = getBirthYearErrorMessage(birthYear);
+  const handleTextChange = (text: string) => {
+    const clean = text.replace(/[^0-9]/g, '');
+    let formatted = clean;
+    if (clean.length > 4 && clean.length <= 6) {
+      formatted = `${clean.slice(0, 4)}-${clean.slice(4)}`;
+    } else if (clean.length > 6) {
+      formatted = `${clean.slice(0, 4)}-${clean.slice(4, 6)}-${clean.slice(6, 8)}`;
+    }
+    setDatingStartedAt(formatted);
+  };
+
+  const datingDateErrorMessage = getDatingDateErrorMessage(datingStartedAt, birthYear);
 
   return (
     <>
@@ -25,21 +37,21 @@ export function BirthYearInputAction() {
           style={[
             styles.textInput,
             isInputFocused && styles.textInputFocused,
-            birthYearErrorMessage !== null && styles.textInputError,
+            datingStartedAt.length > 0 && datingDateErrorMessage !== null && styles.textInputError,
           ]}
-          placeholder="YYYY"
+          placeholder="YYYY-MM-DD (예: 2025-08-13)"
           placeholderTextColor="#BCBCBC"
           keyboardType="numeric"
-          maxLength={4}
-          value={birthYear}
-          onChangeText={setBirthYear}
+          maxLength={10}
+          value={datingStartedAt}
+          onChangeText={handleTextChange}
           onFocus={() => setIsInputFocused(true)}
           onBlur={() => setIsInputFocused(false)}
         />
       </View>
-      {birthYearErrorMessage ? (
+      {datingStartedAt.length > 0 && datingDateErrorMessage ? (
         <View style={styles.validationNotice}>
-          <Text style={styles.validationText}>{birthYearErrorMessage}</Text>
+          <Text style={styles.validationText}>{datingDateErrorMessage}</Text>
         </View>
       ) : null}
     </>
