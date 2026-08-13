@@ -68,7 +68,7 @@ serve(async (req) => {
     const promptText = `제목: "${title}"\n내용: "${detail}"`;
 
     const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent?key=${GEMINI_API_KEY}`,
       {
         method: 'POST',
         headers: {
@@ -92,6 +92,10 @@ serve(async (req) => {
 
     const data = await response.json();
     console.log('[Edge Function] Gemini Response data:', JSON.stringify(data));
+
+    if (data.error) {
+      throw new Error(`Gemini API Error: ${data.error.message || JSON.stringify(data.error)}`);
+    }
 
     const rawText = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
 
