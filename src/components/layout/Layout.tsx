@@ -15,6 +15,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import { NavItem } from './_component/NavItem';
 import { useUserStore } from '@/_state/useUserStore';
+import { useHeaderStore } from '@/_state/useHeaderStore';
 import { NotificationBellSvg } from './_svg/NotificationBellSvg';
 import { OpenSettingBottomSheetAction } from '@/screens/setting/_action/OpenSettingBottomSheet.action';
 import { useCreateForm } from '@/screens/create/_state/useCreateForm';
@@ -56,6 +57,14 @@ export function Layout({
 }: LayoutProps) {
   const insets = useSafeAreaInsets();
   const user = useUserStore(state => state.user);
+  const scrollYAnim = useHeaderStore(state => state.scrollYAnim);
+  const showBackground = activeTab !== 'feed';
+
+  const headerOpacity = scrollYAnim.interpolate({
+    inputRange: [0, 80],
+    outputRange: [0, 1],
+    extrapolate: 'clamp',
+  });
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
   const [containerWidth, setContainerWidth] = useState(0);
 
@@ -185,22 +194,45 @@ export function Layout({
         }
 
         return (
-          <View style={[styles.topGlassHeaderWrapper, { paddingTop: insets.top }]}>
-            <BlurView
-              intensity={80}
-              tint="light"
-              style={StyleSheet.absoluteFillObject}
-            />
-            <LinearGradient
-              colors={[
-                'rgba(255, 255, 255, 0.45)',
-                'rgba(255, 255, 255, 0.15)',
-                'rgba(255, 255, 255, 0.05)',
+          <View
+            style={[
+              styles.topGlassHeaderWrapper,
+              { paddingTop: insets.top },
+              showBackground && {
+                borderBottomWidth: 1.5,
+                borderBottomColor: 'rgba(255, 255, 255, 0.45)',
+                backgroundColor: Platform.OS === 'web' ? 'rgba(255, 255, 255, 0.35)' : 'rgba(255, 255, 255, 0.45)',
+              },
+            ]}
+          >
+            {/* Animated Dynamic Glassmorphism Background Layer */}
+            <Animated.View
+              style={[
+                StyleSheet.absoluteFillObject,
+                {
+                  opacity: showBackground ? 1 : headerOpacity,
+                  borderBottomWidth: 1.5,
+                  borderBottomColor: 'rgba(255, 255, 255, 0.45)',
+                  backgroundColor: Platform.OS === 'web' ? 'rgba(255, 255, 255, 0.35)' : 'rgba(255, 255, 255, 0.45)',
+                },
               ]}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 0, y: 1 }}
-              style={StyleSheet.absoluteFillObject}
-            />
+            >
+              <BlurView
+                intensity={80}
+                tint="light"
+                style={StyleSheet.absoluteFillObject}
+              />
+              <LinearGradient
+                colors={[
+                  'rgba(255, 255, 255, 0.45)',
+                  'rgba(255, 255, 255, 0.15)',
+                  'rgba(255, 255, 255, 0.05)',
+                ]}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 0, y: 1 }}
+                style={StyleSheet.absoluteFillObject}
+              />
+            </Animated.View>
             <View style={styles.header}>
               <Text style={[
                 styles.headerTitle,
@@ -337,9 +369,7 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     zIndex: 100,
-    borderBottomWidth: 1.5,
-    borderBottomColor: 'rgba(255, 255, 255, 0.45)',
-    backgroundColor: Platform.OS === 'web' ? 'rgba(255, 255, 255, 0.35)' : 'rgba(255, 255, 255, 0.45)',
+    backgroundColor: 'transparent',
     ...(Platform.OS === 'web'
       ? {
           backdropFilter: 'blur(30px) saturate(210%)',

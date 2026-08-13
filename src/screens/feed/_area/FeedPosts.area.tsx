@@ -1,20 +1,22 @@
 import React from 'react';
-import { StyleSheet, ScrollView } from 'react-native';
+import { StyleSheet, Animated } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { CommentScreen } from '@/screens/feed/comment/CommentScreen';
 import ReviewScreen from '@/screens/review/ReviewScreen';
 import { PostOptionsScreen } from '@/screens/postOptions/PostOptionsScreen';
 import { AllCategoryHeaderHandler } from '../_handler/AllCategoryHeader.handler';
+import { useHeaderStore } from '@/_state/useHeaderStore';
 import { GeneralPostsListAction } from '../_action/FeedPosts/GeneralPostsList.action';
 import { ImageModalAction } from '../_action/FeedPosts/ImageModal.action';
 
 export function FeedPostsArea() {
   const insets = useSafeAreaInsets();
+  const scrollYAnim = useHeaderStore(state => state.scrollYAnim);
 
   return (
     <>
-      <ScrollView
+      <Animated.ScrollView
         style={styles.scrollView}
         contentContainerStyle={[
           styles.communityListContent,
@@ -22,10 +24,15 @@ export function FeedPostsArea() {
         ]}
         showsVerticalScrollIndicator={false}
         pagingEnabled={false}
-        scrollEventThrottle={32}
+        scrollEventThrottle={16}
+        onScroll={Animated.event(
+          [{ nativeEvent: { contentOffset: { y: scrollYAnim } } }],
+          { useNativeDriver: true }
+        )}
       >
         <LinearGradient
-          colors={['#FFDFE2', '#FAFAFA']}
+          colors={['#FFDFE2', '#FFDFE2', '#FAFAFA']}
+          locations={[0, 0.69, 1]}
           style={styles.gradientBg}
           start={{ x: 0.5, y: 0 }}
           end={{ x: 0.5, y: 1 }}
@@ -33,7 +40,7 @@ export function FeedPostsArea() {
         <AllCategoryHeaderHandler />
 
         <GeneralPostsListAction />
-      </ScrollView>
+      </Animated.ScrollView>
 
       <ImageModalAction />
 
@@ -62,10 +69,10 @@ const styles = StyleSheet.create({
   },
   gradientBg: {
     position: 'absolute',
-    top: 0,
+    top: -1000,
     left: -1000,
     right: -1000,
-    height: 450,
+    height: 1450,
     zIndex: -1,
   },
 });

@@ -1,6 +1,5 @@
 import React from 'react';
 import { StyleSheet, TouchableOpacity, Text } from 'react-native';
-import { BlurView } from 'expo-blur';
 
 interface CategoryChipProps {
   category: string;
@@ -32,13 +31,6 @@ export function CategoryChip({
       onPress={onPress}
       activeOpacity={0.85}
     >
-      {isCommunityGlass && !isSelected && (
-        <BlurView
-          intensity={20}
-          tint="light"
-          style={StyleSheet.absoluteFillObject}
-        />
-      )}
       <Text
         style={[
           styles.categoryChipText,
@@ -77,10 +69,9 @@ const styles = StyleSheet.create({
     borderWidth: 1,
   },
   categoryChipCommunityGlass: {
-    backgroundColor: 'rgba(255, 255, 255, 0.6)',
+    backgroundColor: '#FFFFFF',
     borderColor: 'rgba(255, 93, 123, 0.15)',
     borderWidth: 1,
-    overflow: 'hidden',
     shadowColor: '#000000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.03,
