@@ -1,5 +1,5 @@
-import React from 'react';
-import { StyleSheet, Text, TouchableOpacity } from 'react-native';
+import React, { useEffect, useRef } from 'react';
+import { StyleSheet, Text, TouchableOpacity, Animated } from 'react-native';
 import { MainTabType } from '../Layout';
 import { FeedTabSvg } from '../_svg/FeedTabSvg';
 import { ChatTabSvg } from '../_svg/ChatTabSvg';
@@ -18,20 +18,53 @@ export function NavItem({ type, label, isActive, onPress }: NavItemProps) {
   const inactiveColor = '#8F8F8F';
   const iconColor = isActive ? activeColor : inactiveColor;
 
+  const scaleAnim = useRef(new Animated.Value(1)).current;
+
+  useEffect(() => {
+    if (isActive) {
+      // Tactile iOS-like spring pop bounce sequence
+      Animated.sequence([
+        Animated.timing(scaleAnim, {
+          toValue: 0.88,
+          duration: 90,
+          useNativeDriver: true,
+        }),
+        Animated.spring(scaleAnim, {
+          toValue: 1.1,
+          friction: 4,
+          tension: 100,
+          useNativeDriver: true,
+        }),
+        Animated.spring(scaleAnim, {
+          toValue: 1.0,
+          friction: 6,
+          useNativeDriver: true,
+        }),
+      ]).start();
+    } else {
+      Animated.spring(scaleAnim, {
+        toValue: 1.0,
+        useNativeDriver: true,
+      }).start();
+    }
+  }, [isActive]);
+
   return (
     <TouchableOpacity
       style={styles.navItem}
       onPress={onPress}
       activeOpacity={0.85}
     >
-      {type === 'feed' && <FeedTabSvg isActive={isActive} color={iconColor} />}
-      {type === 'chat' && <ChatTabSvg isActive={isActive} color={iconColor} />}
-      {type === 'create' && <CreateTabSvg isActive={isActive} color={iconColor} />}
-      {type === 'my' && <MyTabSvg isActive={isActive} color={iconColor} />}
+      <Animated.View style={[styles.innerContent, { transform: [{ scale: scaleAnim }] }]}>
+        {type === 'feed' && <FeedTabSvg isActive={isActive} color={iconColor} />}
+        {type === 'chat' && <ChatTabSvg isActive={isActive} color={iconColor} />}
+        {type === 'create' && <CreateTabSvg isActive={isActive} color={iconColor} />}
+        {type === 'my' && <MyTabSvg isActive={isActive} color={iconColor} />}
 
-      <Text style={[styles.navText, isActive && styles.navTextActive]}>
-        {label}
-      </Text>
+        <Text style={[styles.navText, isActive && styles.navTextActive]}>
+          {label}
+        </Text>
+      </Animated.View>
     </TouchableOpacity>
   );
 }
@@ -41,6 +74,10 @@ const styles = StyleSheet.create({
     flex: 1,
     height: 52,
     borderRadius: 26,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  innerContent: {
     alignItems: 'center',
     justifyContent: 'center',
     gap: 3,
