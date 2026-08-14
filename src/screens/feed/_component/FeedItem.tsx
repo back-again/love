@@ -16,7 +16,7 @@ import {
   getHasSeenFirstVoteGuide,
   setHasSeenFirstVoteGuideTrue,
 } from '../_state/useFeedState';
-import { VoteConfirmModal } from '@/components/modal/VoteConfirmModal';
+import { VoteConfirmScreen } from '../confirm/VoteConfirmScreen';
 import { useImageModalStore } from '../_state/useImageModalStore';
 import { usePostOptionsStore } from '@/screens/postOptions/_state/usePostOptionsStore';
 import { useCommentStore } from '@/screens/feed/comment/_state/useCommentStore';
@@ -287,7 +287,7 @@ export function FeedItem({ post }: FeedItemProps) {
           </TouchableOpacity>
         </View>
 
-        <VoteConfirmModal
+        <VoteConfirmScreen
           visible={!!pendingVoteChoice}
           onClose={() => setPendingVoteChoice(null)}
           onConfirm={handleConfirmVote}
