@@ -21,10 +21,15 @@ import { OpenSettingBottomSheetAction } from '@/screens/setting/_action/OpenSett
 import { useCreateForm } from '@/screens/create/_state/useCreateForm';
 import { ToastProvider } from '@/_provider/ToastProvider';
 import { PushNotificationProvider } from '@/_provider/PushNotificationProvider';
-import { NotificationItem, NotificationModal } from '@/components/modal/NotificationModal';
+import {
+  NotificationItem,
+  NotificationModal,
+} from '@/components/modal/NotificationModal';
 import { useCommentStore } from '@/screens/feed/comment/_state/useCommentStore';
 import { Post } from '@/screens/feed/_model/feed.model';
 import { PostOptionsScreen } from '@/screens/postOptions/PostOptionsScreen';
+import { CommentScreen } from '@/screens/feed/comment/CommentScreen';
+import ReviewScreen from '@/screens/review/ReviewScreen';
 import { CategoryHeaderArea } from '@/screens/feed/_area/CategoryHeader.area';
 import { CategoryHydration } from '@/screens/feed/_component/CategoryHydration';
 import { CategoryHeaderFallback } from '@/screens/feed/_component/CategoryHeaderFallback';
@@ -75,8 +80,12 @@ export function Layout({
     my: 3,
   };
 
-  const leftEdgeAnim = useRef(new Animated.Value(tabIndexMap[activeTab])).current;
-  const rightEdgeAnim = useRef(new Animated.Value(tabIndexMap[activeTab] + 1)).current;
+  const leftEdgeAnim = useRef(
+    new Animated.Value(tabIndexMap[activeTab]),
+  ).current;
+  const rightEdgeAnim = useRef(
+    new Animated.Value(tabIndexMap[activeTab] + 1),
+  ).current;
   const prevTabRef = useRef<MainTabType>(activeTab);
 
   useEffect(() => {
@@ -163,7 +172,7 @@ export function Layout({
 
   const centerAnim = Animated.multiply(
     Animated.add(Animated.add(leftEdgeAnim, rightEdgeAnim), -1),
-    0.5
+    0.5,
   );
   const scaleXAnim = Animated.subtract(rightEdgeAnim, leftEdgeAnim);
 
@@ -171,102 +180,114 @@ export function Layout({
     <View style={styles.container}>
       <StatusBar style="dark" />
 
-      {!hideHeader ? (() => {
-        let ddayText = 'D+1';
-        if (user?.dating_started_at) {
-          try {
-            const startDate = new Date(user.dating_started_at);
-            const today = new Date();
-            startDate.setHours(0, 0, 0, 0);
-            today.setHours(0, 0, 0, 0);
-            const diffTime = today.getTime() - startDate.getTime();
-            const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24)) + 1;
-            if (diffDays >= 0) {
-              ddayText = `D+${diffDays}`;
-            } else {
-              ddayText = `D${diffDays}`;
+      {!hideHeader ? (
+        (() => {
+          let ddayText = 'D+1';
+          if (user?.dating_started_at) {
+            try {
+              const startDate = new Date(user.dating_started_at);
+              const today = new Date();
+              startDate.setHours(0, 0, 0, 0);
+              today.setHours(0, 0, 0, 0);
+              const diffTime = today.getTime() - startDate.getTime();
+              const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24)) + 1;
+              if (diffDays >= 0) {
+                ddayText = `D+${diffDays}`;
+              } else {
+                ddayText = `D${diffDays}`;
+              }
+            } catch (e) {
+              console.warn('Failed to calculate D-day:', e);
             }
-          } catch (e) {
-            console.warn('Failed to calculate D-day:', e);
+          } else {
+            ddayText = 'D+365';
           }
-        } else {
-          ddayText = 'D+365';
-        }
 
-        return (
-          <View
-            style={[
-              styles.topGlassHeaderWrapper,
-              { paddingTop: insets.top },
-              showBackground && {
-                borderBottomWidth: 1.5,
-                borderBottomColor: 'rgba(255, 255, 255, 0.45)',
-                backgroundColor: Platform.OS === 'web' ? 'rgba(255, 255, 255, 0.35)' : 'rgba(255, 255, 255, 0.45)',
-              },
-            ]}
-          >
-            {/* Animated Dynamic Glassmorphism Background Layer */}
-            <Animated.View
+          return (
+            <View
               style={[
-                StyleSheet.absoluteFillObject,
-                {
-                  opacity: showBackground ? 1 : headerOpacity,
+                styles.topGlassHeaderWrapper,
+                { paddingTop: insets.top },
+                showBackground && {
                   borderBottomWidth: 1.5,
                   borderBottomColor: 'rgba(255, 255, 255, 0.45)',
-                  backgroundColor: Platform.OS === 'web' ? 'rgba(255, 255, 255, 0.35)' : 'rgba(255, 255, 255, 0.45)',
+                  backgroundColor:
+                    Platform.OS === 'web'
+                      ? 'rgba(255, 255, 255, 0.35)'
+                      : 'rgba(255, 255, 255, 0.45)',
                 },
               ]}
             >
-              <BlurView
-                intensity={80}
-                tint="light"
-                style={StyleSheet.absoluteFillObject}
-              />
-              <LinearGradient
-                colors={[
-                  'rgba(255, 255, 255, 0.45)',
-                  'rgba(255, 255, 255, 0.15)',
-                  'rgba(255, 255, 255, 0.05)',
+              {/* Animated Dynamic Glassmorphism Background Layer */}
+              <Animated.View
+                style={[
+                  StyleSheet.absoluteFillObject,
+                  {
+                    opacity: showBackground ? 1 : headerOpacity,
+                    borderBottomWidth: 1.5,
+                    borderBottomColor: 'rgba(255, 255, 255, 0.45)',
+                    backgroundColor:
+                      Platform.OS === 'web'
+                        ? 'rgba(255, 255, 255, 0.35)'
+                        : 'rgba(255, 255, 255, 0.45)',
+                  },
                 ]}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 0, y: 1 }}
-                style={StyleSheet.absoluteFillObject}
-              />
-            </Animated.View>
-            <View style={styles.header}>
-              <Text style={[
-                styles.headerTitle,
-                activeTab === 'feed' && styles.feedHeaderTitle
-              ]}>
-                {activeTab === 'feed' && ddayText}
-                {activeTab === 'create' && '작성'}
-                {activeTab === 'chat' && '상담'}
-                {activeTab === 'my' && '마이'}
-              </Text>
-
-              {activeTab === 'my' ? (
-                <OpenSettingBottomSheetAction onSettingsPress={onSettingsPress} />
-              ) : (activeTab === 'create' || activeTab === 'chat') ? null : (
-                <TouchableOpacity
-                  style={styles.notificationButton}
-                  onPress={() => setIsNotificationOpen(true)}
-                  activeOpacity={0.7}
+              >
+                <BlurView
+                  intensity={80}
+                  tint="light"
+                  style={StyleSheet.absoluteFillObject}
+                />
+                <LinearGradient
+                  colors={[
+                    'rgba(255, 255, 255, 0.45)',
+                    'rgba(255, 255, 255, 0.15)',
+                    'rgba(255, 255, 255, 0.05)',
+                  ]}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 0, y: 1 }}
+                  style={StyleSheet.absoluteFillObject}
+                />
+              </Animated.View>
+              <View style={styles.header}>
+                <Text
+                  style={[
+                    styles.headerTitle,
+                    activeTab === 'feed' && styles.feedHeaderTitle,
+                  ]}
                 >
-                  <NotificationBellSvg color="#0F172A" />
-                  <View style={styles.unreadBadgeDot} />
-                </TouchableOpacity>
+                  {activeTab === 'feed' && ddayText}
+                  {activeTab === 'create' && '작성'}
+                  {activeTab === 'chat' && '상담'}
+                  {activeTab === 'my' && '마이'}
+                </Text>
+
+                {activeTab === 'my' ? (
+                  <OpenSettingBottomSheetAction
+                    onSettingsPress={onSettingsPress}
+                  />
+                ) : activeTab === 'create' || activeTab === 'chat' ? null : (
+                  <TouchableOpacity
+                    style={styles.notificationButton}
+                    onPress={() => setIsNotificationOpen(true)}
+                    activeOpacity={0.7}
+                  >
+                    <NotificationBellSvg color="#0F172A" />
+                    <View style={styles.unreadBadgeDot} />
+                  </TouchableOpacity>
+                )}
+              </View>
+              {activeTab === 'feed' && (
+                <CategoryHydration>
+                  <Suspense fallback={<CategoryHeaderFallback />}>
+                    <CategoryHeaderArea />
+                  </Suspense>
+                </CategoryHydration>
               )}
             </View>
-            {activeTab === 'feed' && (
-              <CategoryHydration>
-                <Suspense fallback={<CategoryHeaderFallback />}>
-                  <CategoryHeaderArea />
-                </Suspense>
-              </CategoryHydration>
-            )}
-          </View>
-        );
-      })() : (
+          );
+        })()
+      ) : (
         <View style={{ paddingTop: insets.top, backgroundColor: '#FFFFFF' }} />
       )}
 
@@ -324,7 +345,7 @@ export function Layout({
 
             <View
               style={styles.bottomNavContainer}
-              onLayout={(e) => setContainerWidth(e.nativeEvent.layout.width)}
+              onLayout={e => setContainerWidth(e.nativeEvent.layout.width)}
             >
               {NAV_TABS.map(tab => (
                 <NavItem
@@ -341,12 +362,14 @@ export function Layout({
       )}
 
       <PushNotificationProvider
-        onNavigate={(tab) => {
+        onNavigate={tab => {
           onTabChange(tab);
         }}
       />
       <ToastProvider />
       <PostOptionsScreen />
+      <CommentScreen />
+      <ReviewScreen />
 
       {/* Notification Bottom Sheet Modal */}
       <NotificationModal

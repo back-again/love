@@ -2,9 +2,6 @@ import React from 'react';
 import { StyleSheet, Animated } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
-import { CommentScreen } from '@/screens/feed/comment/CommentScreen';
-import ReviewScreen from '@/screens/review/ReviewScreen';
-import { PostOptionsScreen } from '@/screens/postOptions/PostOptionsScreen';
 import { AllCategoryHeaderHandler } from '../_handler/AllCategoryHeader.handler';
 import { useHeaderStore } from '@/_state/useHeaderStore';
 import { GeneralPostsListAction } from '../_action/FeedPosts/GeneralPostsList.action';
@@ -27,7 +24,7 @@ export function FeedPostsArea() {
         scrollEventThrottle={16}
         onScroll={Animated.event(
           [{ nativeEvent: { contentOffset: { y: scrollYAnim } } }],
-          { useNativeDriver: true }
+          { useNativeDriver: true },
         )}
       >
         <LinearGradient
@@ -38,15 +35,10 @@ export function FeedPostsArea() {
           end={{ x: 0.5, y: 1 }}
         />
         <AllCategoryHeaderHandler />
-
         <GeneralPostsListAction />
       </Animated.ScrollView>
 
       <ImageModalAction />
-
-      <CommentScreen />
-      <PostOptionsScreen />
-      <ReviewScreen />
     </>
   );
 }

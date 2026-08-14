@@ -28,7 +28,6 @@ export function EditOptionAction() {
       images: targetPost.images || [],
       voteO: targetPost.voteO || '',
       voteX: targetPost.voteX || '',
-      isVoteEnabled: Boolean(targetPost.voteO || targetPost.voteX),
       isEditMode: true,
       editPostId: targetPost.id,
     });

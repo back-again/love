@@ -1,6 +1,6 @@
 import React from 'react';
 import { StyleSheet, View, Text, TouchableOpacity } from 'react-native';
-import Svg, { Circle } from 'react-native-svg';
+import { MoreOptionsSvg } from '../_svg';
 import { useUserStore } from '@/_state/useUserStore';
 
 export interface WrittenPost {
@@ -68,11 +68,7 @@ export function WrittenPostCard({
           hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
           activeOpacity={0.6}
         >
-          <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
-            <Circle cx={5} cy={12} r={2} fill="#8F8F8F" />
-            <Circle cx={12} cy={12} r={2} fill="#8F8F8F" />
-            <Circle cx={19} cy={12} r={2} fill="#8F8F8F" />
-          </Svg>
+          <MoreOptionsSvg width={18} height={18} color="#8F8F8F" />
         </TouchableOpacity>
       </View>
 

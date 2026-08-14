@@ -2,15 +2,18 @@
 
 import React from 'react';
 import { StyleSheet, View, Text } from 'react-native';
+import { useShallow } from 'zustand/react/shallow';
 import { ReviewInputAction } from '../_action/ReviewInput.action';
 import { ReviewSubmitAction } from '../_action/ReviewSubmit.action';
 import { useReviewModalStore } from '../_state/useReviewModalStore';
 
 export function ReviewWriteArea() {
-  const { postId, closeReviewModal } = useReviewModalStore(state => ({
-    postId: state.postId,
-    closeReviewModal: state.closeReviewModal,
-  }));
+  const { postId, closeReviewModal } = useReviewModalStore(
+    useShallow(state => ({
+      postId: state.postId,
+      closeReviewModal: state.closeReviewModal,
+    })),
+  );
 
   return (
     <View style={styles.container}>

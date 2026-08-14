@@ -17,7 +17,9 @@ export function FeedbackOpenAction() {
         <Text style={styles.myMenuTileTitle}>피드백 보내기</Text>
       </TouchableOpacity>
 
-      <FeedbackScreen visible={visible} onClose={() => setVisible(false)} />
+      {visible && (
+        <FeedbackScreen visible={visible} onClose={() => setVisible(false)} />
+      )}
     </>
   );
 }

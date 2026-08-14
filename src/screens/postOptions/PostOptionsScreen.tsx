@@ -21,6 +21,8 @@ export function PostOptionsScreen() {
 
   const isMyPost = targetPost?.isMyPost !== false;
 
+  if (!visible) return null;
+
   return (
     <BottomSheetModal
       visible={visible}

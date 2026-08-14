@@ -7,7 +7,6 @@ export interface CreateFormState {
   images: string[];
   voteO: string;
   voteX: string;
-  isVoteEnabled: boolean;
   isEditMode: boolean;
   editPostId: string | null;
 }
@@ -19,7 +18,6 @@ export interface CreateFormAction {
   setImages: (images: string[] | ((prev: string[]) => string[])) => void;
   setVoteO: (voteO: string) => void;
   setVoteX: (voteX: string) => void;
-  setIsVoteEnabled: (enabled: boolean) => void;
   setIsEditMode: (enabled: boolean) => void;
   setEditPostId: (id: string | null) => void;
   addImage: (url: string) => void;
@@ -34,7 +32,6 @@ const initialState: CreateFormState = {
   images: [],
   voteO: '',
   voteX: '',
-  isVoteEnabled: false,
   isEditMode: false,
   editPostId: null,
 };
@@ -46,7 +43,6 @@ export const useCreateForm = create<CreateFormState & CreateFormAction>((set) =>
   setDetailSituation: (detailSituation) => set({ detailSituation }),
   setVoteO: (voteO) => set({ voteO }),
   setVoteX: (voteX) => set({ voteX }),
-  setIsVoteEnabled: (isVoteEnabled) => set({ isVoteEnabled }),
   setIsEditMode: (isEditMode) => set({ isEditMode }),
   setEditPostId: (editPostId) => set({ editPostId }),
   setImages: (images) =>

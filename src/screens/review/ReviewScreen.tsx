@@ -5,7 +5,6 @@ import { useShallow } from 'zustand/react/shallow';
 import { BottomSheetModal } from '@/components/modal/BottomSheetModal';
 import { ReviewWriteArea } from './_area/ReviewWrite.area';
 import { ReviewDetailArea } from './_area/ReviewDetail.area';
-import { useReviewForm } from './_state/useReviewForm';
 import { useReviewModalStore, ReviewMode } from './_state/useReviewModalStore';
 
 export type { ReviewMode };
@@ -20,13 +19,8 @@ export default function ReviewScreen() {
   );
 
   const isWriteMode = mode === 'write';
-  const reset = useReviewForm(state => state.reset);
 
-  useEffect(() => {
-    if (!visible) {
-      reset();
-    }
-  }, [visible, reset]);
+  if (!visible) return null;
 
   return (
     <BottomSheetModal

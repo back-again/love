@@ -17,7 +17,9 @@ export function InquiryOpenAction() {
         <Text style={styles.myMenuTileTitle}>문의 사항</Text>
       </TouchableOpacity>
 
-      <InquiryScreen visible={visible} onClose={() => setVisible(false)} />
+      {visible && (
+        <InquiryScreen visible={visible} onClose={() => setVisible(false)} />
+      )}
     </>
   );
 }

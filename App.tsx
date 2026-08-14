@@ -2,13 +2,12 @@
 import React, { useState } from 'react';
 import { StyleSheet, View, ActivityIndicator } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
-import {
-  NavigationContainer,
-  DefaultTheme,
-} from '@react-navigation/native';
+import { NavigationContainer, DefaultTheme } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import LoginScreen from '@/screens/login/LoginScreen';
 import OnboardingScreen from '@/screens/onboarding/OnboardingScreen';
@@ -124,32 +123,36 @@ export default function App() {
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
-      <QueryClientProvider client={queryClient}>
-        <NavigationContainer ref={navigationRef} theme={navTheme}>
-          <StatusBar style="dark" />
-          <Stack.Navigator
-            screenOptions={{
-              headerShown: false,
-              animation: 'slide_from_right',
-              contentStyle: { backgroundColor: 'transparent' },
-            }}
-          >
-            {!user ? (
-              <Stack.Screen name="Login">
-                {props => (
-                  <LoginScreen {...props} onLoginSuccess={handleLoginSuccess} />
+      <SafeAreaProvider>
+        <QueryClientProvider client={queryClient}>
+          <BottomSheetModalProvider>
+            <NavigationContainer ref={navigationRef} theme={navTheme}>
+              <StatusBar style="dark" />
+              <Stack.Navigator
+                screenOptions={{
+                  headerShown: false,
+                  animation: 'slide_from_right',
+                  contentStyle: { backgroundColor: 'transparent' },
+                }}
+              >
+                {!user ? (
+                  <Stack.Screen name="Login">
+                    {props => (
+                      <LoginScreen {...props} onLoginSuccess={handleLoginSuccess} />
+                    )}
+                  </Stack.Screen>
+                ) : !hasOnboarded ? (
+                  <Stack.Screen name="Onboarding" component={OnboardingScreen} />
+                ) : (
+                  <Stack.Screen name="Main">
+                    {() => <MainAppLayout mainNavRef={navigationRef} />}
+                  </Stack.Screen>
                 )}
-              </Stack.Screen>
-            ) : !hasOnboarded ? (
-              <Stack.Screen name="Onboarding" component={OnboardingScreen} />
-            ) : (
-              <Stack.Screen name="Main">
-                {() => <MainAppLayout mainNavRef={navigationRef} />}
-              </Stack.Screen>
-            )}
-          </Stack.Navigator>
-        </NavigationContainer>
-      </QueryClientProvider>
+              </Stack.Navigator>
+            </NavigationContainer>
+          </BottomSheetModalProvider>
+        </QueryClientProvider>
+      </SafeAreaProvider>
     </GestureHandlerRootView>
   );
 }

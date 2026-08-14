@@ -42,8 +42,6 @@ export function ViewReviewBannerAction() {
           <Text style={styles.reviewGradientArrow}>›</Text>
         </LinearGradient>
       </TouchableOpacity>
-
-      <ReviewScreen />
     </>
   );
 }

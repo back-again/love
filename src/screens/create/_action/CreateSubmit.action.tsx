@@ -18,7 +18,6 @@ export function CreateSubmitAction() {
     images,
     voteO,
     voteX,
-    isVoteEnabled,
     isEditMode,
     editPostId,
     reset,
@@ -30,7 +29,6 @@ export function CreateSubmitAction() {
       images: state.images,
       voteO: state.voteO,
       voteX: state.voteX,
-      isVoteEnabled: state.isVoteEnabled,
       isEditMode: state.isEditMode,
       editPostId: state.editPostId,
       reset: state.reset,
@@ -39,6 +37,9 @@ export function CreateSubmitAction() {
 
   const createMutation = useMutation({
     mutationFn: () => {
+      const finalVoteO = voteO.trim() || '괜찮은 것 같아';
+      const finalVoteX = voteX.trim() || '난 별로야';
+
       if (isEditMode && editPostId) {
         return updatePost({
           id: editPostId,
@@ -46,8 +47,8 @@ export function CreateSubmitAction() {
           category,
           content: detailSituation.trim(),
           images,
-          voteO: isVoteEnabled ? voteO.trim() : '',
-          voteX: isVoteEnabled ? voteX.trim() : '',
+          voteO: finalVoteO,
+          voteX: finalVoteX,
         });
       }
       return createPost({
@@ -55,8 +56,8 @@ export function CreateSubmitAction() {
         category,
         content: detailSituation.trim(),
         images,
-        voteO: isVoteEnabled ? voteO.trim() : '',
-        voteX: isVoteEnabled ? voteX.trim() : '',
+        voteO: finalVoteO,
+        voteX: finalVoteX,
       });
     },
     onSuccess: (newPostData) => {

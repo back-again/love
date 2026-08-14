@@ -16,6 +16,7 @@ export function OpenSettingBottomSheetAction({
 
   const handlePress = () => {
     setVisible(true);
+
     if (onSettingsPress) {
       onSettingsPress();
     }
@@ -45,8 +46,9 @@ export function OpenSettingBottomSheetAction({
           />
         </Svg>
       </TouchableOpacity>
-
-      <SettingScreen visible={visible} onClose={() => setVisible(false)} />
+      {visible && (
+        <SettingScreen visible={visible} onClose={() => setVisible(false)} />
+      )}
     </>
   );
 }
