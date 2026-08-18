@@ -2,13 +2,13 @@
 
 import React from 'react';
 import { StyleSheet, View, Text, TouchableOpacity, Image } from 'react-native';
-import { useToastStore } from '@/_state/useToastStore';
+import { useChatDetailStore } from '../detail/_state/useChatDetailStore';
 
 export function DoorimiFloatingFabAction() {
-  const showToast = useToastStore(state => state.showToast);
+  const enterChatRoom = useChatDetailStore(state => state.enterChatRoom);
 
   const handlePress = () => {
-    showToast('출시 준비 중입니다. 🚀');
+    enterChatRoom();
   };
 
   return (
