@@ -23,10 +23,9 @@ export function RequestReviewBannerAction() {
       });
     },
     onSuccess: () => {
-      const postTitle = targetPost?.title || '사연';
       Alert.alert(
         '후기 요청 완료 ✉️',
-        `'${postTitle}' 작성자에게 후기 작성 알림을 보냈습니다!`,
+        '글쓴이에게 후기요청을 보냈습니다.',
       );
       queryClient.invalidateQueries({ queryKey: ['feedPosts'] });
     },

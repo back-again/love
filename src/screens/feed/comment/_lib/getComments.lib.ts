@@ -10,10 +10,12 @@ export async function getCommentsLib({
 }: FetchCommentsParams): Promise<CommentItem[]> {
   if (!postId) return [];
 
+  const cleanPostId = postId.split('-loop-')[0];
+
   const { data: dbComments, error } = await supabase
     .from('comments')
     .select('*')
-    .eq('post_id', postId)
+    .eq('post_id', cleanPostId)
     .order('created_at', { ascending: true });
 
   if (error) {
@@ -28,6 +30,13 @@ export async function getCommentsLib({
     .from('comment_likes')
     .select('comment_id, user_id')
     .in('comment_id', commentIds);
+
+  const { data: postData } = await supabase
+    .from('post_details_view')
+    .select('user_id')
+    .eq('id', cleanPostId)
+    .single();
+  const postAuthorId = postData?.user_id;
 
   const { data: authData } = await supabase.auth.getUser();
   const currentUserId =
@@ -53,6 +62,9 @@ export async function getCommentsLib({
 
   const getUserLabel = (userId?: string) => {
     const key = userId || 'unknown';
+    if (postAuthorId && key === postAuthorId) {
+      return '글쓴이';
+    }
     if (!userMap.has(key)) {
       userMap.set(key, nextUserNum++);
     }
@@ -93,6 +105,10 @@ export async function getCommentsLib({
   });
 
   return rootComments.map(rc => ({
+    ...rc,
+    replies: replyMap[rc.id] || [],
+  }));
+}
     ...rc,
     replies: replyMap[rc.id] || [],
   }));
