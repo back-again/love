@@ -2,23 +2,17 @@
 
 import React from 'react';
 import { StyleSheet, View, ScrollView, Text } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { RelationshipQuizModalAction } from './_action/RelationshipQuizModal.action';
 import { RelationshipProfileHandler } from './_handler/RelationshipProfile.handler';
 import { DoorimiFloatingFabAction } from './_action/DoorimiFloatingFab.action';
 import { ChatDetailScreen } from './detail/ChatDetailScreen';
 
 export default function ChatScreen() {
-  const insets = useSafeAreaInsets();
-
   return (
     <View style={styles.container}>
       <ScrollView
         style={styles.hubScrollView}
-        contentContainerStyle={[
-          styles.hubContentContainer,
-          { paddingTop: insets.top + 52 + 16 },
-        ]}
+        contentContainerStyle={[styles.hubContentContainer, { paddingTop: 16 }]}
         showsVerticalScrollIndicator={false}
       >
         <View style={[styles.sectionHeaderRow, { marginTop: 8 }]}>

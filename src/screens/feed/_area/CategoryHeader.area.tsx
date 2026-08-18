@@ -8,6 +8,7 @@ export function CategoryHeaderArea() {
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
+        style={styles.scrollView}
         contentContainerStyle={styles.categoryScrollContent}
       >
         <CategoryHeaderAction />
@@ -19,14 +20,16 @@ export function CategoryHeaderArea() {
 const styles = StyleSheet.create({
   categoryBarContainer: {
     width: '100%',
-    paddingVertical: 10,
-    paddingHorizontal: 16,
+    paddingVertical: 6,
     backgroundColor: 'transparent',
+  },
+  scrollView: {
+    width: '100%',
   },
   categoryScrollContent: {
     flexDirection: 'row',
     gap: 8,
     alignItems: 'center',
-    paddingRight: 16,
+    paddingHorizontal: 16,
   },
 });

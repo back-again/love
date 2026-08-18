@@ -1,7 +1,6 @@
 import React from 'react';
 import { StyleSheet, ScrollView } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { QuestionTitleArea } from './_area/QuestionTitle.area';
 import { CategorySelectArea } from './_area/CategorySelect.area';
 import { DetailSituationArea } from './_area/DetailSituation.area';
@@ -11,8 +10,6 @@ import { CreateSubmitAction } from './_action/CreateSubmit.action';
 import { LoadProvider } from './_provider/Load.provider';
 
 export default function CreateScreen() {
-  const insets = useSafeAreaInsets();
-
   return (
     <LoadProvider>
       <LinearGradient colors={['#FFFFFF', '#FFFFFF']} style={styles.container}>
@@ -20,7 +17,7 @@ export default function CreateScreen() {
           style={styles.createScrollView}
           contentContainerStyle={[
             styles.createContentContainer,
-            { paddingTop: insets.top + 60 + 16 },
+            { paddingTop: 16 },
           ]}
           showsVerticalScrollIndicator={false}
         >

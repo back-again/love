@@ -1,11 +1,66 @@
-import React from 'react';
-import { StyleSheet, View } from 'react-native';
-import { FeedPostsArea } from './_area/FeedPosts.area';
+import React, { Suspense } from 'react';
+import { StyleSheet, View, Animated } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { LinearGradient } from 'expo-linear-gradient';
+import { useHeaderStore } from '@/_state/useHeaderStore';
+import { CategoryHydration } from './_component/CategoryHydration';
+import { CategoryHeaderFallback } from './_component/CategoryHeaderFallback';
+import { CategoryHeaderArea } from './_area/CategoryHeader.area';
+import { GeneralPostsListAction } from './_action/FeedPosts/GeneralPostsList.action';
+import { ImageModalAction } from './_action/FeedPosts/ImageModal.action';
 
 export default function FeedScreen() {
+  const insets = useSafeAreaInsets();
+  const scrollYAnim = useHeaderStore(state => state.scrollYAnim);
+
+  const gradientTranslateY = scrollYAnim.interpolate({
+    inputRange: [-200, 0, 400],
+    outputRange: [0, 0, -400],
+    extrapolateRight: 'clamp',
+  });
+
   return (
     <View style={styles.container}>
-      <FeedPostsArea />
+      <Animated.View
+        style={[
+          styles.gradientContainer,
+          { transform: [{ translateY: gradientTranslateY }] },
+        ]}
+      >
+        <LinearGradient
+          colors={['#FFDFE2', '#FFDFE2', '#FAFAFA']}
+          locations={[0, 0.69, 1]}
+          style={StyleSheet.absoluteFill}
+          start={{ x: 0.5, y: 0 }}
+          end={{ x: 0.5, y: 1 }}
+        />
+      </Animated.View>
+
+      <View
+        style={[styles.categoryHeaderWrapper, { paddingTop: insets.top + 60 }]}
+      >
+        <CategoryHydration>
+          <Suspense fallback={<CategoryHeaderFallback />}>
+            <CategoryHeaderArea />
+          </Suspense>
+        </CategoryHydration>
+      </View>
+
+      <Animated.ScrollView
+        style={styles.scrollView}
+        contentContainerStyle={styles.communityListContent}
+        showsVerticalScrollIndicator={false}
+        pagingEnabled={false}
+        scrollEventThrottle={16}
+        onScroll={Animated.event(
+          [{ nativeEvent: { contentOffset: { y: scrollYAnim } } }],
+          { useNativeDriver: true },
+        )}
+      >
+        <GeneralPostsListAction />
+      </Animated.ScrollView>
+
+      <ImageModalAction />
     </View>
   );
 }
@@ -15,6 +70,32 @@ const styles = StyleSheet.create({
     flex: 1,
     width: '100%',
     position: 'relative',
-    backgroundColor: '#FAFAFA',
+  },
+  gradientContainer: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    height: 450,
+    zIndex: 0,
+  },
+  categoryHeaderWrapper: {
+    width: '100%',
+    zIndex: 10,
+  },
+  scrollView: {
+    flex: 1,
+    width: '100%',
+    backgroundColor: 'transparent',
+    zIndex: 1,
+  },
+  communityListContent: {
+    paddingHorizontal: 16,
+    paddingTop: 8,
+    paddingBottom: 110,
+    maxWidth: 450,
+    width: '100%',
+    alignSelf: 'center',
+    backgroundColor: 'transparent',
   },
 });
