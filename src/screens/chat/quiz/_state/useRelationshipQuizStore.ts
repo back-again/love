@@ -5,7 +5,7 @@ import { saveRelationshipProfileLib } from '../../_lib/relationshipProfile.lib';
 interface RelationshipQuizState {
   currentStep: number;
   answers: Record<number, string>;
-  selectOption: (trait: string, onSuccess?: () => void) => void;
+  selectOption: (trait: string, onSuccess?: () => void) => Promise<void>;
   resetQuiz: () => void;
 }
 
@@ -14,7 +14,7 @@ export const useRelationshipQuizStore = create<RelationshipQuizState>(
     currentStep: 0,
     answers: {},
 
-    selectOption: (trait, onSuccess) => {
+    selectOption: async (trait, onSuccess) => {
       const { currentStep, answers } = get();
       const updatedAnswers = { ...answers, [currentStep]: trait };
       set({ answers: updatedAnswers });
@@ -23,7 +23,7 @@ export const useRelationshipQuizStore = create<RelationshipQuizState>(
         set({ currentStep: currentStep + 1 });
       } else {
         const resultProfile = calculateProfileMatch(updatedAnswers);
-        saveRelationshipProfileLib(resultProfile);
+        await saveRelationshipProfileLib(resultProfile);
         set({ currentStep: 0, answers: {} });
         if (onSuccess) onSuccess();
       }
