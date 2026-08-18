@@ -56,6 +56,7 @@ export const useChatDetailStore = create<ChatDetailState>((set, get) => ({
           id: `c_${Date.now()}`,
           sender: 'counselor',
           text: greetingText,
+          isPostSelectorPrompt: true,
           timestamp: new Date().toLocaleTimeString('ko-KR', {
             hour: '2-digit',
             minute: '2-digit',

@@ -27,6 +27,10 @@ export function InlinePostDiagnosisAction() {
     })),
   );
 
+  if (writtenPosts.length === 0) {
+    return null;
+  }
+
   return (
     <View style={styles.inlinePostSelectorCard}>
       <Text style={styles.inlineSelectorHeader}>관련 고민 사연 선택</Text>

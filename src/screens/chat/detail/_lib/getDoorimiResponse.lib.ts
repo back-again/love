@@ -53,9 +53,7 @@ export function getDdayCounselingText(days: number, query: string): string {
 export function generateInitialGreeting(
   profile: RelationshipProfile | null,
 ): string {
-  return profile
-    ? `안녕하세요 두두님! 연애 상담원 두림이입니다. 💖\n\n두두님의 연애 추구미인 '${profile.typeTitle}' 성향과 갈등 해결 방식('${profile.conflictHeadline}')을 기억하고 있어요.\n\n두두님의 피해야 할 상대 기준을 바탕으로 단호하고 명확한 솔루션을 들려드릴게요. 오늘 어떤 이야기가 나누고 싶으신가요?`
-    : `안녕하세요 두두님! 연애 상담원 두림이입니다. 💖\n\n연애 고민, 감정 토로, 한풀이 대화 등 무엇이든 이야기해주세요. 상단에서 '내 연애 추구미'를 진단받으시면 더욱 정밀한 맞춤 솔루션을 받아보실 수 있습니다.`;
+  return `안녕하세요 두두님! 연애 상담원 두림이입니다. 💖\n\n두두님의 연애 성향 분석 결과와 지금까지 작성해주신 고민들을 바탕으로 맞춤 1:1 상담을 준비했어요.\n\n혹시 **지금 연애 고민 중에 아직 해결되지 않은 부분**이 있으신가요? 편하게 이야기 나누고 싶은 과거 고민 글을 골라주시거나, 아래 추천 주제를 눌러주시면 바로 깊은 대화를 시작해볼게요!`;
 }
 
 export function generateCounselingResponse(
