@@ -15,10 +15,12 @@ export async function requestReviewLib({
     (await supabase.auth.getUser()).data.user?.id ||
     '00000000-0000-0000-0000-000000000001';
 
+  const cleanPostId = postId.split('-loop-')[0];
+
   const { error: reqError } = await supabase
     .from('review_requests')
     .upsert(
-      { post_id: postId, user_id: activeUserId },
+      { post_id: cleanPostId, user_id: activeUserId },
       { onConflict: 'post_id, user_id' },
     );
 
@@ -28,16 +30,16 @@ export async function requestReviewLib({
   }
 
   const { data: postData } = await supabase
-    .from('posts')
+    .from('post_details_view')
     .select('user_id')
-    .eq('id', postId)
+    .eq('id', cleanPostId)
     .single();
 
   if (postData?.user_id && postData.user_id !== activeUserId) {
     await supabase.from('notifications').insert({
       user_id: postData.user_id,
       type: 'REVIEW_REQUEST',
-      post_id: postId,
+      post_id: cleanPostId,
     });
 
     const { data: targetUser } = await supabase
@@ -51,7 +53,7 @@ export async function requestReviewLib({
         to: targetUser.push_token,
         title: '후기 작성 요청 💌',
         body: '누군가가 내 고민의 후기를 궁금해하고 있어요!',
-        data: { postId, type: 'REVIEW_REQUEST' },
+        data: { postId: cleanPostId, type: 'REVIEW_REQUEST' },
       });
     }
   }

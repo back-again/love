@@ -18,10 +18,12 @@ export async function createCommentLib({
   const userId =
     authData.user?.id || '00000000-0000-0000-0000-000000000001';
 
+  const cleanPostId = postId.split('-loop-')[0];
+
   const { data, error } = await supabase
     .from('comments')
     .insert({
-      post_id: postId,
+      post_id: cleanPostId,
       user_id: userId,
       parent_id: parentId,
       content,
@@ -36,9 +38,9 @@ export async function createCommentLib({
   }
 
   const { data: postData } = await supabase
-    .from('posts')
+    .from('post_details_view')
     .select('user_id')
-    .eq('id', postId)
+    .eq('id', cleanPostId)
     .single();
 
   if (postData?.user_id && postData.user_id !== userId) {
@@ -47,7 +49,7 @@ export async function createCommentLib({
     await supabase.from('notifications').insert({
       user_id: postData.user_id,
       type: notiType,
-      post_id: postId,
+      post_id: cleanPostId,
     });
 
     const { data: targetUser } = await supabase
@@ -61,7 +63,7 @@ export async function createCommentLib({
         to: targetUser.push_token,
         title: parentId ? '새 답글 등록 💬' : '새 댓글 등록 💬',
         body: content,
-        data: { postId, type: notiType },
+        data: { postId: cleanPostId, type: notiType },
       });
     }
   }
