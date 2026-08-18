@@ -6,8 +6,10 @@ export async function deletePostLib(postId: string): Promise<void> {
     const { error } = await supabase.from('posts').delete().eq('id', rawId);
     if (error) {
       console.warn('deletePostLib error:', error.message);
+      throw error;
     }
   } catch (err) {
     console.warn('deletePostLib fallback error:', err);
+    throw err;
   }
 }

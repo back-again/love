@@ -19,7 +19,7 @@ export function PostOptionsScreen() {
     })),
   );
 
-  const isMyPost = targetPost?.isMyPost !== false;
+  const isMyPost = Boolean(targetPost?.isMyPost);
 
   if (!visible) return null;
 
@@ -59,7 +59,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '700',
     color: '#0F172A',
-    marginBottom: 16,
+    marginBottom: 12,
   },
   divider: {
     width: '100%',

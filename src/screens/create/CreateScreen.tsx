@@ -7,30 +7,30 @@ import { DetailSituationArea } from './_area/DetailSituation.area';
 import { ImageAttachmentArea } from './_area/ImageAttachment.area';
 import { VoteOptionSettingArea } from './_area/VoteOptionSetting.area';
 import { CreateSubmitAction } from './_action/CreateSubmit.action';
-import { LoadProvider } from './_provider/Load.provider';
+import { useCreateLoad } from './_state/useCreateLoad';
 
 export default function CreateScreen() {
-  return (
-    <LoadProvider>
-      <LinearGradient colors={['#FFFFFF', '#FFFFFF']} style={styles.container}>
-        <ScrollView
-          style={styles.createScrollView}
-          contentContainerStyle={[
-            styles.createContentContainer,
-            { paddingTop: 16 },
-          ]}
-          showsVerticalScrollIndicator={false}
-        >
-          <CategorySelectArea />
-          <QuestionTitleArea />
-          <DetailSituationArea />
-          <ImageAttachmentArea />
-          <VoteOptionSettingArea />
+  useCreateLoad();
 
-          <CreateSubmitAction />
-        </ScrollView>
-      </LinearGradient>
-    </LoadProvider>
+  return (
+    <LinearGradient colors={['#FFFFFF', '#FFFFFF']} style={styles.container}>
+      <ScrollView
+        style={styles.createScrollView}
+        contentContainerStyle={[
+          styles.createContentContainer,
+          { paddingTop: 16 },
+        ]}
+        showsVerticalScrollIndicator={false}
+      >
+        <CategorySelectArea />
+        <QuestionTitleArea />
+        <DetailSituationArea />
+        <ImageAttachmentArea />
+        <VoteOptionSettingArea />
+
+        <CreateSubmitAction />
+      </ScrollView>
+    </LinearGradient>
   );
 }
 
@@ -46,5 +46,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
     paddingTop: 16,
     paddingBottom: 120,
+    gap: 24,
   },
 });

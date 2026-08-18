@@ -29,6 +29,7 @@ export interface FetchFeedParams {
 export interface FetchFeedResponse {
   rawPosts: RawFeedPost[];
   userVoteMap: Record<string, 'O' | 'X'>;
+  currentUserId: string;
   page: number;
   nextPage: number | null;
   hasMore: boolean;
@@ -43,6 +44,19 @@ export async function getFeedPostsLib({
   try {
     const from = (page - 1) * pageSize;
     const to = from + pageSize - 1;
+
+    const { data: authData } = await supabase.auth.getUser();
+    const userId = authData.user?.id || '00000000-0000-0000-0000-000000000001';
+
+    // 1. 차단된 사용자 목록 조회
+    const { data: userBlocks } = await supabase
+      .from('user_blocks')
+      .select('blocked_id')
+      .eq('blocker_id', userId);
+
+    const blockedUserIds = new Set(
+      (userBlocks || []).map((b: any) => b.blocked_id),
+    );
 
     let query = supabase.from('post_details_view').select('*');
 
@@ -67,7 +81,11 @@ export async function getFeedPostsLib({
       console.error('Supabase fetch feed error:', error.message);
     }
 
-    let filteredDbPosts = dbPosts || [];
+    // 2. 차단된 사용자의 글 및 인기 글 조건 필터링
+    let filteredDbPosts = (dbPosts || []).filter(
+      (p: any) => !blockedUserIds.has(p.user_id),
+    );
+
     if (effectiveType === 'hot') {
       filteredDbPosts = filteredDbPosts.filter(
         (p: any) => ((p.vote_o_count ?? 0) + (p.vote_x_count ?? 0)) >= 20
@@ -75,12 +93,17 @@ export async function getFeedPostsLib({
     }
 
     if (!filteredDbPosts || filteredDbPosts.length === 0) {
-      return { rawPosts: [], userVoteMap: {}, page, nextPage: null, hasMore: false };
+      return {
+        rawPosts: [],
+        userVoteMap: {},
+        currentUserId: userId,
+        page,
+        nextPage: null,
+        hasMore: false,
+      };
     }
 
     const postIds = filteredDbPosts.map((p: any) => p.id);
-    const { data: authData } = await supabase.auth.getUser();
-    const userId = authData.user?.id || '00000000-0000-0000-0000-000000000001';
     const userVoteMap: Record<string, 'O' | 'X'> = {};
 
     const { data: dbUserVotes } = await supabase
@@ -101,12 +124,20 @@ export async function getFeedPostsLib({
     return {
       rawPosts: filteredDbPosts as RawFeedPost[],
       userVoteMap,
+      currentUserId: userId,
       page,
       nextPage,
       hasMore,
     };
   } catch (err) {
     console.error('Unexpected error fetching feed from Supabase:', err);
-    return { rawPosts: [], userVoteMap: {}, page: 1, nextPage: null, hasMore: false };
+    return {
+      rawPosts: [],
+      userVoteMap: {},
+      currentUserId: '00000000-0000-0000-0000-000000000001',
+      page: 1,
+      nextPage: null,
+      hasMore: false,
+    };
   }
 }
