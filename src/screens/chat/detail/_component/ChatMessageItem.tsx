@@ -6,6 +6,25 @@ interface ChatMessageItemProps {
   message: Message;
 }
 
+function renderParsedText(text: string, isUser: boolean) {
+  if (!text) return '';
+  const parts = text.split('**');
+  if (parts.length === 1) {
+    return text;
+  }
+  return parts.map((part, index) => {
+    const isBold = index % 2 === 1;
+    return (
+      <Text
+        key={index}
+        style={isBold ? (isUser ? styles.boldTextUser : styles.boldText) : undefined}
+      >
+        {part}
+      </Text>
+    );
+  });
+}
+
 export function ChatMessageItem({ message }: ChatMessageItemProps) {
   const isUser = message.sender === 'user';
 
@@ -30,7 +49,7 @@ export function ChatMessageItem({ message }: ChatMessageItemProps) {
         ]}
       >
         <Text style={[styles.messageText, isUser && styles.messageTextUser]}>
-          {message.text}
+          {renderParsedText(message.text, isUser)}
         </Text>
         <Text style={[styles.timestampText, isUser && styles.timestampUser]}>
           {message.timestamp}
@@ -82,6 +101,14 @@ const styles = StyleSheet.create({
     letterSpacing: -0.3,
   },
   messageTextUser: {
+    color: '#FFFFFF',
+  },
+  boldText: {
+    fontWeight: '700',
+    color: '#0F172A',
+  },
+  boldTextUser: {
+    fontWeight: '700',
     color: '#FFFFFF',
   },
   timestampText: {
