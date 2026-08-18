@@ -3,7 +3,7 @@
 import React from 'react';
 import { StyleSheet, View, ScrollView, Text } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { RelationshipQuizScreen } from './quiz/RelationshipQuizScreen';
+import { RelationshipQuizModalAction } from './_action/RelationshipQuizModal.action';
 import { RelationshipProfileHandler } from './_handler/RelationshipProfile.handler';
 import { DoorimiFloatingFabAction } from './_action/DoorimiFloatingFab.action';
 import { ChatDetailScreen } from './detail/ChatDetailScreen';
@@ -29,7 +29,7 @@ export default function ChatScreen() {
       </ScrollView>
 
       <DoorimiFloatingFabAction />
-      <RelationshipQuizScreen />
+      <RelationshipQuizModalAction />
       <ChatDetailScreen />
     </View>
   );
