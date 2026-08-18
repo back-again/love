@@ -1,10 +1,8 @@
-import React, { Suspense } from 'react';
+import React from 'react';
 import { StyleSheet, View, Animated } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useHeaderStore } from '@/_state/useHeaderStore';
-import { CategoryHydration } from './_component/CategoryHydration';
-import { CategoryHeaderFallback } from './_component/CategoryHeaderFallback';
 import { CategoryHeaderArea } from './_area/CategoryHeader.area';
 import { GeneralPostsListAction } from './_action/FeedPosts/GeneralPostsList.action';
 import { ImageModalAction } from './_action/FeedPosts/ImageModal.action';
@@ -39,11 +37,7 @@ export default function FeedScreen() {
       <View
         style={[styles.categoryHeaderWrapper, { paddingTop: insets.top + 60 }]}
       >
-        <CategoryHydration>
-          <Suspense fallback={<CategoryHeaderFallback />}>
-            <CategoryHeaderArea />
-          </Suspense>
-        </CategoryHydration>
+        <CategoryHeaderArea />
       </View>
 
       <Animated.ScrollView

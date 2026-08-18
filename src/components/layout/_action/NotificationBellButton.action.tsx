@@ -1,44 +1,39 @@
 'use client';
 
-import React, { useState } from 'react';
+import React from 'react';
 import { StyleSheet, View, TouchableOpacity } from 'react-native';
+import { useQuery } from '@tanstack/react-query';
 import { NotificationBellSvg } from '../_svg/NotificationBellSvg';
-import {
-  NotificationItem,
-  NotificationModal,
-} from '@/components/modal/NotificationModal';
+import { useNotificationStore } from '@/screens/notification/_state/useNotificationStore';
+import { getNotificationsLib } from '@/screens/notification/_lib/getNotifications.lib';
 
 interface NotificationBellButtonActionProps {
   onTabChange?: (tab: 'feed') => void;
 }
 
 export function NotificationBellButtonAction({
-  onTabChange,
+  onTabChange: _onTabChange,
 }: NotificationBellButtonActionProps) {
-  const [isNotificationOpen, setIsNotificationOpen] = useState(false);
+  const openNotification = useNotificationStore(
+    state => state.openNotification,
+  );
 
-  const handleSelectNotification = (_item: NotificationItem) => {
-    setIsNotificationOpen(false);
-    onTabChange?.('feed');
-  };
+  const { data: notifications = [] } = useQuery({
+    queryKey: ['notifications'],
+    queryFn: getNotificationsLib,
+  });
+
+  const hasUnread = notifications.some(n => !n.isRead);
 
   return (
-    <>
-      <TouchableOpacity
-        style={styles.notificationButton}
-        onPress={() => setIsNotificationOpen(true)}
-        activeOpacity={0.7}
-      >
-        <NotificationBellSvg color="#0F172A" />
-        <View style={styles.unreadBadgeDot} />
-      </TouchableOpacity>
-
-      <NotificationModal
-        visible={isNotificationOpen}
-        onClose={() => setIsNotificationOpen(false)}
-        onSelectNotification={handleSelectNotification}
-      />
-    </>
+    <TouchableOpacity
+      style={styles.notificationButton}
+      onPress={openNotification}
+      activeOpacity={0.7}
+    >
+      <NotificationBellSvg color="#0F172A" />
+      {hasUnread && <View style={styles.unreadBadgeDot} />}
+    </TouchableOpacity>
   );
 }
 

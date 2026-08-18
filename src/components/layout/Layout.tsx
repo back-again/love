@@ -11,6 +11,7 @@ import { PushNotificationProvider } from '@/_provider/PushNotificationProvider';
 import { PostOptionsScreen } from '@/screens/postOptions/PostOptionsScreen';
 import { CommentScreen } from '@/screens/feed/comment/CommentScreen';
 import ReviewScreen from '@/screens/review/ReviewScreen';
+import { NotificationModalAction } from '@/screens/notification/_action/NotificationModal.action';
 
 export type MainTabType = 'feed' | 'chat' | 'create' | 'my';
 
@@ -63,6 +64,7 @@ export function Layout({
       <PostOptionsScreen />
       <CommentScreen />
       <ReviewScreen />
+      <NotificationModalAction />
     </View>
   );
 }
