@@ -9,7 +9,6 @@ import {
 } from '@gorhom/bottom-sheet';
 import { BottomSheetModal } from '@/components/modal/BottomSheetModal';
 import { useCommentStore } from './_state/useCommentStore';
-import { CommentHeaderArea } from './_area/CommentHeader.area';
 import { ReviewBannerArea } from './_area/ReviewBanner.area';
 import { CommentListArea } from './_area/CommentList.area';
 import { CommentInputArea } from './_area/CommentInput.area';
@@ -37,7 +36,7 @@ export function CommentScreen() {
     <BottomSheetModal
       visible={visible}
       onClose={closeComments}
-      snapPoints={['67%']}
+      snapPoints={['67%', '94%']}
       useScrollView={true}
       enableDynamicSizing={false}
       footerComponent={renderFooter}
@@ -45,7 +44,6 @@ export function CommentScreen() {
       enableContentPanningGesture={false}
     >
       <View style={styles.topSection}>
-        <CommentHeaderArea />
         <ReviewBannerArea />
         <View style={styles.sectionDivider} />
       </View>
