@@ -32,10 +32,11 @@ export function CommentListArea() {
   );
 
   const postId = targetPost?.id || '';
+  const postAuthorId = targetPost?.userId;
 
   const { data: fetchedComments = [], isLoading } = useQuery({
     queryKey: ['comments', postId],
-    queryFn: () => getCommentsLib({ postId }),
+    queryFn: () => getCommentsLib({ postId, postAuthorId }),
     enabled: Boolean(visible && postId),
   });
 

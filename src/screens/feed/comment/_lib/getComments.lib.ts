@@ -3,10 +3,12 @@ import { CommentItem, ReplyItem } from '../_model/comment.model';
 
 export interface FetchCommentsParams {
   postId: string;
+  postAuthorId?: string;
 }
 
 export async function getCommentsLib({
   postId,
+  postAuthorId,
 }: FetchCommentsParams): Promise<CommentItem[]> {
   if (!postId) return [];
 
@@ -52,6 +54,9 @@ export async function getCommentsLib({
   let nextUserNum = 1;
 
   const getUserLabel = (userId?: string) => {
+    if (userId && postAuthorId && userId === postAuthorId) {
+      return '글쓴이';
+    }
     const key = userId || 'unknown';
     if (!userMap.has(key)) {
       userMap.set(key, nextUserNum++);
@@ -72,21 +77,21 @@ export async function getCommentsLib({
       replyMap[c.parent_id].push({
         id: c.id,
         user: userLabel,
-        votedChoice,
         text: c.content,
         likes,
         isLiked,
         isMyComment,
+        votedChoice,
       });
     } else {
       rootComments.push({
         id: c.id,
         user: userLabel,
-        votedChoice,
         text: c.content,
         likes,
         isLiked,
         isMyComment,
+        votedChoice,
         replies: [],
       });
     }
