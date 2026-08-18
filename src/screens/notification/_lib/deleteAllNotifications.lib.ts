@@ -1,9 +1,9 @@
 import { supabase } from '@/api/supabase';
+import { getCurrentUserId } from '@/_lib/getCurrentUserId.lib';
 
 export async function deleteAllNotificationsLib(): Promise<void> {
-  const { data: authData } = await supabase.auth.getUser();
-  const userId =
-    authData.user?.id || '00000000-0000-0000-0000-000000000001';
+  const userId = await getCurrentUserId();
+  if (!userId) return;
 
   const { error } = await supabase
     .from('notifications')

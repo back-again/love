@@ -1,9 +1,13 @@
 import { supabase } from '@/api/supabase';
+import { getCurrentUserId } from '@/_lib/getCurrentUserId.lib';
 
 export async function submitVoteLib(postId: string, choice: 'O' | 'X'): Promise<void> {
   try {
-    const { data: authData } = await supabase.auth.getUser();
-    const userId = authData.user?.id || '00000000-0000-0000-0000-000000000001';
+    const userId = await getCurrentUserId();
+    if (!userId) {
+      console.warn('submitVoteLib: no user logged in');
+      return;
+    }
 
     const rawPostId = postId.split('-loop-')[0];
 

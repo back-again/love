@@ -46,22 +46,5 @@ export async function updateOnboardingProfile({
     return upsertData;
   }
 
-  // 3. Fallback for mock test user (e.g., '00000000-0000-0000-0000-000000000001') when RLS blocks mock session
-  if (updateError?.code === '42501' || upsertError?.code === '42501') {
-    console.warn(
-      'Supabase RLS Policy warning on mock test user. Applying local user state fallback.',
-    );
-    return {
-      id: userId,
-      email: 'expo-test@datingnote.com',
-      gender,
-      birth_year: birthYear ? parseInt(birthYear, 10) : undefined,
-      notification_allowed: notificationAllowed,
-      dating_started_at: datingStartedAt || undefined,
-      provider: 'google',
-      created_at: new Date().toISOString(),
-    };
-  }
-
   throw updateError || upsertError;
 }

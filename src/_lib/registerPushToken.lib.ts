@@ -2,6 +2,7 @@ import * as Notifications from 'expo-notifications';
 import Constants from 'expo-constants';
 import { Platform } from 'react-native';
 import { supabase } from '@/api/supabase';
+import { getCurrentUserId } from '@/_lib/getCurrentUserId.lib';
 
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
@@ -53,19 +54,19 @@ export async function registerPushTokenLib(): Promise<string | null> {
     console.log('Successfully acquired Expo Push Token:', pushToken);
 
     if (pushToken) {
-      const { data: authData } = await supabase.auth.getUser();
-      const currentUserId =
-        authData.user?.id || '00000000-0000-0000-0000-000000000001';
+      const currentUserId = await getCurrentUserId();
 
-      const { error } = await supabase
-        .from('users')
-        .update({ push_token: pushToken, notification_allowed: true })
-        .eq('id', currentUserId);
+      if (currentUserId) {
+        const { error } = await supabase
+          .from('users')
+          .update({ push_token: pushToken, notification_allowed: true })
+          .eq('id', currentUserId);
 
-      if (error) {
-        console.error('Failed to update push_token in Supabase:', error.message);
-      } else {
-        console.log('Updated push_token in Supabase for user:', currentUserId);
+        if (error) {
+          console.error('Failed to update push_token in Supabase:', error.message);
+        } else {
+          console.log('Updated push_token in Supabase for user:', currentUserId);
+        }
       }
     }
 

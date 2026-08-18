@@ -1,7 +1,6 @@
 import { supabase } from '@/api/supabase';
+import { getCurrentUserId } from '@/_lib/getCurrentUserId.lib';
 import { RelationshipProfile } from '../_state/useRelationshipProfileStore';
-
-const FALLBACK_USER_ID = '00000000-0000-0000-0000-000000000001';
 
 /**
  * Save user relationship profile to Supabase users table
@@ -10,8 +9,8 @@ export async function saveRelationshipProfileLib(
   profile: RelationshipProfile
 ): Promise<void> {
   try {
-    const { data: authData } = await supabase.auth.getUser();
-    const userId = authData.user?.id || FALLBACK_USER_ID;
+    const userId = await getCurrentUserId();
+    if (!userId) return;
 
     const payload = {
       relationship_profile: profile,
@@ -31,7 +30,7 @@ export async function saveRelationshipProfileLib(
       }
     }
   } catch (err) {
-    console.warn('saveRelationshipProfileLib fallback error:', err);
+    console.warn('saveRelationshipProfileLib error:', err);
   }
 }
 
@@ -40,8 +39,8 @@ export async function saveRelationshipProfileLib(
  */
 export async function getRelationshipProfileLib(): Promise<RelationshipProfile | null> {
   try {
-    const { data: authData } = await supabase.auth.getUser();
-    const userId = authData.user?.id || FALLBACK_USER_ID;
+    const userId = await getCurrentUserId();
+    if (!userId) return null;
 
     const { data, error } = await supabase
       .from('users')
@@ -55,7 +54,7 @@ export async function getRelationshipProfileLib(): Promise<RelationshipProfile |
 
     return data.relationship_profile as RelationshipProfile;
   } catch (err) {
-    console.warn('getRelationshipProfileLib fallback error:', err);
+    console.warn('getRelationshipProfileLib error:', err);
     return null;
   }
 }

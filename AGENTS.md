@@ -22,14 +22,13 @@
 - **SQL View 1 (`post_details_view`)**: 투표 수(`vote_o_count`, `vote_x_count`), 후기 유무(`has_review`), 댓글 수(`comment_count`), 이미지 URL 콤마 구분 결합(`image_urls`)을 집계/조인하여 반환.
 - **SQL View 2 (`comment_details_view`)**: 댓글별 좋아요 수(`like_count`) 집계.
 
-### 2) 데이터베이스 접근 및 Auth Fallback 규칙
+### 2) 사용자 식별 (getCurrentUserId) 규칙
 
-- Expo Go 테스트 및 비로그인 상태 호환성을 위해 Supabase 인증 사용자 식별 시 **Fallback Auth ID**를 반드시 사용합니다.
+- 사용자 식별 시 `src/_lib/getCurrentUserId.lib.ts`의 `getCurrentUserId()`를 표준으로 사용합니다.
   ```typescript
-  const { data: authData } = await supabase.auth.getUser();
-  const userId = authData.user?.id || '00000000-0000-0000-0000-000000000001';
+  const userId = await getCurrentUserId();
   ```
-- 데이터 조회 및 좋아요/댓글 쿼리 작성 시 `getCommentsLib` 및 `toggleCommentLikeLib` 등 모든 쿼리 함수에서 동일한 Fallback ID를 적용하여 쿼리 불일치를 방지합니다.
+- Zustand `useUserStore`의 로그인 사용자 정보를 우선 조회하고, 없을 경우 `supabase.auth.getUser()`를 조회합니다. 하드코딩된 특정 테스트 ID로의 강제 fallback은 금지합니다.
 
 ---
 

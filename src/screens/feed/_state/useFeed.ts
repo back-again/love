@@ -48,8 +48,7 @@ export function useFeed(
         data.pages
           .flatMap(page => {
             const userVoteMap = page.userVoteMap || {};
-            const currentUserId =
-              page.currentUserId || '00000000-0000-0000-0000-000000000001';
+            const currentUserId = page.currentUserId;
             return page.rawPosts.map((item: RawFeedPost, index: number) => {
               const images: string[] = item.image_urls
                 ? item.image_urls.split(',').filter(Boolean)
@@ -71,7 +70,7 @@ export function useFeed(
               return {
                 id: item.id,
                 userId: item.user_id,
-                isMyPost: item.user_id === currentUserId,
+                isMyPost: Boolean(currentUserId && item.user_id === currentUserId),
                 category: item.category || '',
                 isHot: totalVoteCount >= 20,
                 title: item.title,

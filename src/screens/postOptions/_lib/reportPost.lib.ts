@@ -1,4 +1,5 @@
 import { supabase } from '@/api/supabase';
+import { getCurrentUserId } from '@/_lib/getCurrentUserId.lib';
 
 interface ReportPostParams {
   postId: string;
@@ -11,9 +12,10 @@ export async function reportPostLib({
   reportedUserId,
   reason = '부적절한 게시글',
 }: ReportPostParams): Promise<void> {
-  const { data: authData } = await supabase.auth.getUser();
-  const reporterId =
-    authData.user?.id || '00000000-0000-0000-0000-000000000001';
+  const reporterId = await getCurrentUserId();
+  if (!reporterId) {
+    throw new Error('로그인이 필요합니다.');
+  }
 
   const rawPostId = postId.split('-loop-')[0];
 
@@ -29,5 +31,6 @@ export async function reportPostLib({
 
   if (error) {
     console.warn('reportPostLib error:', error.message);
+    throw error;
   }
 }

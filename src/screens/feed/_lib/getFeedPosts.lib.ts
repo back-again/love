@@ -1,4 +1,5 @@
 import { supabase } from '@/api/supabase';
+import { getCurrentUserId } from '@/_lib/getCurrentUserId.lib';
 
 export interface RawFeedPost {
   id: string;
@@ -29,7 +30,7 @@ export interface FetchFeedParams {
 export interface FetchFeedResponse {
   rawPosts: RawFeedPost[];
   userVoteMap: Record<string, 'O' | 'X'>;
-  currentUserId: string;
+  currentUserId: string | null;
   page: number;
   nextPage: number | null;
   hasMore: boolean;
@@ -45,18 +46,20 @@ export async function getFeedPostsLib({
     const from = (page - 1) * pageSize;
     const to = from + pageSize - 1;
 
-    const { data: authData } = await supabase.auth.getUser();
-    const userId = authData.user?.id || '00000000-0000-0000-0000-000000000001';
+    const userId = await getCurrentUserId();
 
     // 1. 차단된 사용자 목록 조회
-    const { data: userBlocks } = await supabase
-      .from('user_blocks')
-      .select('blocked_id')
-      .eq('blocker_id', userId);
+    const blockedUserIds = new Set<string>();
+    if (userId) {
+      const { data: userBlocks } = await supabase
+        .from('user_blocks')
+        .select('blocked_id')
+        .eq('blocker_id', userId);
 
-    const blockedUserIds = new Set(
-      (userBlocks || []).map((b: any) => b.blocked_id),
-    );
+      if (userBlocks) {
+        userBlocks.forEach((b: any) => blockedUserIds.add(b.blocked_id));
+      }
+    }
 
     let query = supabase.from('post_details_view').select('*');
 
@@ -106,16 +109,18 @@ export async function getFeedPostsLib({
     const postIds = filteredDbPosts.map((p: any) => p.id);
     const userVoteMap: Record<string, 'O' | 'X'> = {};
 
-    const { data: dbUserVotes } = await supabase
-      .from('votes')
-      .select('post_id, choice')
-      .eq('user_id', userId)
-      .in('post_id', postIds);
+    if (userId) {
+      const { data: dbUserVotes } = await supabase
+        .from('votes')
+        .select('post_id, choice')
+        .eq('user_id', userId)
+        .in('post_id', postIds);
 
-    if (dbUserVotes) {
-      dbUserVotes.forEach((v: any) => {
-        userVoteMap[v.post_id] = v.choice as 'O' | 'X';
-      });
+      if (dbUserVotes) {
+        dbUserVotes.forEach((v: any) => {
+          userVoteMap[v.post_id] = v.choice as 'O' | 'X';
+        });
+      }
     }
 
     const hasMore = filteredDbPosts.length === pageSize;
@@ -134,7 +139,7 @@ export async function getFeedPostsLib({
     return {
       rawPosts: [],
       userVoteMap: {},
-      currentUserId: '00000000-0000-0000-0000-000000000001',
+      currentUserId: null,
       page: 1,
       nextPage: null,
       hasMore: false,

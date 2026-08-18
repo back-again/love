@@ -1,4 +1,5 @@
 import { supabase } from '@/api/supabase';
+import { getCurrentUserId } from '@/_lib/getCurrentUserId.lib';
 import { sendPushNotificationLib } from '@/_lib/sendPushNotification.lib';
 
 export interface ToggleCommentLikeParams {
@@ -10,9 +11,10 @@ export async function toggleCommentLikeLib({
   commentId,
   isLiked,
 }: ToggleCommentLikeParams) {
-  const { data: authData } = await supabase.auth.getUser();
-  const userId =
-    authData.user?.id || '00000000-0000-0000-0000-000000000001';
+  const userId = await getCurrentUserId();
+  if (!userId) {
+    throw new Error('로그인이 필요합니다.');
+  }
 
   if (isLiked) {
     const { error } = await supabase

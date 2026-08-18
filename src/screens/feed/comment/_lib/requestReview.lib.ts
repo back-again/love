@@ -1,4 +1,5 @@
 import { supabase } from '@/api/supabase';
+import { getCurrentUserId } from '@/_lib/getCurrentUserId.lib';
 import { sendPushNotificationLib } from '@/_lib/sendPushNotification.lib';
 
 interface RequestReviewParams {
@@ -10,10 +11,10 @@ export async function requestReviewLib({
   postId,
   userId,
 }: RequestReviewParams): Promise<void> {
-  const activeUserId =
-    userId ||
-    (await supabase.auth.getUser()).data.user?.id ||
-    '00000000-0000-0000-0000-000000000001';
+  const activeUserId = userId || (await getCurrentUserId());
+  if (!activeUserId) {
+    throw new Error('로그인이 필요합니다.');
+  }
 
   const cleanPostId = postId.split('-loop-')[0];
 

@@ -1,9 +1,11 @@
 import { supabase } from '@/api/supabase';
+import { getCurrentUserId } from '@/_lib/getCurrentUserId.lib';
 
 export async function blockUserLib(targetUserId: string): Promise<void> {
-  const { data: authData } = await supabase.auth.getUser();
-  const blockerId =
-    authData.user?.id || '00000000-0000-0000-0000-000000000001';
+  const blockerId = await getCurrentUserId();
+  if (!blockerId) {
+    throw new Error('로그인이 필요합니다.');
+  }
 
   const { error } = await supabase
     .from('user_blocks')
@@ -14,5 +16,6 @@ export async function blockUserLib(targetUserId: string): Promise<void> {
 
   if (error) {
     console.warn('blockUserLib error:', error.message);
+    throw error;
   }
 }

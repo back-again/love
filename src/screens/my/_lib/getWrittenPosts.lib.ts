@@ -1,4 +1,5 @@
 import { supabase } from '@/api/supabase';
+import { getCurrentUserId } from '@/_lib/getCurrentUserId.lib';
 import { WrittenPost } from '../_component/WrittenPostCard';
 
 interface GetWrittenPostsParams {
@@ -9,7 +10,10 @@ export async function getWrittenPosts({
   userId,
 }: GetWrittenPostsParams = {}): Promise<WrittenPost[]> {
   try {
-    const targetUserId = userId || '00000000-0000-0000-0000-000000000001';
+    const targetUserId = userId || (await getCurrentUserId());
+    if (!targetUserId) {
+      return [];
+    }
 
     const { data, error } = await supabase
       .from('post_details_view')

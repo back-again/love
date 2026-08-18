@@ -1,4 +1,5 @@
 import { supabase } from '@/api/supabase';
+import { getCurrentUserId } from '@/_lib/getCurrentUserId.lib';
 import { CommentItem, ReplyItem } from '../_model/comment.model';
 
 export interface FetchCommentsParams {
@@ -43,9 +44,7 @@ export async function getCommentsLib({
     postAuthorId = postData?.user_id;
   }
 
-  const { data: authData } = await supabase.auth.getUser();
-  const currentUserId =
-    authData.user?.id || '00000000-0000-0000-0000-000000000001';
+  const currentUserId = await getCurrentUserId();
 
   const likeCountMap: Record<string, number> = {};
   const userLikedSet = new Set<string>();

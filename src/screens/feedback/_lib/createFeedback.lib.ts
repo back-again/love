@@ -1,4 +1,5 @@
 import { supabase } from '@/api/supabase';
+import { getCurrentUserId } from '@/_lib/getCurrentUserId.lib';
 import { InquiryFeedback } from '@/types/database.types';
 
 interface CreateFeedbackParams {
@@ -7,11 +8,16 @@ interface CreateFeedbackParams {
 }
 
 export async function createFeedback({
-  userId = '00000000-0000-0000-0000-000000000001',
+  userId,
   content,
 }: CreateFeedbackParams): Promise<InquiryFeedback> {
+  const activeUserId = userId || (await getCurrentUserId());
+  if (!activeUserId) {
+    throw new Error('로그인이 필요합니다.');
+  }
+
   const payload = {
-    user_id: userId,
+    user_id: activeUserId,
     type: 'FEEDBACK' as const,
     content,
   };
@@ -23,18 +29,6 @@ export async function createFeedback({
     .single();
 
   if (error) {
-    if (error.code === '42501' || error.message?.includes('security policy')) {
-      console.warn(
-        'Supabase RLS Policy warning on mock test user. Applying local feedback state fallback.',
-      );
-      return {
-        id: `mock-fb-${Date.now()}`,
-        user_id: userId,
-        type: 'FEEDBACK',
-        content,
-        created_at: new Date().toISOString(),
-      };
-    }
     throw error;
   }
 

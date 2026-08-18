@@ -1,4 +1,5 @@
 import { supabase } from '@/api/supabase';
+import { getCurrentUserId } from '@/_lib/getCurrentUserId.lib';
 import { uploadImageToR2 } from '@/api/storage.api';
 
 export interface CreatePostParams {
@@ -20,20 +21,10 @@ export async function createPost({
   voteO = '괜찮은데?',
   voteX = '난 싫어',
 }: CreatePostParams) {
-  // 1. 로그인 유저 ID 확인 및 users 테이블 레코드 보장 (FK 에러 방지)
-  let activeUserId = userId;
+  // 1. 로그인 유저 ID 확인
+  const activeUserId = userId || (await getCurrentUserId());
   if (!activeUserId) {
-    const { data: authData } = await supabase.auth.getUser();
-    activeUserId = authData.user?.id || '00000000-0000-0000-0000-000000000001';
-  }
-
-  try {
-    await supabase.from('users').upsert(
-      { id: activeUserId, email: 'expo-test@datingnote.com', nickname: '두두님' },
-      { onConflict: 'id' }
-    );
-  } catch (userErr) {
-    console.warn('User upsert fallback warning:', userErr);
+    throw new Error('로그인이 필요합니다.');
   }
 
   // 2. 카테고리 ID 확인 (categories 테이블 조회)
@@ -52,7 +43,7 @@ export async function createPost({
     console.warn('Category lookup warning:', catErr);
   }
 
-  // 3. 게시글 등록 전 Cloudflare R2 스토리지로 이미지 일괄 업로드 트랜잭션 처리
+  // 3. 게시글 등록 전 Cloudflare R2 스토리지로 이미지 일괄 업로드
   const uploadedImageUrls: string[] = [];
   if (images.length > 0) {
     try {
@@ -79,7 +70,6 @@ export async function createPost({
   let postData: any = null;
   let postError: any = null;
 
-  // Attempt 1: Full payload
   const fullPayload: any = {
     user_id: activeUserId,
     title,
@@ -94,7 +84,6 @@ export async function createPost({
   postData = res1.data;
   postError = res1.error;
 
-  // Attempt 2: Without vote_o / vote_x if columns don't exist on posts table
   if (postError) {
     console.warn('Posts insert Attempt 1 failed:', postError.message);
     const payload2: any = {
@@ -110,7 +99,6 @@ export async function createPost({
     postError = res2.error;
   }
 
-  // Attempt 3: Without category (using category_id only)
   if (postError) {
     console.warn('Posts insert Attempt 2 failed:', postError.message);
     const payload3: any = {
@@ -125,35 +113,12 @@ export async function createPost({
     postError = res3.error;
   }
 
-  // Attempt 4: Minimal (user_id, title, content)
-  if (postError) {
-    console.warn('Posts insert Attempt 3 failed:', postError.message);
-    const payload4 = {
-      user_id: activeUserId,
-      title,
-      content,
-    };
-    const res4 = await supabase.from('posts').insert([payload4]).select().single();
-    postData = res4.data;
-    postError = res4.error;
-  }
-
   if (postError) {
     console.error('CRITICAL: All Supabase posts insert attempts failed:', postError);
-    return {
-      id: String(Date.now()),
-      user_id: activeUserId,
-      title,
-      content,
-      category,
-      vote_o: voteO,
-      vote_x: voteX,
-      created_at: new Date().toISOString(),
-      images: uploadedImageUrls,
-    };
+    throw new Error('게시글 등록에 실패했습니다.');
   }
 
-  // 4. Supabase public.post_images 레코드 저장
+  // 5. Supabase public.post_images 레코드 저장
   if (uploadedImageUrls.length > 0 && postData?.id) {
     const imageRecords = uploadedImageUrls.map((url, index) => ({
       post_id: postData.id,
