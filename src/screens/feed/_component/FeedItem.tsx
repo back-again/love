@@ -373,12 +373,12 @@ const styles = StyleSheet.create({
     letterSpacing: -0.2,
   },
   categoryBadgePill: {
-    backgroundColor: '#FFF0F2',
+    backgroundColor: '#FFF8F8',
     paddingHorizontal: 8,
     paddingVertical: 3,
     borderRadius: 4,
     borderWidth: 1,
-    borderColor: '#FFF0F2',
+    borderColor: '#FFF8F8',
   },
   categoryBadgeText: {
     fontSize: 11,

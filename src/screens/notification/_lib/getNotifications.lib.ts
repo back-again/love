@@ -47,6 +47,8 @@ export async function getNotificationsLib(): Promise<NotificationItem[]> {
         message = `${choiceLabel}에 1표가 달렸어요!`;
       } else if (item.type === 'REVIEW_REQUEST') {
         message = '누군가가 내 고민의 후기를 궁금해하고 있어요!';
+      } else if (item.type === 'REVIEW_CREATED') {
+        message = item.content || '요청하신 사연의 후기가 도착했습니다! 💌';
       } else if (item.type === 'COMMENT_LIKE') {
         message = '내 댓글에 공감이 달렸어요! ❤️';
       } else {

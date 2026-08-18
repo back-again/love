@@ -17,6 +17,12 @@ export default function FeedScreen() {
     extrapolateRight: 'clamp',
   });
 
+  const categoryOpacity = scrollYAnim.interpolate({
+    inputRange: [0, 40],
+    outputRange: [1, 0],
+    extrapolate: 'clamp',
+  });
+
   return (
     <View style={styles.container}>
       <Animated.View
@@ -34,15 +40,12 @@ export default function FeedScreen() {
         />
       </Animated.View>
 
-      <View
-        style={[styles.categoryHeaderWrapper, { paddingTop: insets.top + 60 }]}
-      >
-        <CategoryHeaderArea />
-      </View>
-
       <Animated.ScrollView
         style={styles.scrollView}
-        contentContainerStyle={styles.communityListContent}
+        contentContainerStyle={[
+          styles.communityListContent,
+          { paddingTop: insets.top + 60 },
+        ]}
         showsVerticalScrollIndicator={false}
         pagingEnabled={false}
         scrollEventThrottle={16}
@@ -51,7 +54,12 @@ export default function FeedScreen() {
           { useNativeDriver: true },
         )}
       >
-        <GeneralPostsListAction />
+        <Animated.View style={{ opacity: categoryOpacity }}>
+          <CategoryHeaderArea />
+        </Animated.View>
+        <View style={styles.postsContainer}>
+          <GeneralPostsListAction />
+        </View>
       </Animated.ScrollView>
 
       <ImageModalAction />
@@ -84,12 +92,16 @@ const styles = StyleSheet.create({
     zIndex: 1,
   },
   communityListContent: {
-    paddingHorizontal: 16,
     paddingTop: 8,
     paddingBottom: 110,
     maxWidth: 450,
     width: '100%',
     alignSelf: 'center',
     backgroundColor: 'transparent',
+  },
+  postsContainer: {
+    width: '100%',
+    paddingHorizontal: 16,
+    marginTop: 14,
   },
 });

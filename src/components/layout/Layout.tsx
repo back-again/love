@@ -1,6 +1,8 @@
 import React, { ReactNode } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { StyleSheet, View, Animated } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { BlurView } from 'expo-blur';
+import { useHeaderStore } from '@/_state/useHeaderStore';
 
 import { HeaderTitleAction } from './_action/HeaderTitle.action';
 import { NotificationBellButtonAction } from './_action/NotificationBellButton.action';
@@ -29,29 +31,65 @@ export function Layout({
   children,
 }: LayoutProps) {
   const insets = useSafeAreaInsets();
+  const scrollYAnim = useHeaderStore(state => state.scrollYAnim);
   const isFeed = activeTab === 'feed';
+
+  const headerBgOpacity = scrollYAnim.interpolate({
+    inputRange: [60, 90],
+    outputRange: [0, 1],
+    extrapolate: 'clamp',
+  });
 
   return (
     <View style={styles.container}>
-      <View
-        style={[
-          styles.headerContainer,
-          { paddingTop: insets.top },
-          isFeed && styles.absoluteHeaderContainer,
-        ]}
-      >
-        <View style={styles.header}>
-          <HeaderTitleAction activeTab={activeTab} />
-
-          {activeTab === 'my' ? (
-            <OpenSettingBottomSheetAction onSettingsPress={onSettingsPress} />
-          ) : activeTab === 'create' || activeTab === 'chat' ? null : (
-            <NotificationBellButtonAction onTabChange={onTabChange} />
-          )}
+      {!isFeed && (
+        <View style={[styles.headerContainer, { paddingTop: insets.top }]}>
+          <View style={styles.header}>
+            <HeaderTitleAction activeTab={activeTab} />
+            {activeTab === 'my' ? (
+              <OpenSettingBottomSheetAction onSettingsPress={onSettingsPress} />
+            ) : activeTab === 'create' || activeTab === 'chat' ? null : (
+              <NotificationBellButtonAction onTabChange={onTabChange} />
+            )}
+          </View>
         </View>
-      </View>
+      )}
 
       <View style={styles.contentArea}>{children}</View>
+
+      {isFeed && (
+        <Animated.View
+          style={[
+            styles.headerContainer,
+            { paddingTop: insets.top },
+            styles.absoluteHeaderContainer,
+          ]}
+        >
+          <Animated.View
+            style={[
+              StyleSheet.absoluteFill,
+              {
+                opacity: headerBgOpacity,
+                shadowColor: '#000000',
+                shadowOffset: { width: 0, height: 4 },
+                shadowOpacity: 0.04,
+                shadowRadius: 8,
+                elevation: 3,
+              },
+            ]}
+          >
+            <BlurView
+              intensity={80}
+              tint="light"
+              style={StyleSheet.absoluteFill}
+            />
+          </Animated.View>
+          <View style={styles.header}>
+            <HeaderTitleAction activeTab={activeTab} />
+            <NotificationBellButtonAction onTabChange={onTabChange} />
+          </View>
+        </Animated.View>
+      )}
 
       <BottomNavArea activeTab={activeTab} onTabChange={onTabChange} />
 
@@ -82,6 +120,7 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     zIndex: 10,
+    elevation: 10,
   },
   header: {
     height: 60,

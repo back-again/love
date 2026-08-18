@@ -15,6 +15,6 @@ export function ReviewBannerArea() {
 const styles = StyleSheet.create({
   voteSectionCleanWrapper: {
     width: '100%',
-    paddingVertical: 10,
+    paddingVertical: 8,
   },
 });

@@ -20,7 +20,8 @@ export function CategoryHeaderArea() {
 const styles = StyleSheet.create({
   categoryBarContainer: {
     width: '100%',
-    paddingVertical: 6,
+    paddingTop: 14,
+    paddingBottom: 0,
     backgroundColor: 'transparent',
   },
   scrollView: {

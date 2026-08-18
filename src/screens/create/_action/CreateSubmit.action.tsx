@@ -6,6 +6,8 @@ import { useCreateForm } from '../_state/useCreateForm';
 import { createPost } from '../_lib/createPost.lib';
 import { updatePost } from '../_lib/updatePost.lib';
 import { useLocalPostsStore } from '@/screens/feed/_state/useLocalPostsStore';
+import { navigationRef } from '@/_lib/navigation';
+import { useCategoryStore } from '@/screens/feed/_state/useCategoryStore';
 
 import { inspectPostQualityLib } from '../_lib/inspectPostQuality.lib';
 
@@ -106,6 +108,10 @@ export function CreateSubmitAction() {
         );
       }
       reset();
+      useCategoryStore.getState().setSelectedCategory('전체');
+      if (navigationRef.current?.isReady()) {
+        navigationRef.current.navigate('Feed');
+      }
     },
     onError: (error) => {
       console.error('Submit post error:', error);

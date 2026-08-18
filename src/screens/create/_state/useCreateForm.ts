@@ -27,7 +27,7 @@ export interface CreateFormAction {
 
 const initialState: CreateFormState = {
   questionTitle: '',
-  category: '고민',
+  category: '',
   detailSituation: '',
   images: [],
   voteO: '',

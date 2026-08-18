@@ -1,89 +1,48 @@
 'use client';
 
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
-import { EnvelopeSvg } from '../_svg';
-import ReviewScreen from '@/screens/review/ReviewScreen';
-import { useReviewModalStore } from '@/screens/review/_state/useReviewModalStore';
+import { View, Text, StyleSheet } from 'react-native';
 import { useCommentStore } from '../_state/useCommentStore';
 
 export function ViewReviewBannerAction() {
-  const openReviewModal = useReviewModalStore(state => state.openReviewModal);
   const targetPost = useCommentStore(state => state.targetPost);
-
-  const handleOpenReview = () => {
-    openReviewModal({
-      mode: 'view',
-      reviewText: targetPost?.reviewContent || '',
-      postId: targetPost?.id,
-    });
-  };
+  const reviewContent = targetPost?.reviewContent || '';
 
   return (
-    <>
-      <TouchableOpacity
-        onPress={handleOpenReview}
-        activeOpacity={0.88}
-        style={styles.reviewGradientTouch}
-      >
-        <LinearGradient
-          colors={['#FEEBED', '#FFFFFF']}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 0 }}
-          style={styles.reviewGradientContainer}
-        >
-          <View style={styles.reviewIconBadgeWhite}>
-            <EnvelopeSvg />
-          </View>
-          <Text style={styles.reviewGradientButtonText}>
-            작성자의 후기 읽어보기
-          </Text>
-          <Text style={styles.reviewGradientArrow}>›</Text>
-        </LinearGradient>
-      </TouchableOpacity>
-    </>
+    <View style={styles.reviewCardContainer}>
+      <Text style={styles.reviewHeaderTitle}>📝 작성자 후기</Text>
+      <View style={styles.reviewCardBox}>
+        <Text style={styles.reviewCardBodyText}>{reviewContent}</Text>
+      </View>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  reviewGradientTouch: {
+  reviewCardContainer: {
     width: '100%',
-    borderRadius: 25,
-    marginTop: 6,
+    marginTop: 4,
     marginBottom: 4,
-    borderWidth: 1,
-    borderColor: '#FEB5C9',
   },
-  reviewGradientContainer: {
-    width: '100%',
-    height: 50,
-    borderRadius: 24,
-    paddingHorizontal: 16,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    overflow: 'hidden',
-  },
-  reviewIconBadgeWhite: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
-    backgroundColor: '#FFFFFF',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  reviewGradientButtonText: {
-    fontSize: 13.5,
-    fontWeight: '700',
+  reviewHeaderTitle: {
+    fontSize: 14,
+    fontWeight: '800',
     color: '#F9758D',
+    marginBottom: 8,
     letterSpacing: -0.2,
-    flex: 1,
-    marginLeft: 10,
   },
-  reviewGradientArrow: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: '#F9758D',
+  reviewCardBox: {
+    width: '100%',
+    backgroundColor: '#FFF8F8',
+    borderRadius: 16,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: '#FFE3E5',
+  },
+  reviewCardBodyText: {
+    fontSize: 14,
+    color: '#475569',
+    lineHeight: 21,
+    letterSpacing: -0.3,
   },
 });

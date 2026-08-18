@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { StyleSheet, View, Text, ScrollView } from 'react-native';
 import { useQuery } from '@tanstack/react-query';
 import { useShallow } from 'zustand/react/shallow';
@@ -25,12 +25,6 @@ export function CategorySelectArea() {
     }
     return DEFAULT_CATEGORIES;
   }, [categoryData]);
-
-  useEffect(() => {
-    if (!category && categories.length > 0) {
-      setCategory(categories[0]);
-    }
-  }, [categories, category, setCategory]);
 
   return (
     <View style={styles.createSection}>

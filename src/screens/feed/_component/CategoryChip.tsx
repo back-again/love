@@ -48,10 +48,10 @@ export function CategoryChip({
 
 const styles = StyleSheet.create({
   categoryChip: {
-    paddingHorizontal: 16,
+    paddingHorizontal: 12,
     paddingVertical: 8,
     height: 36,
-    minWidth: 56,
+    minWidth: 44,
     borderRadius: 10,
     backgroundColor: 'transparent',
     borderWidth: 1,
@@ -69,13 +69,13 @@ const styles = StyleSheet.create({
     borderWidth: 1,
   },
   categoryChipCommunityGlass: {
-    backgroundColor: '#FFFFFF',
-    borderColor: 'rgba(255, 93, 123, 0.15)',
+    backgroundColor: 'rgba(255, 255, 255, 0.6)',
+    borderColor: 'rgba(255, 255, 255, 0.3)',
     borderWidth: 1,
     shadowColor: '#000000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.03,
-    shadowRadius: 6,
+    shadowOpacity: 0.04,
+    shadowRadius: 8,
     elevation: 1,
   },
   categoryChipActiveCommunityGlass: {
