@@ -4,6 +4,7 @@ export interface ReplyItem {
   text: string;
   likes: number;
   isLiked?: boolean;
+  isMyComment?: boolean;
   votedChoice?: 'O' | 'X';
 }
 
@@ -13,6 +14,7 @@ export interface CommentItem {
   text: string;
   likes: number;
   isLiked?: boolean;
+  isMyComment?: boolean;
   votedChoice?: 'O' | 'X';
   replies?: ReplyItem[];
 }

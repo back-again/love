@@ -9,19 +9,19 @@ import {
 } from 'react-native';
 import { CenterModal } from '@/components/modal';
 
-interface VoteConfirmScreenProps {
+interface VoteConfirmModalProps {
   visible: boolean;
   onClose: () => void;
   onConfirm: () => void;
   choiceText?: string;
 }
 
-export function VoteConfirmScreen({
+export function VoteConfirmModal({
   visible,
   onClose,
   onConfirm,
   choiceText,
-}: VoteConfirmScreenProps) {
+}: VoteConfirmModalProps) {
   if (!visible) return null;
 
   return (
@@ -32,16 +32,13 @@ export function VoteConfirmScreen({
       dismissOnBackdropPress={true}
     >
       <View style={styles.modalCard}>
-        {/* Title */}
         <Text style={styles.modalTitle}>투표는 변경할 수 없어요</Text>
 
-        {/* Description */}
         <Text style={styles.modalSub}>
           작성자의 고민 해결에 큰 힘이 되는 투표에요.
           {'\n'}투표 후에는 선택을 바꿀 수 없으니 신중히 결정해 주세요!
         </Text>
 
-        {/* Selected Choice Pill Preview if provided */}
         {choiceText ? (
           <View style={styles.choicePreviewPill}>
             <Text style={styles.choicePreviewLabel}>선택한 항목:</Text>
@@ -51,7 +48,6 @@ export function VoteConfirmScreen({
           </View>
         ) : null}
 
-        {/* Action Buttons */}
         <View style={styles.buttonRow}>
           <TouchableOpacity
             style={styles.cancelButton}
@@ -76,9 +72,6 @@ export function VoteConfirmScreen({
     </CenterModal>
   );
 }
-
-// Export alias for backward compatibility
-export const VoteConfirmModal = VoteConfirmScreen;
 
 const styles = StyleSheet.create({
   modalCard: {

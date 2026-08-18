@@ -105,9 +105,9 @@ export function BottomNavArea({ activeTab, onTabChange }: BottomNavAreaProps) {
         />
         <LinearGradient
           colors={[
-            'rgba(255, 255, 255, 0.35)',
-            'rgba(255, 255, 255, 0.12)',
-            'rgba(255, 255, 255, 0.04)',
+            'rgba(255, 255, 255, 0.92)',
+            'rgba(255, 255, 255, 0.85)',
+            'rgba(255, 255, 255, 0.78)',
           ]}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
@@ -178,18 +178,18 @@ const styles = StyleSheet.create({
     height: '100%',
     borderRadius: 31.5,
     overflow: 'hidden',
-    borderWidth: 1.8,
-    borderColor: 'rgba(255, 255, 255, 0.65)',
+    borderWidth: 1.5,
+    borderColor: 'rgba(255, 255, 255, 0.85)',
     backgroundColor:
       Platform.OS === 'web'
-        ? 'rgba(255, 255, 255, 0.15)'
-        : 'rgba(255, 255, 255, 0.22)',
+        ? 'rgba(255, 255, 255, 0.82)'
+        : 'rgba(255, 255, 255, 0.85)',
     ...(Platform.OS === 'web'
       ? {
           backdropFilter: 'blur(30px) saturate(210%)',
           WebkitBackdropFilter: 'blur(30px) saturate(210%)',
           boxShadow:
-            'inset 1px 1px 2px 0px rgba(255, 255, 255, 0.8), inset -1px -1px 2px 0px rgba(0, 0, 0, 0.03), 0 12px 20px 0px rgba(0, 0, 0, 0.12)',
+            'inset 1px 1px 2px 0px rgba(255, 255, 255, 0.9), inset -1px -1px 2px 0px rgba(0, 0, 0, 0.03), 0 12px 20px 0px rgba(0, 0, 0, 0.12)',
         }
       : {}),
   },

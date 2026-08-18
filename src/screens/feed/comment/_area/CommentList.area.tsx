@@ -6,23 +6,28 @@ import {
   Text,
   StyleSheet,
   ActivityIndicator,
+  Alert,
 } from 'react-native';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useShallow } from 'zustand/react/shallow';
 import { useCommentStore } from '../_state/useCommentStore';
+import { useToastStore } from '@/_state/useToastStore';
 import { getCommentsLib } from '../_lib/getComments.lib';
 import { toggleCommentLikeLib } from '../_lib/toggleCommentLike.lib';
+import { deleteCommentLib } from '../_lib/deleteComment.lib';
 import { CommentItem as CommentItemType } from '../_model/comment.model';
 import { CommentItem } from '../_component/CommentItem';
 
 export function CommentListArea() {
   const queryClient = useQueryClient();
+  const showToast = useToastStore(state => state.showToast);
 
-  const { visible, targetPost, setReplyTarget } = useCommentStore(
+  const { visible, targetPost, setReplyTarget, setEditTarget } = useCommentStore(
     useShallow(state => ({
       visible: state.visible,
       targetPost: state.targetPost,
       setReplyTarget: state.setReplyTarget,
+      setEditTarget: state.setEditTarget,
     })),
   );
 
@@ -33,6 +38,30 @@ export function CommentListArea() {
     queryFn: () => getCommentsLib({ postId }),
     enabled: Boolean(visible && postId),
   });
+
+  const { mutate: deleteComment } = useMutation({
+    mutationFn: async (commentId: string) => {
+      await deleteCommentLib({ commentId });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['comments', postId] });
+      showToast('댓글이 삭제되었습니다.');
+    },
+    onError: () => {
+      showToast('댓글 삭제에 실패했습니다.');
+    },
+  });
+
+  const handleDeleteComment = (commentId: string) => {
+    Alert.alert('댓글 삭제', '댓글을 정말 삭제하시겠습니까?', [
+      { text: '취소', style: 'cancel' },
+      {
+        text: '삭제',
+        style: 'destructive',
+        onPress: () => deleteComment(commentId),
+      },
+    ]);
+  };
 
   const { mutate: toggleLike } = useMutation({
     mutationFn: async ({
@@ -133,6 +162,8 @@ export function CommentListArea() {
             isLast={idx === fetchedComments.length - 1}
             onReply={setReplyTarget}
             onToggleLike={toggleLike}
+            onEdit={setEditTarget}
+            onDelete={handleDeleteComment}
           />
         ))
       )}

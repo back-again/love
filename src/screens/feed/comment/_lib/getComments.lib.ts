@@ -64,6 +64,7 @@ export async function getCommentsLib({
     const userLabel = getUserLabel(c.user_id);
     const likes = likeCountMap[c.id] || 0;
     const isLiked = userLikedSet.has(c.id);
+    const isMyComment = Boolean(currentUserId && c.user_id === currentUserId);
     const votedChoice = (c.voted_choice as 'O' | 'X') || undefined;
 
     if (isReply && c.parent_id) {
@@ -75,6 +76,7 @@ export async function getCommentsLib({
         text: c.content,
         likes,
         isLiked,
+        isMyComment,
       });
     } else {
       rootComments.push({
@@ -84,6 +86,7 @@ export async function getCommentsLib({
         text: c.content,
         likes,
         isLiked,
+        isMyComment,
         replies: [],
       });
     }

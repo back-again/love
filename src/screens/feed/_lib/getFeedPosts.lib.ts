@@ -80,20 +80,19 @@ export async function getFeedPostsLib({
 
     const postIds = filteredDbPosts.map((p: any) => p.id);
     const { data: authData } = await supabase.auth.getUser();
+    const userId = authData.user?.id || '00000000-0000-0000-0000-000000000001';
     const userVoteMap: Record<string, 'O' | 'X'> = {};
 
-    if (authData.user?.id) {
-      const { data: dbUserVotes } = await supabase
-        .from('votes')
-        .select('post_id, choice')
-        .eq('user_id', authData.user.id)
-        .in('post_id', postIds);
+    const { data: dbUserVotes } = await supabase
+      .from('votes')
+      .select('post_id, choice')
+      .eq('user_id', userId)
+      .in('post_id', postIds);
 
-      if (dbUserVotes) {
-        dbUserVotes.forEach((v: any) => {
-          userVoteMap[v.post_id] = v.choice as 'O' | 'X';
-        });
-      }
+    if (dbUserVotes) {
+      dbUserVotes.forEach((v: any) => {
+        userVoteMap[v.post_id] = v.choice as 'O' | 'X';
+      });
     }
 
     const hasMore = filteredDbPosts.length === pageSize;

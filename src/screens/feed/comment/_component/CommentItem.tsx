@@ -11,6 +11,8 @@ interface CommentItemProps {
   isLast?: boolean;
   onReply: (target: { commentId: string; userName: string }) => void;
   onToggleLike: (params: { commentId: string; isLiked?: boolean }) => void;
+  onEdit: (params: { commentId: string; text: string }) => void;
+  onDelete: (commentId: string) => void;
 }
 
 export function CommentItem({
@@ -18,13 +20,12 @@ export function CommentItem({
   isLast,
   onReply,
   onToggleLike,
+  onEdit,
+  onDelete,
 }: CommentItemProps) {
   return (
     <View
-      style={[
-        styles.commentRowContainer,
-        isLast && { borderBottomWidth: 0 },
-      ]}
+      style={[styles.commentRowContainer, isLast && { borderBottomWidth: 0 }]}
     >
       <View style={styles.commentHeaderRow}>
         <Text style={styles.userNameText}>{item.user}</Text>
@@ -43,18 +44,48 @@ export function CommentItem({
       <Text style={styles.commentBodyText}>{item.text}</Text>
 
       <View style={styles.commentActionRow}>
-        <TouchableOpacity
-          style={styles.replyBtn}
-          onPress={() =>
-            onReply({
-              commentId: item.id,
-              userName: item.user,
-            })
-          }
-          activeOpacity={0.7}
-        >
-          <Text style={styles.replyBtnText}>답글 달기</Text>
-        </TouchableOpacity>
+        <View style={styles.actionLeftGroup}>
+          <TouchableOpacity
+            style={styles.replyBtn}
+            onPress={() =>
+              onReply({
+                commentId: item.id,
+                userName: item.user,
+              })
+            }
+            activeOpacity={0.7}
+          >
+            <Text style={styles.replyBtnText}>답글 달기</Text>
+          </TouchableOpacity>
+
+          {item.isMyComment && (
+            <>
+              <Text style={styles.actionDotDivider}>·</Text>
+              <TouchableOpacity
+                style={styles.replyBtn}
+                onPress={() =>
+                  onEdit({
+                    commentId: item.id,
+                    text: item.text,
+                  })
+                }
+                activeOpacity={0.7}
+              >
+                <Text style={styles.replyBtnText}>수정</Text>
+              </TouchableOpacity>
+              <Text style={styles.actionDotDivider}>·</Text>
+              <TouchableOpacity
+                style={styles.replyBtn}
+                onPress={() => onDelete(item.id)}
+                activeOpacity={0.7}
+              >
+                <Text style={[styles.replyBtnText, styles.deleteBtnText]}>
+                  삭제
+                </Text>
+              </TouchableOpacity>
+            </>
+          )}
+        </View>
 
         <TouchableOpacity
           style={styles.thumbLikeBtn}
@@ -82,6 +113,8 @@ export function CommentItem({
               key={reply.id}
               reply={reply}
               onToggleLike={onToggleLike}
+              onEdit={onEdit}
+              onDelete={onDelete}
             />
           ))}
         </View>
@@ -155,6 +188,15 @@ const styles = StyleSheet.create({
     paddingRight: 4,
     marginTop: 2,
   },
+  actionLeftGroup: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  actionDotDivider: {
+    fontSize: 12,
+    color: '#CBD5E1',
+  },
   replyBtn: {
     paddingVertical: 2,
   },
@@ -162,6 +204,9 @@ const styles = StyleSheet.create({
     fontSize: 12.5,
     fontWeight: '600',
     color: '#8F8F8F',
+  },
+  deleteBtnText: {
+    color: '#EF4444',
   },
   thumbLikeBtn: {
     flexDirection: 'row',

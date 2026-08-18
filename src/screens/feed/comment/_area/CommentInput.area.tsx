@@ -9,6 +9,7 @@ import { useShallow } from 'zustand/react/shallow';
 import { SendSvg } from '../_svg';
 import { useCommentStore } from '../_state/useCommentStore';
 import { createCommentLib } from '../_lib/createComment.lib';
+import { updateCommentLib } from '../_lib/updateComment.lib';
 
 export function CommentInputArea() {
   const queryClient = useQueryClient();
@@ -31,16 +32,25 @@ export function CommentInputArea() {
     };
   }, []);
 
-  const { targetPost, replyTarget, setReplyTarget } = useCommentStore(
-    useShallow(state => ({
-      targetPost: state.targetPost,
-      replyTarget: state.replyTarget,
-      setReplyTarget: state.setReplyTarget,
-    })),
-  );
+  const { targetPost, replyTarget, editTarget, setReplyTarget, setEditTarget } =
+    useCommentStore(
+      useShallow(state => ({
+        targetPost: state.targetPost,
+        replyTarget: state.replyTarget,
+        editTarget: state.editTarget,
+        setReplyTarget: state.setReplyTarget,
+        setEditTarget: state.setEditTarget,
+      })),
+    );
 
   const postId = targetPost?.id || '';
   const [newCommentText, setNewCommentText] = useState('');
+
+  useEffect(() => {
+    if (editTarget) {
+      setNewCommentText(editTarget.text);
+    }
+  }, [editTarget]);
 
   const { mutate: submitComment, isPending: isSubmitting } = useMutation({
     mutationFn: async ({
@@ -66,13 +76,39 @@ export function CommentInputArea() {
     },
   });
 
-  const handleAddComment = () => {
-    if (!newCommentText.trim() || isSubmitting) return;
+  const { mutate: submitEditComment, isPending: isEditing } = useMutation({
+    mutationFn: async ({
+      commentId,
+      content,
+    }: {
+      commentId: string;
+      content: string;
+    }) => {
+      await updateCommentLib({ commentId, content });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['comments', postId] });
+      setNewCommentText('');
+      setEditTarget(null);
+    },
+  });
 
-    submitComment({
-      text: newCommentText.trim(),
-      parentId: replyTarget?.commentId ?? null,
-    });
+  const isProcessing = isSubmitting || isEditing;
+
+  const handleSubmit = () => {
+    if (!newCommentText.trim() || isProcessing) return;
+
+    if (editTarget) {
+      submitEditComment({
+        commentId: editTarget.commentId,
+        content: newCommentText.trim(),
+      });
+    } else {
+      submitComment({
+        text: newCommentText.trim(),
+        parentId: replyTarget?.commentId ?? null,
+      });
+    }
   };
 
   const dynamicPaddingBottom = isKeyboardOpen
@@ -86,7 +122,26 @@ export function CommentInputArea() {
         { paddingBottom: dynamicPaddingBottom },
       ]}
     >
-      {replyTarget && (
+      {editTarget && (
+        <View style={styles.replyTargetBar}>
+          <Text style={styles.replyTargetText}>
+            <Text style={{ fontWeight: '700', color: '#FF3B6B' }}>
+              댓글 수정 중
+            </Text>
+          </Text>
+          <TouchableOpacity
+            onPress={() => {
+              setEditTarget(null);
+              setNewCommentText('');
+            }}
+            activeOpacity={0.7}
+          >
+            <Text style={styles.replyCancelText}>취소</Text>
+          </TouchableOpacity>
+        </View>
+      )}
+
+      {replyTarget && !editTarget && (
         <View style={styles.replyTargetBar}>
           <Text style={styles.replyTargetText}>
             <Text style={{ fontWeight: '700', color: '#FF3B6B' }}>
@@ -107,24 +162,26 @@ export function CommentInputArea() {
         <BottomSheetTextInput
           style={styles.commentInput}
           placeholder={
-            replyTarget
-              ? `@${replyTarget.userName} 님에게 답글 남기기...`
-              : '댓글을 입력하세요...'
+            editTarget
+              ? '댓글을 수정하세요...'
+              : replyTarget
+                ? `@${replyTarget.userName} 님에게 답글 남기기...`
+                : '댓글을 입력하세요...'
           }
           placeholderTextColor="#94A3B8"
           value={newCommentText}
           onChangeText={setNewCommentText}
-          onSubmitEditing={handleAddComment}
+          onSubmitEditing={handleSubmit}
         />
         <TouchableOpacity
           style={[
             styles.sendBtn,
-            newCommentText.trim() && !isSubmitting
+            newCommentText.trim() && !isProcessing
               ? styles.sendBtnActive
               : styles.sendBtnDisabled,
           ]}
-          onPress={handleAddComment}
-          disabled={!newCommentText.trim() || isSubmitting}
+          onPress={handleSubmit}
+          disabled={!newCommentText.trim() || isProcessing}
           activeOpacity={0.8}
         >
           <SendSvg color={newCommentText.trim() ? '#FFFFFF' : '#94A3B8'} />

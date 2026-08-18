@@ -8,9 +8,16 @@ import { ThumbLikeSvg } from '../_svg';
 interface ReplyItemProps {
   reply: ReplyItemType;
   onToggleLike: (params: { commentId: string; isLiked?: boolean }) => void;
+  onEdit: (params: { commentId: string; text: string }) => void;
+  onDelete: (commentId: string) => void;
 }
 
-export function ReplyItem({ reply, onToggleLike }: ReplyItemProps) {
+export function ReplyItem({
+  reply,
+  onToggleLike,
+  onEdit,
+  onDelete,
+}: ReplyItemProps) {
   return (
     <View style={styles.replyItemRow}>
       <View style={styles.commentHeaderRow}>
@@ -30,7 +37,35 @@ export function ReplyItem({ reply, onToggleLike }: ReplyItemProps) {
       <Text style={styles.commentBodyText}>{reply.text}</Text>
 
       <View style={styles.commentActionRow}>
-        <View />
+        <View style={styles.actionLeftGroup}>
+          {reply.isMyComment && (
+            <>
+              <TouchableOpacity
+                style={styles.replyBtn}
+                onPress={() =>
+                  onEdit({
+                    commentId: reply.id,
+                    text: reply.text,
+                  })
+                }
+                activeOpacity={0.7}
+              >
+                <Text style={styles.replyBtnText}>수정</Text>
+              </TouchableOpacity>
+              <Text style={styles.actionDotDivider}>·</Text>
+              <TouchableOpacity
+                style={styles.replyBtn}
+                onPress={() => onDelete(reply.id)}
+                activeOpacity={0.7}
+              >
+                <Text style={[styles.replyBtnText, styles.deleteBtnText]}>
+                  삭제
+                </Text>
+              </TouchableOpacity>
+            </>
+          )}
+        </View>
+
         <TouchableOpacity
           style={styles.thumbLikeBtn}
           onPress={() =>
@@ -117,6 +152,26 @@ const styles = StyleSheet.create({
     paddingLeft: 2,
     paddingRight: 4,
     marginTop: 2,
+  },
+  actionLeftGroup: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  actionDotDivider: {
+    fontSize: 12,
+    color: '#CBD5E1',
+  },
+  replyBtn: {
+    paddingVertical: 2,
+  },
+  replyBtnText: {
+    fontSize: 12.5,
+    fontWeight: '600',
+    color: '#8F8F8F',
+  },
+  deleteBtnText: {
+    color: '#EF4444',
   },
   thumbLikeBtn: {
     flexDirection: 'row',
