@@ -126,7 +126,7 @@ CREATE TABLE IF NOT EXISTS public.inquiries_feedback (
 -- ========================================================
 DROP VIEW IF EXISTS public.post_details_view CASCADE;
 CREATE OR REPLACE VIEW public.post_details_view AS
-SELECT 
+SELECT
   p.id,
   p.user_id,
   p.category_id,
@@ -168,7 +168,7 @@ LEFT JOIN (
 -- ========================================================
 DROP VIEW IF EXISTS public.comment_details_view CASCADE;
 CREATE OR REPLACE VIEW public.comment_details_view AS
-SELECT 
+SELECT
   c.id,
   c.post_id,
   c.user_id,
@@ -182,7 +182,7 @@ LEFT JOIN (
 ) cl ON c.id = cl.comment_id;
 
 -- ========================================================
--- RLS DISABLE COMMANDS (Run this to bypass RLS errors completely)
+-- RLS DISABLE COMMANDS (Run this to bypass RLS errors completely for local testing)
 -- ========================================================
 ALTER TABLE public.categories DISABLE ROW LEVEL SECURITY;
 ALTER TABLE public.users DISABLE ROW LEVEL SECURITY;
@@ -198,17 +198,81 @@ ALTER TABLE public.user_reports DISABLE ROW LEVEL SECURITY;
 ALTER TABLE public.inquiries_feedback DISABLE ROW LEVEL SECURITY;
 
 -- ========================================================
+-- RLS ENABLE & SECURITY POLICIES (Only Logged-in / Authenticated Users)
+-- ========================================================
+
+-- 1. categories
+ALTER TABLE public.categories ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Authenticated users full access to categories" ON public.categories
+  FOR ALL TO authenticated USING (true) WITH CHECK (true);
+
+-- 2. users
+ALTER TABLE public.users ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Authenticated users full access to users" ON public.users
+  FOR ALL TO authenticated USING (true) WITH CHECK (true);
+
+-- 3. posts
+ALTER TABLE public.posts ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Authenticated users full access to posts" ON public.posts
+  FOR ALL TO authenticated USING (true) WITH CHECK (true);
+
+-- 4. post_images
+ALTER TABLE public.post_images ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Authenticated users full access to post_images" ON public.post_images
+  FOR ALL TO authenticated USING (true) WITH CHECK (true);
+
+-- 5. votes
+ALTER TABLE public.votes ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Authenticated users full access to votes" ON public.votes
+  FOR ALL TO authenticated USING (true) WITH CHECK (true);
+
+-- 6. comments
+ALTER TABLE public.comments ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Authenticated users full access to comments" ON public.comments
+  FOR ALL TO authenticated USING (true) WITH CHECK (true);
+
+-- 7. comment_likes
+ALTER TABLE public.comment_likes ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Authenticated users full access to comment_likes" ON public.comment_likes
+  FOR ALL TO authenticated USING (true) WITH CHECK (true);
+
+-- 8. review_requests
+ALTER TABLE public.review_requests ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Authenticated users full access to review_requests" ON public.review_requests
+  FOR ALL TO authenticated USING (true) WITH CHECK (true);
+
+-- 9. notifications
+ALTER TABLE public.notifications ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Authenticated users full access to notifications" ON public.notifications
+  FOR ALL TO authenticated USING (true) WITH CHECK (true);
+
+-- 10. user_blocks
+ALTER TABLE public.user_blocks ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Authenticated users full access to user_blocks" ON public.user_blocks
+  FOR ALL TO authenticated USING (true) WITH CHECK (true);
+
+-- 11. user_reports
+ALTER TABLE public.user_reports ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Authenticated users full access to user_reports" ON public.user_reports
+  FOR ALL TO authenticated USING (true) WITH CHECK (true);
+
+-- 12. inquiries_feedback
+ALTER TABLE public.inquiries_feedback ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Authenticated users full access to inquiries_feedback" ON public.inquiries_feedback
+  FOR ALL TO authenticated USING (true) WITH CHECK (true);
+
+-- ========================================================
 -- Seed Mock Test Users for Expo Go Testing (1 ~ 100)
 -- ========================================================
 INSERT INTO auth.users (id, email)
-SELECT 
+SELECT
   ('00000000-0000-0000-0000-' || LPAD(i::text, 12, '0'))::uuid,
   CASE WHEN i = 1 THEN 'expo-test@datingnote.com' ELSE 'user' || i || '@datingnote.com' END
 FROM generate_series(1, 100) AS i
 ON CONFLICT (id) DO NOTHING;
 
 INSERT INTO public.users (id, email, provider, gender, birth_year, notification_allowed, dating_started_at, created_at)
-SELECT 
+SELECT
   ('00000000-0000-0000-0000-' || LPAD(i::text, 12, '0'))::uuid,
   CASE WHEN i = 1 THEN 'expo-test@datingnote.com' ELSE 'user' || i || '@datingnote.com' END,
   CASE WHEN i % 2 = 0 THEN 'google' ELSE 'apple' END,
@@ -224,7 +288,7 @@ ON CONFLICT (id) DO NOTHING;
 -- Seed Categories (Actual UUIDs)
 -- ========================================================
 INSERT INTO public.categories (id, name, order_index)
-VALUES 
+VALUES
   ('c087b497-6a3d-4bc1-a1dd-ee0f0dba9d64', '연애/썸', 1),
   ('324ade76-827f-4c49-b179-4b3438652d60', '이별/재회', 2),
   ('8f47d20f-7bc2-4b1e-bfec-0645ca3d5abd', '19/관계', 3),
@@ -235,7 +299,7 @@ ON CONFLICT (id) DO UPDATE SET name = EXCLUDED.name, order_index = EXCLUDED.orde
 -- Seed Posts (Stories 1 ~ 6 from seed.js)
 -- ========================================================
 INSERT INTO public.posts (id, user_id, category_id, title, content, vote_o, vote_x, review_content, created_at)
-VALUES 
+VALUES
   (
     '20000000-0000-0000-0000-000000000001',
     '00000000-0000-0000-0000-000000000001',
@@ -308,10 +372,10 @@ ON CONFLICT (id) DO NOTHING;
 -- Seed Votes (All Users in public.users Voting on All Posts in public.posts)
 -- ========================================================
 INSERT INTO public.votes (post_id, user_id, choice, created_at)
-SELECT 
+SELECT
   p.id AS post_id,
   u.id AS user_id,
-  CASE 
+  CASE
     -- Post 1: biasX = 0.75 (25% O, 75% X)
     WHEN p.id = '20000000-0000-0000-0000-000000000001' THEN CASE WHEN (abs(hashtext(u.id::text || 'p1')) % 100 < 25) THEN 'O' ELSE 'X' END
     -- Post 2: biasX = 0.35 (65% O, 35% X)
@@ -336,7 +400,7 @@ ON CONFLICT (post_id, user_id) DO UPDATE SET choice = EXCLUDED.choice;
 -- Seed Comments (Detailed Comments for each Post from seed.js)
 -- ========================================================
 INSERT INTO public.comments (id, post_id, user_id, content, voted_choice, created_at)
-VALUES 
+VALUES
   -- Post 1 Comments
   ('30000000-0000-0000-0000-000000000101', '20000000-0000-0000-0000-000000000001', '00000000-0000-0000-0000-000000000004', '나중에 정산하는 건 쪼끔 아쉽지만 그래도 돈 계산 확실한 게 오히려 깔끔하고 낫지 않나? 요즘은 더치페이가 대세임.', 'O', NOW() - INTERVAL '50 seconds'),
   ('30000000-0000-0000-0000-000000000102', '20000000-0000-0000-0000-000000000001', '00000000-0000-0000-0000-000000000008', '첫 만남에 눈치 안 보고 정확하게 반반 하는 게 난 더 편하더라. 한 번 더 만나보고 결정해도 늦지 않음.', 'O', NOW() - INTERVAL '45 seconds'),
@@ -383,7 +447,7 @@ ON CONFLICT (id) DO NOTHING;
 -- Seed Comment Likes
 -- ========================================================
 INSERT INTO public.comment_likes (comment_id, user_id, created_at)
-SELECT 
+SELECT
   c.id AS comment_id,
   ('00000000-0000-0000-0000-' || LPAD(u.i::text, 12, '0'))::uuid AS user_id,
   NOW() - (u.i || ' seconds')::interval AS created_at
