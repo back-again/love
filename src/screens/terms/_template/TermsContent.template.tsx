@@ -109,6 +109,12 @@ export function TermsContentTemplate() {
         2. 서비스는 회원 간에 발생한 분쟁이나 감정적 피해에 대해 책임을 지지 않습니다.
       </Text>
 
+      <Text style={styles.articleTitle}>제9조 (문의사항 및 고객지원)</Text>
+      <Text style={styles.articleBody}>
+        서비스 이용 관련 고충, 신고 문의, 피드백 등은 아래 공식 이메일 주소를 통해 주시면 신속하게 조치하겠습니다.{"\n"}
+        • 이메일: rsj01223@gmail.com
+      </Text>
+
       <Text style={styles.dateStampText}>
         공고일자: 2026년 08월 19일 | 개정 및 시행일자: 2026년 08월 19일
       </Text>
