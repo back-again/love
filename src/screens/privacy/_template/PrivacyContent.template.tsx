@@ -51,7 +51,7 @@ export function PrivacyContentTemplate() {
       <Text style={styles.articleTitle}>8. 개인정보 보호책임자 및 고충처리</Text>
       <Text style={styles.articleBody}>
         • 책임자: 연OX 운영 책임자{"\n"}
-        • 이메일: support@yeonox.com
+        • 이메일: rsj01223@gmail.com
       </Text>
 
       <Text style={styles.dateStampText}>

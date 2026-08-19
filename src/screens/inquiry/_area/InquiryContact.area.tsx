@@ -5,7 +5,7 @@ export function InquiryContactArea() {
   return (
     <View style={styles.inquiryContactBox}>
       <Text style={styles.inquiryContactTitle}>1:1 이메일 문의</Text>
-      <Text style={styles.inquiryContactEmail}>support@odaplove.com</Text>
+      <Text style={styles.inquiryContactEmail}>rsj01223@gmail.com</Text>
       <Text style={styles.inquiryContactSub}>
         평일 10:00 ~ 18:00 (주말/공휴일 제외)
       </Text>
