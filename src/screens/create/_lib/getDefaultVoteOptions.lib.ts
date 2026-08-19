@@ -10,8 +10,8 @@ export function getDefaultVoteOptions(
 ): { voteO: string; voteX: string } {
   const result = getRawDefaultVoteOptions(title, content, itemVoteO, itemVoteX);
   return {
-    voteO: result.voteO.slice(0, 8).trim(),
-    voteX: result.voteX.slice(0, 8).trim(),
+    voteO: result.voteO.slice(0, 15).trim(),
+    voteX: result.voteX.slice(0, 15).trim(),
   };
 }
 
