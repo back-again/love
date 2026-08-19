@@ -167,11 +167,7 @@ export function FeedItem({ post }: FeedItemProps) {
                 activeOpacity={0.88}
               >
                 <View style={styles.votedBarTrack}>
-                  <Text
-                    style={styles.votedBarOptionTextUnvoted}
-                    numberOfLines={1}
-                    ellipsizeMode="tail"
-                  >
+                  <Text style={styles.votedBarOptionTextUnvoted}>
                     <Text style={styles.badgeOText}>O </Text>
                     <Text style={styles.optionContentText}>{cleanOptionO}</Text>
                   </Text>
@@ -187,11 +183,7 @@ export function FeedItem({ post }: FeedItemProps) {
                 activeOpacity={0.88}
               >
                 <View style={styles.votedBarTrack}>
-                  <Text
-                    style={styles.votedBarOptionTextUnvoted}
-                    numberOfLines={1}
-                    ellipsizeMode="tail"
-                  >
+                  <Text style={styles.votedBarOptionTextUnvoted}>
                     <Text style={styles.badgeXText}>X </Text>
                     <Text style={styles.optionContentText}>{cleanOptionX}</Text>
                   </Text>
@@ -218,11 +210,7 @@ export function FeedItem({ post }: FeedItemProps) {
                       { width: `${percentO}%` },
                     ]}
                   />
-                  <Text
-                    style={styles.votedBarOptionText}
-                    numberOfLines={1}
-                    ellipsizeMode="tail"
-                  >
+                  <Text style={styles.votedBarOptionText}>
                     <Text
                       style={
                         selectedVote === 'O'
@@ -273,11 +261,7 @@ export function FeedItem({ post }: FeedItemProps) {
                       { width: `${percentX}%` },
                     ]}
                   />
-                  <Text
-                    style={styles.votedBarOptionText}
-                    numberOfLines={1}
-                    ellipsizeMode="tail"
-                  >
+                  <Text style={styles.votedBarOptionText}>
                     <Text
                       style={
                         selectedVote === 'X'
