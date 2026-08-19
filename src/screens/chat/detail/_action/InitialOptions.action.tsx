@@ -9,8 +9,6 @@ export function InitialOptionsAction() {
 
   return (
     <View style={styles.bubbleContainer}>
-      <Text style={styles.promptText}>원하시는 대화 방식을 선택해 주세요 💬</Text>
-      
       <View style={styles.optionsWrap}>
         <TouchableOpacity
           style={styles.optionBtn}
