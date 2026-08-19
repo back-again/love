@@ -24,6 +24,7 @@ interface ChatDetailState {
   confirmPostSelectionInChat: (
     posts?: Array<{ id: string; title: string }>,
   ) => void;
+  selectInitialOption: (optionKey: 'POSTS' | 'TOPICS' | 'CHAT') => void;
 }
 
 export const useChatDetailStore = create<ChatDetailState>((set, get) => ({
@@ -56,7 +57,7 @@ export const useChatDetailStore = create<ChatDetailState>((set, get) => ({
           id: `c_${Date.now()}`,
           sender: 'counselor',
           text: greetingText,
-          isPostSelectorPrompt: true,
+          isInitialOptionsPrompt: true,
           timestamp: new Date().toLocaleTimeString('ko-KR', {
             hour: '2-digit',
             minute: '2-digit',
@@ -77,6 +78,64 @@ export const useChatDetailStore = create<ChatDetailState>((set, get) => ({
       isTyping: false,
       hasDiagnosedPosts: false,
     });
+  },
+
+  selectInitialOption: (optionKey: 'POSTS' | 'TOPICS' | 'CHAT') => {
+    const { messages } = get();
+    const updatedMessages = messages.map(msg =>
+      msg.isInitialOptionsPrompt ? { ...msg, isInitialOptionsPrompt: false } : msg
+    );
+
+    let userText = '';
+    let counselorText = '';
+    let isPostPrompt = false;
+    let isTopicPrompt = false;
+
+    if (optionKey === 'POSTS') {
+      userText = '작성한 고민에 대해 얘기할래';
+      counselorText = '두두님이 작성하신 고민들 중에서 상담하고 싶은 사연을 선택해주세요!';
+      isPostPrompt = true;
+    } else if (optionKey === 'TOPICS') {
+      userText = '상담 추천 주제가 뭐야?';
+      counselorText = '두두님을 위해 준비한 맞춤 상담 주제들입니다. 아래 주제 중 하나를 선택해 주세요!';
+      isTopicPrompt = true;
+    } else {
+      userText = '그냥 대화하고 싶어';
+      counselorText = '좋아요! 지금 마음에 담아두고 계신 연애 고민이나 나누고 싶으신 대화가 있다면 무엇이든 편하게 입력해 주세요. 💖';
+    }
+
+    const userMsg: Message = {
+      id: `u_${Date.now()}`,
+      sender: 'user',
+      text: userText,
+      timestamp: new Date().toLocaleTimeString('ko-KR', {
+        hour: '2-digit',
+        minute: '2-digit',
+      }),
+    };
+
+    set({
+      messages: [...updatedMessages, userMsg],
+      isTyping: true,
+    });
+
+    setTimeout(() => {
+      const counselorMsg: Message = {
+        id: `c_${Date.now()}`,
+        sender: 'counselor',
+        text: counselorText,
+        isPostSelectorPrompt: isPostPrompt,
+        isTopicSelectorPrompt: isTopicPrompt,
+        timestamp: new Date().toLocaleTimeString('ko-KR', {
+          hour: '2-digit',
+          minute: '2-digit',
+        }),
+      };
+      set(state => ({
+        messages: [...state.messages, counselorMsg],
+        isTyping: false,
+      }));
+    }, 800);
   },
 
   sendMessage: (customText?: string) => {

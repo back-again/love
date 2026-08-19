@@ -6,6 +6,8 @@ import { useShallow } from 'zustand/react/shallow';
 import { useChatDetailStore } from '../_state/useChatDetailStore';
 import { ChatMessageItem } from '../_component/ChatMessageItem';
 import { InlinePostDiagnosisAction } from '../_action/InlinePostDiagnosis.action';
+import { InitialOptionsAction } from '../_action/InitialOptions.action';
+import { InlineTopicSelectorAction } from '../_action/InlineTopicSelector.action';
 
 export function ChatMessageListArea() {
   const scrollViewRef = useRef<ScrollView>(null);
@@ -32,8 +34,16 @@ export function ChatMessageListArea() {
         <View key={msg.id} style={styles.messageBlockWrap}>
           <ChatMessageItem message={msg} />
 
+          {msg.isInitialOptionsPrompt && (
+            <InitialOptionsAction />
+          )}
+
           {msg.isPostSelectorPrompt && !hasDiagnosedPosts && (
             <InlinePostDiagnosisAction />
+          )}
+
+          {msg.isTopicSelectorPrompt && (
+            <InlineTopicSelectorAction />
           )}
         </View>
       ))}

@@ -13,7 +13,6 @@ import { RightSlideModal } from '@/components/modal/RightSlideModal';
 import { useChatDetailStore } from './_state/useChatDetailStore';
 import { ChatDetailHeaderArea } from './_area/ChatDetailHeader.area';
 import { ChatMessageListArea } from './_area/ChatMessageList.area';
-import { ChatTopicChipsAction } from './_action/ChatTopicChips.action';
 import { ChatInputAction } from './_action/ChatInput.action';
 
 export function ChatDetailScreen() {
@@ -47,7 +46,6 @@ export function ChatDetailScreen() {
             { paddingBottom: Math.max(insets.bottom, 12) },
           ]}
         >
-          <ChatTopicChipsAction />
           <ChatInputAction />
         </View>
       </KeyboardAvoidingView>

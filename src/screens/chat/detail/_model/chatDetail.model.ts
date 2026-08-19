@@ -4,6 +4,8 @@ export interface Message {
   text: string;
   timestamp: string;
   isPostSelectorPrompt?: boolean;
+  isInitialOptionsPrompt?: boolean;
+  isTopicSelectorPrompt?: boolean;
 }
 
 export interface PostItemData {
