@@ -2,7 +2,6 @@ import React from 'react';
 import { StyleSheet, View, Text, Switch } from 'react-native';
 import { useShallow } from 'zustand/react/shallow';
 import { useCreateForm } from '../_state/useCreateForm';
-import { AiVoteRecommendAction } from '../_action/AiVoteRecommend.action';
 import { VoteOptionInputAction } from '../_action/VoteOptionInput.action';
 
 export function VoteOptionSettingArea() {
@@ -19,7 +18,7 @@ export function VoteOptionSettingArea() {
         <View style={styles.titleTextWrap}>
           <Text style={styles.createSectionTitle}>OX로 빠른 의견 받기</Text>
           <Text style={styles.createSectionSub}>
-            AI가 사연을 분석해 맞춤 선택지를 제안합니다.
+            선택지를 직접 입력해 피드백을 받아보세요.
           </Text>
         </View>
         <Switch
@@ -33,7 +32,6 @@ export function VoteOptionSettingArea() {
 
       {hasVote && (
         <View style={styles.optionsContent}>
-          <AiVoteRecommendAction />
           <VoteOptionInputAction />
         </View>
       )}
