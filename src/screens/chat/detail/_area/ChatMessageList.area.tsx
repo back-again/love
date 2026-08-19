@@ -40,11 +40,6 @@ export function ChatMessageListArea() {
 
       {isTyping && (
         <View style={styles.typingRow}>
-          <Image
-            source={require('../../../../assets/counselor_momo.png')}
-            style={styles.aiAvatarImg}
-            resizeMode="contain"
-          />
           <View style={styles.typingBubble}>
             <Text style={styles.typingText}>답변을 생각하는 중입니다...</Text>
           </View>

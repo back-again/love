@@ -35,13 +35,6 @@ export function ChatMessageItem({ message }: ChatMessageItemProps) {
         isUser ? styles.messageRowUser : styles.messageRowAi,
       ]}
     >
-      {!isUser && (
-        <Image
-          source={require('../../../../assets/counselor_momo.png')}
-          style={styles.aiAvatarImg}
-          resizeMode="contain"
-        />
-      )}
       <View
         style={[
           styles.messageBubble,
