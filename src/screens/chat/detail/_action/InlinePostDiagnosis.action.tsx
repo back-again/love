@@ -13,6 +13,8 @@ export function InlinePostDiagnosisAction() {
   const { data: writtenPosts = [] } = useQuery({
     queryKey: ['writtenPosts', userId],
     queryFn: () => getWrittenPosts({ userId }),
+    staleTime: 0,
+    refetchOnMount: true,
   });
 
   const selectSinglePostForDiagnosis = useChatDetailStore(
