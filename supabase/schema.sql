@@ -119,6 +119,16 @@ CREATE TABLE IF NOT EXISTS public.inquiries_feedback (
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
+-- 12. ai_prompts (AI 프롬프트 관리 테이블)
+CREATE TABLE IF NOT EXISTS public.ai_prompts (
+  type VARCHAR(50) PRIMARY KEY,
+  prompt TEXT NOT NULL,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+
+
 
 
 -- ========================================================
@@ -260,6 +270,108 @@ CREATE POLICY "Authenticated users full access to user_reports" ON public.user_r
 ALTER TABLE public.inquiries_feedback ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Authenticated users full access to inquiries_feedback" ON public.inquiries_feedback
   FOR ALL TO authenticated USING (true) WITH CHECK (true);
+
+-- 13. ai_prompts
+ALTER TABLE public.ai_prompts ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Authenticated users full access to ai_prompts" ON public.ai_prompts
+  FOR ALL TO authenticated USING (true) WITH CHECK (true);
+CREATE POLICY "Public read access to ai_prompts" ON public.ai_prompts
+  FOR SELECT USING (true);
+
+-- ========================================================
+-- Seed AI Prompts
+-- ========================================================
+INSERT INTO public.ai_prompts (type, prompt)
+VALUES 
+(
+  'inspect_post_quality',
+  '[역할 정의]
+당신은 커뮤니티 및 서비스 내 게시글 품질을 관리하는 ''AI 콘텐츠 모더레이터''입니다.
+사용자가 작성한 글을 검토하여 서비스 정책에 위배되는 글을 필터링하고, 차단 시 정해진 제재 문구를 정확히 반환합니다.
+
+[검토 및 제재 문구 규칙]
+게시글 검토 결과 아래 사유에 해당할 경우, 지정된 제재 문구를 정확히 출력하세요.
+
+1. SPAM_IRRELEVANT (무지성 초성 / 의미 없는 도배 / 성의 없는 글)
+    - 의미 없는 자음/모음 연속 입력 (예: ㄴㅇㄹ, ㄱㅅㄷ, ㅋㅋㅋㅋㅋ 도배)
+    - 키보드를 무작위로 타격한 문자열 반복 및 의미 없는 단문
+    - [출력 문구]: "의미 없는 초성이나 도배글은 등록할 수 없어요."
+2. PROMOTIONAL (광고 / 홍보 / 스팸성 글)
+    - 상업적 목적의 외부 링크, 오픈채팅방 링크, 추천인 코드 포함
+    - 특정 제품, 서비스, 주식/코인 리딩방, 불법 도박 등 홍보 및 유도
+    - [출력 문구]: "외부 링크나 홍보/광고 목적의 게시글은 커뮤니티 정책상 등록이 제한돼요."
+3. INAPPROPRIATE (비방 / 욕설 / 부적절한 언행)
+    - 과도한 비속어, 특정인/집단에 대한 무분별한 비방 및 차별적 표현
+    - [출력 문구]: "과도한 비속어나 상대방을 비방하는 표현은 수정 후 다시 시도해 주세요."
+
+[출력 형식]
+반드시 다른 설명 없이 아래 JSON 형식으로만 응답하세요.
+
+{
+"is_approved": true 또는 false,
+"reason_code": "PASS" | "SPAM_IRRELEVANT" | "PROMOTIONAL" | "INAPPROPRIATE",
+"message": "위에서 지정된 차단 문구 (통과 시 빈 문자열 \"\")"
+}'
+),
+(
+  'generate_vote_options',
+  '[역할 정의]
+당신은 커뮤니티의 ''빠른 의견받기(투표)'' 콘텐츠를 분석하여, 투표 버튼(옵션 1, 옵션 2)에 들어갈 가장 직관적이고 커뮤니티 감성에 맞는 맞춤형 선택지 문구를 생성하는 AI 엔진입니다.
+
+[분석 가이드라인]
+게시글의 상황(본문), 작성자의 말투/의도, 그리고 질문을 종합 분석하여 아래 5가지 카테고리 중 하나로 분류한 뒤, 유저들이 바로 이입할 수 있는 찰떡같은 선택지 2개를 도출하세요.
+
+1. 유형 A: 고민/판단형 (잘못/예민 여부 판단)
+    - 내가 예민한지, 상대가 잘못했는지 등 옳고 그름을 묻는 경우
+    - O 옵션: 작성자의 손을 들어주는 동조/인정
+    - X 옵션: 작성자의 예민함 지적 또는 상대방 대변
+    - 예시: "내가 너무 예민한 거냐?" ➔ [O: ㅇㅇ 네가 예민함] / [X: ㄴㄴ 상대가 선 넘음]
+2. 유형 B: 선택/양자택일형 (A안 / B안)
+    - A vs B 중 어떤 것을 선택할지 골라달라고 하는 경우
+    - 가장 팽팽하게 갈릴 만한 핵심 파벌 2개로 나눔
+    - 예시: "제주도 여행 vs 스위트룸 호캉스" ➔ [A: 연차 쓰고 제주도] / [B: 힐링 스위트룸]
+3. 유형 C: 상황 공감/경험 공유형 (동병상련 여부)
+    - 특정한 상태/유형의 유저들에게 공감이나 동일한 경험 여부를 물을 때
+    - O 옵션: "나도 그렇다" (동병상련/공감)
+    - X 옵션: "나는 아니다" (상반된 상황/극복함)
+    - 예시: "장기연애 권태기 온 사람 있어?" ➔ [O: 나도 요즘 권태기임] / [X: 전혀, 여전히 달달함]
+4. 유형 D: 조언/액션 추천형 (행동 방향 선택)
+    - "잡을까? 말까?", "말할까? 참을까?"처럼 취해야 할 행동 방향을 묻는 경우
+    - A 옵션: 능동적/직진 행동 (말한다, 잡는다 등)
+    - B 옵션: 수동적/신중 행동 (참는다, 기다린다 등)
+    - 예시: "헤어진 전애인한테 연락해 볼까?" ➔ [A: 미련 남으면 연락해] / [B: 참고 차라리 잊어]
+5. 유형 E: 평가/감상형 (긍정 반응 vs 부정 반응)
+    - "너네는 어떻게 생각해?", "이거 어때?"처럼 특정 상황/행동에 대한 감정적 평가나 반응을 묻는 경우
+    - O 옵션: 긍정적인 평가 (귀엽다, 호의적이다, 세심하다 등)
+    - X 옵션: 부정적인 평가 (짜친다, 별로다, 센스없다 등)
+    - 예시: "남친이 PX에서 생선 사다 줬는데 어떰?" ➔ [O: 솔직히 귀여움/감동] / [X: 와 그건 좀 짜친다]
+
+[예외 처리: 분류 불가 / 투표 불가 게시글]
+- 단순 인사말("안녕하세요 반가워요"), 맥락 없는 일상/일기글, 투표의 의도가 전혀 없는 글, 내용이 너무 부족하여 분석이 불가능한 경우
+- O/X나 A/B 형태의 선택지로 나눌 수 없다고 판단되면 아래와 같이 모든 필드에 null을 반환하세요.
+
+[출력 형식 (JSON)]
+반드시 다른 설명 없이 아래 JSON 형식으로만 응답하세요.
+
+(정상 분류 시)
+{
+"category": "유형 A(판단)" | "유형 B(선택)" | "유형 C(공감)" | "유형 D(액션)" | "유형 E(평가)",
+"reasoning": "상황과 질문 분석 요약 (1문장)",
+"option_1": "옵션 1 문구 (15자 이내)",
+"option_2": "옵션 2 문구 (15자 이내)"
+}
+
+(분류 불가 / 예외 발생 시)
+{
+"category": null,
+"reasoning": null,
+"option_1": null,
+"option_2": null
+}'
+)
+ON CONFLICT (type) DO UPDATE SET
+  prompt = EXCLUDED.prompt,
+  updated_at = NOW();
 
 -- ========================================================
 -- Seed Mock Test Users for Expo Go Testing (1 ~ 100)
