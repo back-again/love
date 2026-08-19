@@ -80,7 +80,9 @@ const styles = StyleSheet.create({
     position: 'relative',
   },
   messageBubbleUser: {
-    backgroundColor: '#FF5D7B',
+    backgroundColor: '#FFF1F2',
+    borderWidth: 1,
+    borderColor: '#FFE4E6',
     borderBottomRightRadius: 4,
   },
   messageBubbleAi: {
@@ -94,7 +96,7 @@ const styles = StyleSheet.create({
     letterSpacing: -0.3,
   },
   messageTextUser: {
-    color: '#FFFFFF',
+    color: '#334155',
   },
   boldText: {
     fontWeight: '700',
@@ -102,7 +104,7 @@ const styles = StyleSheet.create({
   },
   boldTextUser: {
     fontWeight: '700',
-    color: '#FFFFFF',
+    color: '#E11D48',
   },
   timestampText: {
     fontSize: 10.5,
@@ -111,6 +113,6 @@ const styles = StyleSheet.create({
     textAlign: 'right',
   },
   timestampUser: {
-    color: 'rgba(255, 255, 255, 0.8)',
+    color: '#94A3B8',
   },
 });
