@@ -12,7 +12,7 @@ export default function PrivacyScreen({ visible, onClose }: PrivacyScreenProps) 
   return (
     <BottomSheetModal visible={visible} onClose={onClose} snapPoints={['85%']}>
       <View style={styles.headerRow}>
-        <Text style={styles.sheetTitle}>오답연애 개인정보 처리방침</Text>
+        <Text style={styles.sheetTitle}>연OX 개인정보 처리방침</Text>
       </View>
       <PrivacyContentTemplate />
     </BottomSheetModal>

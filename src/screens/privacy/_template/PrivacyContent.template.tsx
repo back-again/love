@@ -5,32 +5,32 @@ export function PrivacyContentTemplate() {
   return (
     <View style={styles.contentSection}>
       <Text style={styles.introText}>
-        주식회사 오답연애(이하 "회사")는 「개인정보 보호법」 등 관련 법령을 준수하며, 회원의 개인정보를 보호하고 고충을 신속하게 처리하기 위해 개인정보처리방침을 수립·공개합니다.
+        연OX 운영팀(이하 "운영팀")은 「개인정보 보호법」 등 관련 법령을 준수하며, 회원의 개인정보를 보호하고 고충을 신속하게 처리하기 위해 개인정보처리방침을 수립·공개합니다.
       </Text>
 
       <Text style={styles.articleTitle}>1. 개인정보의 수집 및 이용 목적</Text>
       <Text style={styles.articleBody}>
-        • 회원 관리: 소셜 로그인을 통한 회원 식별, 가입 의사 확인, 부정 이용 방지{"\n"}
-        • 서비스 제공: 연령별·성별 통계학적 분석 및 맞춤형 오답노트/후기 추천, 랭킹 시스템 운영{"\n"}
-        • 고충 처리: 문의사항 접수 및 피드백 반영, 불량 회원 신고/차단 조치
+        • 회원 관리: 애플 소셜 로그인을 통한 회원 식별, 부정 이용 방지{"\n"}
+        • 서비스 제공: 고민글 및 찬반 투표 결과 조회, 연애 성향 진단 분석 데이터 관리, 1:1 AI 상담 내역 관리{"\n"}
+        • 고충 처리: 문의사항 접수 및 피드백 반영, 불량 회원 신고 및 차단 조치
       </Text>
 
       <Text style={styles.articleTitle}>2. 수집하는 개인정보의 항목 및 방법</Text>
       <Text style={styles.articleBody}>
         • 필수 항목: 이메일 주소, 소셜 회원식별자(ID){"\n"}
-        • 선택 항목: 성별, 생년월일 (맞춤형 통계용){"\n"}
-        • 자동 수집: 이용 기록, 접속 로그, IP 정보, 기기 정보
+        • 선택 항목: 성별, 생년월일 (맞춤형 성향 분석용){"\n"}
+        • 자동 수집: 서비스 이용 기록, 접속 로그, 기기 정보
       </Text>
 
       <Text style={styles.articleTitle}>3. 개인정보의 보유 및 이용 기간</Text>
       <Text style={styles.articleBody}>
-        1. 회원 탈퇴 시 개인정보는 즉시 완전히 파기됩니다.{"\n"}
-        2. [중요 - 탈퇴 후 데이터 잔존 정책]: 탈퇴 시 개인 식별 정보가 완전 파기되므로 서버에 남은 오답노트/댓글은 작성자를 추적할 수 없는 '완전한 익명 데이터'로 전환되어 유지됩니다.
+        1. 회원 탈퇴 시 개인 식별 정보는 즉시 완전히 파기됩니다.{"\n"}
+        2. [중요 - 탈퇴 후 데이터 잔존 정책]: 탈퇴 시 개인 식별 정보가 완전 파기되므로 서버에 남은 고민글, 댓글, 투표 기록은 작성자를 추적할 수 없는 '완전한 익명 데이터'로 전환되어 유지됩니다.
       </Text>
 
       <Text style={styles.articleTitle}>4. 개인정보의 제3자 제공 및 처리위탁</Text>
       <Text style={styles.articleBody}>
-        회사는 회원의 사전 동의 없이는 원칙적으로 개인정보를 외부에 제공하거나 위탁하지 않습니다.
+        운영팀은 회원의 사전 동의 없이는 원칙적으로 개인정보를 외부에 제공하거나 위탁하지 않습니다.
       </Text>
 
       <Text style={styles.articleTitle}>5. 정보주체의 권리·의무 및 행사방법</Text>
@@ -40,22 +40,22 @@ export function PrivacyContentTemplate() {
 
       <Text style={styles.articleTitle}>6. 개인정보의 파기 절차 및 방법</Text>
       <Text style={styles.articleBody}>
-        전자적 파일 형태의 개인정보는 복구할 수 없는 기술적 방법을 사용하여 파기합니다.
+        전자적 파일 형태의 개인정보는 복구할 수 없는 기술적 방법을 사용하여 완전히 파기합니다.
       </Text>
 
       <Text style={styles.articleTitle}>7. 개인정보의 안전성 확보 조치</Text>
       <Text style={styles.articleBody}>
-        암호화 전송 및 데이터 백신 설치, 개인정보 취급 직원의 최소화 및 보안 교육을 이행합니다.
+        암호화 전송 및 보안 서버 구축, 취급 인원의 최소화 및 관리자 보안 수칙을 준수합니다.
       </Text>
 
       <Text style={styles.articleTitle}>8. 개인정보 보호책임자 및 고충처리</Text>
       <Text style={styles.articleBody}>
-        • 책임자: 대표이사 / 개인정보 보호책임자{"\n"}
-        • 이메일: support@odaplove.com
+        • 책임자: 연OX 운영 책임자{"\n"}
+        • 이메일: support@yeonox.com
       </Text>
 
       <Text style={styles.dateStampText}>
-        공고일자: 2026년 07월 21일 | 시행일자: 2026년 07월 21일
+        공고일자: 2026년 08월 19일 | 시행일자: 2026년 08월 19일
       </Text>
     </View>
   );

@@ -12,7 +12,7 @@ export default function TermsScreen({ visible, onClose }: TermsScreenProps) {
   return (
     <BottomSheetModal visible={visible} onClose={onClose} snapPoints={['85%']}>
       <View style={styles.headerRow}>
-        <Text style={styles.sheetTitle}>오답연애 서비스 이용약관</Text>
+        <Text style={styles.sheetTitle}>연OX 서비스 이용약관</Text>
       </View>
       <TermsContentTemplate />
     </BottomSheetModal>
