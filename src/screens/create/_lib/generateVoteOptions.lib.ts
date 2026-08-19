@@ -65,8 +65,8 @@ export async function generateAiVoteOptions(
       }
       if (data.oText && data.xText) {
         const result = {
-          oText: data.oText.slice(0, 10).trim(),
-          xText: data.xText.slice(0, 10).trim(),
+          oText: data.oText.slice(0, 8).trim(),
+          xText: data.xText.slice(0, 8).trim(),
         };
         optionsCache.set(cacheKey, result);
         return result;
@@ -78,8 +78,8 @@ export async function generateAiVoteOptions(
 
   const fallbackResult = getLocalFallbackOptions(title, detail);
   const slicedFallback = {
-    oText: fallbackResult.oText.slice(0, 10).trim(),
-    xText: fallbackResult.xText.slice(0, 10).trim(),
+    oText: fallbackResult.oText.slice(0, 8).trim(),
+    xText: fallbackResult.xText.slice(0, 8).trim(),
   };
   optionsCache.set(cacheKey, slicedFallback);
   return slicedFallback;
