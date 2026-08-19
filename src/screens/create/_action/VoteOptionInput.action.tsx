@@ -57,7 +57,7 @@ export function VoteOptionInputAction() {
               ? ({ boxShadow: '0 0 0 3px rgba(139, 117, 249, 0.15)' } as any)
               : {},
           ]}
-          placeholder="O 선택지 직접 입력 (최대 12자)"
+          placeholder="O 선택지 직접 입력 (최대 10자)"
           placeholderTextColor="#8F8F8F"
           value={voteO}
           onChangeText={text => {
@@ -66,7 +66,7 @@ export function VoteOptionInputAction() {
           }}
           onFocus={() => setFocusedField('O')}
           onBlur={() => setFocusedField(null)}
-          maxLength={12}
+          maxLength={10}
         />
       </View>
 
@@ -83,7 +83,7 @@ export function VoteOptionInputAction() {
               ? ({ boxShadow: '0 0 0 3px rgba(249, 117, 141, 0.15)' } as any)
               : {},
           ]}
-          placeholder="X 선택지 직접 입력 (최대 12자)"
+          placeholder="X 선택지 직접 입력 (최대 10자)"
           placeholderTextColor="#8F8F8F"
           value={voteX}
           onChangeText={text => {
@@ -92,7 +92,7 @@ export function VoteOptionInputAction() {
           }}
           onFocus={() => setFocusedField('X')}
           onBlur={() => setFocusedField(null)}
-          maxLength={12}
+          maxLength={10}
         />
       </View>
     </View>
