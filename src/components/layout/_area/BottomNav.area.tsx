@@ -94,7 +94,7 @@ export function BottomNavArea({ activeTab, onTabChange }: BottomNavAreaProps) {
     <View
       style={[
         styles.bottomNavOuterWrapper,
-        { bottom: Math.max(12, insets.bottom - 12) },
+        { bottom: insets.bottom > 0 ? insets.bottom : 16 },
       ]}
     >
       <View style={styles.bottomNavInnerCapsule}>
@@ -170,7 +170,8 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 12 },
     shadowOpacity: 0.12,
     shadowRadius: 20,
-    elevation: 8,
+    elevation: 9999,
+    zIndex: 9999,
     backgroundColor: 'transparent',
   },
   bottomNavInnerCapsule: {

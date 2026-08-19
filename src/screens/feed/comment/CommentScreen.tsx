@@ -36,7 +36,7 @@ export function CommentScreen() {
     <BottomSheetModal
       visible={visible}
       onClose={closeComments}
-      snapPoints={['67%', '94%']}
+      snapPoints={['95%']}
       useScrollView={true}
       enableDynamicSizing={false}
       footerComponent={renderFooter}

@@ -35,16 +35,15 @@ export async function getSinglePostLib(postId: string): Promise<Post | null> {
       ? rawPost.image_urls.split(',').filter(Boolean)
       : [];
 
-    const scaleMultiplier = 35;
-    const voteOCount = (rawPost.vote_o_count ?? 0) * scaleMultiplier + ((rawPost.vote_o_count ?? 0) > 0 ? 12 : 0);
-    const voteXCount = (rawPost.vote_x_count ?? 0) * scaleMultiplier + ((rawPost.vote_x_count ?? 0) > 0 ? 18 : 0);
+    const voteOCount = rawPost.vote_o_count ?? 0;
+    const voteXCount = rawPost.vote_x_count ?? 0;
     const totalVoteCount = voteOCount + voteXCount;
 
     const percentO =
       totalVoteCount > 0 ? Math.round((voteOCount / totalVoteCount) * 100) : 50;
     const percentX = 100 - percentO;
 
-    const commentCount = (rawPost.comment_count ?? 0) * 3 + ((rawPost.comment_count ?? 0) > 0 ? 8 : 0);
+    const commentCount = rawPost.comment_count ?? 0;
 
     return {
       id: rawPost.id,

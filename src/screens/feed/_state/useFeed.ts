@@ -54,9 +54,8 @@ export function useFeed(
                 ? item.image_urls.split(',').filter(Boolean)
                 : [];
 
-              const scaleMultiplier = 35;
-              const voteOCount = (item.vote_o_count ?? 0) * scaleMultiplier + ((item.vote_o_count ?? 0) > 0 ? 12 : 0);
-              const voteXCount = (item.vote_x_count ?? 0) * scaleMultiplier + ((item.vote_x_count ?? 0) > 0 ? 18 : 0);
+              const voteOCount = item.vote_o_count ?? 0;
+              const voteXCount = item.vote_x_count ?? 0;
               const totalVoteCount = voteOCount + voteXCount;
               const percentO =
                 totalVoteCount > 0
@@ -68,7 +67,7 @@ export function useFeed(
               const myVoteChoice =
                 userVoteMap[item.id] || userVoteMap[rawId] || null;
 
-              const commentCount = (item.comment_count ?? 0) * 3 + ((item.comment_count ?? 0) > 0 ? 8 : 0);
+              const commentCount = item.comment_count ?? 0;
 
               return {
                 id: item.id,
