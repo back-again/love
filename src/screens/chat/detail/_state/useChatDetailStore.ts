@@ -25,6 +25,10 @@ interface ChatDetailState {
     posts?: Array<{ id: string; title: string }>,
   ) => void;
   selectInitialOption: (optionKey: 'POSTS' | 'TOPICS' | 'CHAT') => void;
+  selectSinglePostForDiagnosis: (
+    postId: string,
+    posts: Array<{ id: string; title: string }>,
+  ) => void;
 }
 
 export const useChatDetailStore = create<ChatDetailState>((set, get) => ({
@@ -250,6 +254,58 @@ export const useChatDetailStore = create<ChatDetailState>((set, get) => ({
         (profile
           ? `두두님의 연애 추구미 '${profile.typeTitle}' 기준에서 볼 때, 상대방과의 고민 패턴이 반복되지 않으려면 대화의 기준을 명확히 설정해야 합니다. 더 깊이 논의해보고 싶은 부분이 있으신가요?`
           : `상대방과의 고민 패턴을 보면, 감정적 응어리가 반복되지 않도록 대화의 규칙을 세우시는 것이 매우 중요합니다. 더 논의해보고 싶은 부분이 있으신가요?`);
+
+      const counselorMsg: Message = {
+        id: `c_${Date.now()}`,
+        sender: 'counselor',
+        text: diagnosisResultText,
+        timestamp: new Date().toLocaleTimeString('ko-KR', {
+          hour: '2-digit',
+          minute: '2-digit',
+        }),
+      };
+
+      set(state => ({
+        messages: [...state.messages, counselorMsg],
+        isTyping: false,
+      }));
+    }, 1000);
+  },
+
+  selectSinglePostForDiagnosis: (
+    postId: string,
+    posts: Array<{ id: string; title: string }>,
+  ) => {
+    const { messages } = get();
+    const chosenPost = posts.find(p => p.id === postId);
+    if (!chosenPost) return;
+
+    const userMsg: Message = {
+      id: `u_${Date.now()}`,
+      sender: 'user',
+      text: `선택 사연: '${chosenPost.title}' 사연에 대해 상담할래.`,
+      timestamp: new Date().toLocaleTimeString('ko-KR', {
+        hour: '2-digit',
+        minute: '2-digit',
+      }),
+    };
+
+    set({
+      hasDiagnosedPosts: true,
+      messages: [...messages, userMsg],
+      isTyping: true,
+    });
+
+    setTimeout(() => {
+      const profile = useRelationshipProfileStore.getState().profile;
+      const diagnosisResultText =
+        `선택하신 '${chosenPost.title}' 사연을 심층 분석했습니다.\n\n` +
+        `[사연 분석 결과]\n` +
+        `이 고민 글에 대해 다수의 연인들은 갈등을 정면으로 솔직하게 풀어나가는 태도를 옹호하였으며, 이성적인 판단을 중요하게 보았습니다.\n\n` +
+        `[맞춤 연애 상담 솔루션]\n` +
+        (profile
+          ? `두두님의 연애 성향인 '${profile.typeTitle}' 기준에서 볼 때, ${profile.conflictHeadline}처럼 상대방의 태도를 가만히 받아들이기만 하기보다 확실하게 의견을 나누고 조율을 시도하는 것이 필요합니다. 상대방에게 이 점을 진지하게 건네보는 건 어떨까요?`
+          : `상대방과의 대화 시 감정에 휩쓸리지 않고, 서로가 생각하는 적정 기준과 행동선을 미리 조율하는 태도가 매우 중요합니다. 더 논의해보고 싶으신 구체적인 부분이 있으신가요?`);
 
       const counselorMsg: Message = {
         id: `c_${Date.now()}`,
