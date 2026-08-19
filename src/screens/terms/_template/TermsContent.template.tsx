@@ -59,6 +59,44 @@ export function TermsContentTemplate() {
         3. 차단 시스템: 특정 유저를 직접 차단할 수 있으며, 차단된 유저가 작성한 게시글과 댓글은 피드 상에서 완전히 숨김 처리됩니다.
       </Text>
 
+      {/* 커뮤니티 가이드라인 및 신고/차단 테이블 */}
+      <View style={styles.tableContainer}>
+        <View style={styles.tableHeader}>
+          <View style={[styles.tableCell, { flex: 1 }]}><Text style={styles.tableHeaderText}>위반 항목</Text></View>
+          <View style={[styles.tableCell, { flex: 1.5 }]}><Text style={styles.tableHeaderText}>신고 인정 기준</Text></View>
+          <View style={[styles.tableCell, { flex: 1.2 }]}><Text style={styles.tableHeaderText}>1~2회 누적</Text></View>
+          <View style={[styles.tableCell, { flex: 1.2 }]}><Text style={styles.tableHeaderText}>3회 누적</Text></View>
+        </View>
+
+        <View style={styles.tableRow}>
+          <View style={[styles.tableCell, { flex: 1 }]}><Text style={styles.tableRowText}>욕설 및 비하</Text></View>
+          <View style={[styles.tableCell, { flex: 1.5 }]}><Text style={styles.tableRowText}>타인 인신공격, 조롱, 혐오 발언</Text></View>
+          <View style={[styles.tableCell, { flex: 1.2 }]}><Text style={styles.tableRowText}>콘텐츠 즉시 삭제 및 경고</Text></View>
+          <View style={[styles.tableCell, { flex: 1.2 }]}><Text style={styles.tableRowTextRed}>영구정지 및 강제탈퇴</Text></View>
+        </View>
+
+        <View style={styles.tableRow}>
+          <View style={[styles.tableCell, { flex: 1 }]}><Text style={styles.tableRowText}>도배 및 스팸</Text></View>
+          <View style={[styles.tableCell, { flex: 1.5 }]}><Text style={styles.tableRowText}>의미 없는 연속 글, 상업적 광고</Text></View>
+          <View style={[styles.tableCell, { flex: 1.2 }]}><Text style={styles.tableRowText}>콘텐츠 즉시 삭제 및 경고</Text></View>
+          <View style={[styles.tableCell, { flex: 1.2 }]}><Text style={styles.tableRowTextRed}>영구정지 및 강제탈퇴</Text></View>
+        </View>
+
+        <View style={styles.tableRow}>
+          <View style={[styles.tableCell, { flex: 1 }]}><Text style={styles.tableRowText}>신상 유포</Text></View>
+          <View style={[styles.tableCell, { flex: 1.5 }]}><Text style={styles.tableRowText}>실명, 연락처, 거주지, SNS 무단 노출</Text></View>
+          <View style={[styles.tableCell, { flex: 1.2 }]}><Text style={styles.tableRowText}>경고 없이 콘텐츠 완전 삭제</Text></View>
+          <View style={[styles.tableCell, { flex: 1.2 }]}><Text style={styles.tableRowTextRed}>영구정지 및 강제탈퇴</Text></View>
+        </View>
+
+        <View style={[styles.tableRow, { borderBottomWidth: 0 }]}>
+          <View style={[styles.tableCell, { flex: 1 }]}><Text style={styles.tableRowText}>허위 신고</Text></View>
+          <View style={[styles.tableCell, { flex: 1.5 }]}><Text style={styles.tableRowText}>무고 유저를 고의로 반복 신고</Text></View>
+          <View style={[styles.tableCell, { flex: 1.2 }]}><Text style={styles.tableRowText}>신고 기능 7일 제한 및 경고</Text></View>
+          <View style={[styles.tableCell, { flex: 1.2 }]}><Text style={styles.tableRowTextRed}>영구정지 및 강제탈퇴</Text></View>
+        </View>
+      </View>
+
       <Text style={styles.articleTitle}>제7조 (게시물의 저작권 및 서비스 탈퇴 시 데이터 처리)</Text>
       <Text style={styles.articleBody}>
         1. 회원이 작성한 게시물 및 댓글의 저작권은 작성자 본인에게 있으나, 서비스 내 노출 및 공유 기능 활용에 동의한 것으로 간주합니다.{"\n"}
@@ -98,6 +136,51 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: '#8F8F8F',
     lineHeight: 19,
+  },
+  tableContainer: {
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    borderRadius: 12,
+    overflow: 'hidden',
+    marginTop: 6,
+  },
+  tableHeader: {
+    flexDirection: 'row',
+    backgroundColor: '#FFF1F2',
+    borderBottomWidth: 1,
+    borderColor: '#E2E8F0',
+    paddingVertical: 10,
+    paddingHorizontal: 8,
+  },
+  tableRow: {
+    flexDirection: 'row',
+    borderBottomWidth: 1,
+    borderColor: '#E2E8F0',
+    paddingVertical: 10,
+    paddingHorizontal: 8,
+    backgroundColor: '#FFFFFF',
+  },
+  tableCell: {
+    justifyContent: 'center',
+    paddingHorizontal: 4,
+  },
+  tableHeaderText: {
+    fontSize: 11,
+    fontWeight: '800',
+    color: '#E11D48',
+    textAlign: 'center',
+  },
+  tableRowText: {
+    fontSize: 10,
+    fontWeight: '500',
+    color: '#475569',
+    lineHeight: 14,
+  },
+  tableRowTextRed: {
+    fontSize: 10,
+    fontWeight: '800',
+    color: '#E11D48',
+    lineHeight: 14,
   },
   dateStampText: {
     fontSize: 12,
