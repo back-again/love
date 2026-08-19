@@ -8,8 +8,8 @@ export interface CreatePostParams {
   category?: string;
   images?: string[]; // 로컬 선택 이미지 URI 배열
   userId?: string;
-  voteO?: string;
-  voteX?: string;
+  voteO?: string | null;
+  voteX?: string | null;
 }
 
 export async function createPost({

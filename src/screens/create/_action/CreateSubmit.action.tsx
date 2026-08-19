@@ -22,6 +22,7 @@ export function CreateSubmitAction() {
     voteX,
     isEditMode,
     editPostId,
+    hasVote,
     reset,
   } = useCreateForm(
     useShallow((state) => ({
@@ -33,14 +34,15 @@ export function CreateSubmitAction() {
       voteX: state.voteX,
       isEditMode: state.isEditMode,
       editPostId: state.editPostId,
+      hasVote: state.hasVote,
       reset: state.reset,
     }))
   );
 
   const createMutation = useMutation({
     mutationFn: () => {
-      const finalVoteO = voteO.trim() || '괜찮은 것 같아';
-      const finalVoteX = voteX.trim() || '난 별로야';
+      const finalVoteO = hasVote ? (voteO.trim() || '괜찮은 것 같아') : null;
+      const finalVoteX = hasVote ? (voteX.trim() || '난 별로야') : null;
 
       if (isEditMode && editPostId) {
         return updatePost({

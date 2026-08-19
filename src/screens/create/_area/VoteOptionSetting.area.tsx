@@ -1,19 +1,42 @@
 import React from 'react';
-import { StyleSheet, View, Text } from 'react-native';
+import { StyleSheet, View, Text, Switch } from 'react-native';
+import { useShallow } from 'zustand/react/shallow';
+import { useCreateForm } from '../_state/useCreateForm';
 import { AiVoteRecommendAction } from '../_action/AiVoteRecommend.action';
 import { VoteOptionInputAction } from '../_action/VoteOptionInput.action';
 
 export function VoteOptionSettingArea() {
+  const { hasVote, setHasVote } = useCreateForm(
+    useShallow(state => ({
+      hasVote: state.hasVote,
+      setHasVote: state.setHasVote,
+    }))
+  );
+
   return (
     <View style={styles.createSection}>
-      <View style={styles.titleWrap}>
-        <Text style={styles.createSectionTitle}>OX로 빠른 의견 받기</Text>
-        <Text style={styles.createSectionSub}>
-          AI가 사연을 분석해 맞춤 선택지를 제안합니다.
-        </Text>
+      <View style={styles.titleRow}>
+        <View style={styles.titleTextWrap}>
+          <Text style={styles.createSectionTitle}>OX로 빠른 의견 받기</Text>
+          <Text style={styles.createSectionSub}>
+            AI가 사연을 분석해 맞춤 선택지를 제안합니다.
+          </Text>
+        </View>
+        <Switch
+          value={hasVote}
+          onValueChange={setHasVote}
+          trackColor={{ false: '#E2E8F0', true: '#FFB5C5' }}
+          thumbColor={hasVote ? '#FF5D7B' : '#F4F4F5'}
+          ios_backgroundColor="#E2E8F0"
+        />
       </View>
-      <AiVoteRecommendAction />
-      <VoteOptionInputAction />
+
+      {hasVote && (
+        <View style={styles.optionsContent}>
+          <AiVoteRecommendAction />
+          <VoteOptionInputAction />
+        </View>
+      )}
     </View>
   );
 }
@@ -23,9 +46,15 @@ const styles = StyleSheet.create({
     marginBottom: 28,
     position: 'relative',
   },
-  titleWrap: {
-    paddingRight: 90,
+  titleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
     marginBottom: 12,
+  },
+  titleTextWrap: {
+    flex: 1,
+    paddingRight: 16,
   },
   createSectionTitle: {
     fontSize: 17,
@@ -39,5 +68,8 @@ const styles = StyleSheet.create({
     color: '#8F8F8F',
     lineHeight: 18,
     letterSpacing: -0.3,
+  },
+  optionsContent: {
+    marginTop: 4,
   },
 });

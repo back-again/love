@@ -7,8 +7,8 @@ export interface UpdatePostParams {
   content: string;
   category?: string;
   images?: string[]; // 로컬 선택 이미지 URI 또는 이미 업로드된 R2 URL 배열
-  voteO?: string;
-  voteX?: string;
+  voteO?: string | null;
+  voteX?: string | null;
 }
 
 export async function updatePost({

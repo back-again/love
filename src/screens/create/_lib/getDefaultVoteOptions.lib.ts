@@ -8,6 +8,19 @@ export function getDefaultVoteOptions(
   itemVoteO?: string,
   itemVoteX?: string
 ): { voteO: string; voteX: string } {
+  const result = getRawDefaultVoteOptions(title, content, itemVoteO, itemVoteX);
+  return {
+    voteO: result.voteO.slice(0, 12).trim(),
+    voteX: result.voteX.slice(0, 12).trim(),
+  };
+}
+
+function getRawDefaultVoteOptions(
+  title: string = '',
+  content: string = '',
+  itemVoteO?: string,
+  itemVoteX?: string
+): { voteO: string; voteX: string } {
   if (itemVoteO && itemVoteX) {
     return { voteO: itemVoteO, voteX: itemVoteX };
   }

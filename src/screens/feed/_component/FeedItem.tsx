@@ -34,6 +34,14 @@ export function FeedItem({ post }: FeedItemProps) {
     null,
   );
 
+  const hasVoteOption =
+    !!post.voteO &&
+    !!post.voteX &&
+    post.voteO !== 'null' &&
+    post.voteX !== 'null' &&
+    post.voteO.trim().length > 0 &&
+    post.voteX.trim().length > 0;
+
   const handleCardVote = (choice: 'O' | 'X') => {
     if (isVoted) return;
 
@@ -57,7 +65,7 @@ export function FeedItem({ post }: FeedItemProps) {
   };
 
   const handleOpenComments = () => {
-    if (!isVoted) {
+    if (hasVoteOption && !isVoted) {
       showToast('💡 소신 있는 투표를 위해, 투표 후 댓글이 열려요!');
       return;
     }
@@ -147,169 +155,175 @@ export function FeedItem({ post }: FeedItemProps) {
         )}
 
         {/* Vote Selection / Result Bar */}
-        {!isVoted ? (
-          <View style={styles.votedResultsContainer}>
-            <TouchableOpacity
-              style={styles.votedBarWrapper}
-              onPress={e => {
-                e.stopPropagation();
-                handleCardVote('O');
-              }}
-              activeOpacity={0.88}
-            >
-              <View style={styles.votedBarTrack}>
-                <Text
-                  style={styles.votedBarOptionTextUnvoted}
-                  numberOfLines={1}
-                  ellipsizeMode="tail"
-                >
-                  <Text style={styles.badgeOText}>O </Text>
-                  <Text style={styles.optionContentText}>{cleanOptionO}</Text>
-                </Text>
-              </View>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={styles.votedBarWrapper}
-              onPress={e => {
-                e.stopPropagation();
-                handleCardVote('X');
-              }}
-              activeOpacity={0.88}
-            >
-              <View style={styles.votedBarTrack}>
-                <Text
-                  style={styles.votedBarOptionTextUnvoted}
-                  numberOfLines={1}
-                  ellipsizeMode="tail"
-                >
-                  <Text style={styles.badgeXText}>X </Text>
-                  <Text style={styles.optionContentText}>{cleanOptionX}</Text>
-                </Text>
-              </View>
-            </TouchableOpacity>
-          </View>
-        ) : (
-          <View style={styles.votedResultsContainer}>
-            <View style={styles.votedBarWrapper}>
-              <View
-                style={[
-                  styles.votedBarTrack,
-                  selectedVote === 'O'
-                    ? styles.votedBarTrackOSelected
-                    : styles.votedBarTrackUnselected,
-                ]}
+        {hasVoteOption && (
+          !isVoted ? (
+            <View style={styles.votedResultsContainer}>
+              <TouchableOpacity
+                style={styles.votedBarWrapper}
+                onPress={e => {
+                  e.stopPropagation();
+                  handleCardVote('O');
+                }}
+                activeOpacity={0.88}
               >
+                <View style={styles.votedBarTrack}>
+                  <Text
+                    style={styles.votedBarOptionTextUnvoted}
+                    numberOfLines={1}
+                    ellipsizeMode="tail"
+                  >
+                    <Text style={styles.badgeOText}>O </Text>
+                    <Text style={styles.optionContentText}>{cleanOptionO}</Text>
+                  </Text>
+                </View>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={styles.votedBarWrapper}
+                onPress={e => {
+                  e.stopPropagation();
+                  handleCardVote('X');
+                }}
+                activeOpacity={0.88}
+              >
+                <View style={styles.votedBarTrack}>
+                  <Text
+                    style={styles.votedBarOptionTextUnvoted}
+                    numberOfLines={1}
+                    ellipsizeMode="tail"
+                  >
+                    <Text style={styles.badgeXText}>X </Text>
+                    <Text style={styles.optionContentText}>{cleanOptionX}</Text>
+                  </Text>
+                </View>
+              </TouchableOpacity>
+            </View>
+          ) : (
+            <View style={styles.votedResultsContainer}>
+              <View style={styles.votedBarWrapper}>
                 <View
                   style={[
-                    styles.votedBarFill,
+                    styles.votedBarTrack,
                     selectedVote === 'O'
-                      ? styles.votedBarFillOSelected
-                      : styles.votedBarFillUnselected,
-                    { width: `${percentO}%` },
-                  ]}
-                />
-                <Text
-                  style={styles.votedBarOptionText}
-                  numberOfLines={1}
-                  ellipsizeMode="tail"
-                >
-                  <Text
-                    style={
-                      selectedVote === 'O'
-                        ? styles.badgeOText
-                        : styles.badgeUnselectedText
-                    }
-                  >
-                    O{' '}
-                  </Text>
-                  <Text
-                    style={
-                      selectedVote === 'O'
-                        ? styles.optionContentTextSelectedO
-                        : styles.optionContentTextUnselected
-                    }
-                  >
-                    {cleanOptionO}
-                  </Text>
-                </Text>
-                <Text
-                  style={[
-                    styles.votedPercentText,
-                    selectedVote === 'O'
-                      ? styles.votedPercentTextOSelected
-                      : styles.votedPercentTextUnselected,
+                      ? styles.votedBarTrackOSelected
+                      : styles.votedBarTrackUnselected,
                   ]}
                 >
-                  {percentO}%
-                </Text>
+                  <View
+                    style={[
+                      styles.votedBarFill,
+                      selectedVote === 'O'
+                        ? styles.votedBarFillOSelected
+                        : styles.votedBarFillUnselected,
+                      { width: `${percentO}%` },
+                    ]}
+                  />
+                  <Text
+                    style={styles.votedBarOptionText}
+                    numberOfLines={1}
+                    ellipsizeMode="tail"
+                  >
+                    <Text
+                      style={
+                        selectedVote === 'O'
+                          ? styles.badgeOText
+                          : styles.badgeUnselectedText
+                      }
+                    >
+                      O{' '}
+                    </Text>
+                    <Text
+                      style={
+                        selectedVote === 'O'
+                          ? styles.optionContentTextSelectedO
+                          : styles.optionContentTextUnselected
+                      }
+                    >
+                      {cleanOptionO}
+                    </Text>
+                  </Text>
+                  <Text
+                    style={[
+                      styles.votedPercentText,
+                      selectedVote === 'O'
+                        ? styles.votedPercentTextOSelected
+                        : styles.votedPercentTextUnselected,
+                    ]}
+                  >
+                    {percentO}%
+                  </Text>
+                </View>
               </View>
-            </View>
 
-            <View style={styles.votedBarWrapper}>
-              <View
-                style={[
-                  styles.votedBarTrack,
-                  selectedVote === 'X'
-                    ? styles.votedBarTrackXSelected
-                    : styles.votedBarTrackUnselected,
-                ]}
-              >
+              <View style={styles.votedBarWrapper}>
                 <View
                   style={[
-                    styles.votedBarFill,
+                    styles.votedBarTrack,
                     selectedVote === 'X'
-                      ? styles.votedBarFillXSelected
-                      : styles.votedBarFillUnselected,
-                    { width: `${percentX}%` },
-                  ]}
-                />
-                <Text
-                  style={styles.votedBarOptionText}
-                  numberOfLines={1}
-                  ellipsizeMode="tail"
-                >
-                  <Text
-                    style={
-                      selectedVote === 'X'
-                        ? styles.badgeXText
-                        : styles.badgeUnselectedText
-                    }
-                  >
-                    X{' '}
-                  </Text>
-                  <Text
-                    style={
-                      selectedVote === 'X'
-                        ? styles.optionContentTextSelectedX
-                        : styles.optionContentTextUnselected
-                    }
-                  >
-                    {cleanOptionX}
-                  </Text>
-                </Text>
-                <Text
-                  style={[
-                    styles.votedPercentText,
-                    selectedVote === 'X'
-                      ? styles.votedPercentTextXSelected
-                      : styles.votedPercentTextUnselected,
+                      ? styles.votedBarTrackXSelected
+                      : styles.votedBarTrackUnselected,
                   ]}
                 >
-                  {percentX}%
-                </Text>
+                  <View
+                    style={[
+                      styles.votedBarFill,
+                      selectedVote === 'X'
+                        ? styles.votedBarFillXSelected
+                        : styles.votedBarFillUnselected,
+                      { width: `${percentX}%` },
+                    ]}
+                  />
+                  <Text
+                    style={styles.votedBarOptionText}
+                    numberOfLines={1}
+                    ellipsizeMode="tail"
+                  >
+                    <Text
+                      style={
+                        selectedVote === 'X'
+                          ? styles.badgeXText
+                          : styles.badgeUnselectedText
+                      }
+                    >
+                      X{' '}
+                    </Text>
+                    <Text
+                      style={
+                        selectedVote === 'X'
+                          ? styles.optionContentTextSelectedX
+                          : styles.optionContentTextUnselected
+                      }
+                    >
+                      {cleanOptionX}
+                    </Text>
+                  </Text>
+                  <Text
+                    style={[
+                      styles.votedPercentText,
+                      selectedVote === 'X'
+                        ? styles.votedPercentTextXSelected
+                        : styles.votedPercentTextUnselected,
+                    ]}
+                  >
+                    {percentX}%
+                  </Text>
+                </View>
               </View>
             </View>
-          </View>
+          )
         )}
 
         <View style={styles.bottomStatsRow}>
-          <View style={styles.statLeftCol}>
-            <VoteStatsSvg />
-            <Text style={styles.statLeftText}>
-              {totalVotes.toLocaleString()}명 투표 중
-            </Text>
-          </View>
+          {hasVoteOption ? (
+            <View style={styles.statLeftCol}>
+              <VoteStatsSvg />
+              <Text style={styles.statLeftText}>
+                {totalVotes.toLocaleString()}명 투표 중
+              </Text>
+            </View>
+          ) : (
+            <View style={styles.statLeftCol} />
+          )}
 
           <TouchableOpacity
             style={styles.statRightCol}
