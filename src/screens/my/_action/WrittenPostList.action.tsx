@@ -70,18 +70,20 @@ export function WrittenPostListAction() {
           onOpenWriteReview={handleOpenReview('write')}
           onOpenOptions={targetPost => {
             openPostOptions({
-              ...targetPost,
-              storySummary: targetPost.title || '',
-              fullStory: targetPost.title || '',
+              id: targetPost.id,
+              userId: userId || '',
+              category: '고민',
+              title: targetPost.title || '',
+              content: targetPost.title || '',
               images: [],
               voteO: '',
               voteX: '',
-              topComments: [],
-              reviewStatus: '',
-              fireCount: 0,
-              facepalmCount: 0,
               commentCount: 0,
-              isMyPost: true,
+              voteOCount: targetPost.voteO || 0,
+              voteXCount: targetPost.voteX || 0,
+              reviewContent: targetPost.reviewContent,
+              hasReview: targetPost.hasReview,
+              createdAt: targetPost.created_at || new Date().toISOString(),
             });
           }}
         />

@@ -3,16 +3,17 @@
 import React, { useEffect } from 'react';
 import { View, StyleSheet, Platform } from 'react-native';
 import { useInView } from 'react-intersection-observer';
+import { useFeedList } from '../../_state/useFeedList';
 
-interface InViewSentinelProps {
-  onVisible: () => void;
+interface InViewSentinelActionProps {
   rootMargin?: string;
 }
 
-export function InViewSentinel({
-  onVisible,
+export function InViewSentinelAction({
   rootMargin = '200px',
-}: InViewSentinelProps) {
+}: InViewSentinelActionProps = {}) {
+  const { loadMore } = useFeedList();
+
   if (Platform.OS === 'web') {
     const { ref, inView } = useInView({
       rootMargin,
@@ -21,9 +22,9 @@ export function InViewSentinel({
 
     useEffect(() => {
       if (inView) {
-        onVisible();
+        loadMore();
       }
-    }, [inView, onVisible]);
+    }, [inView, loadMore]);
 
     return <View ref={ref as any} style={styles.sentinel} />;
   }
@@ -32,7 +33,7 @@ export function InViewSentinel({
     <View
       style={styles.sentinel}
       onLayout={() => {
-        onVisible();
+        loadMore();
       }}
     />
   );

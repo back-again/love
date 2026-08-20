@@ -24,7 +24,7 @@ export function EditOptionAction() {
     useCreateForm.setState({
       questionTitle: targetPost.title || '',
       category: targetPost.category || '고민',
-      detailSituation: targetPost.fullStory || '',
+      detailSituation: targetPost.content || '',
       images: targetPost.images || [],
       voteO: targetPost.voteO || '',
       voteX: targetPost.voteX || '',

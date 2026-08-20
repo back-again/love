@@ -23,7 +23,6 @@ export interface RawFeedPost {
 export interface FetchFeedParams {
   type?: 'hot' | 'recent';
   categoryId?: string;
-  category?: string;
   page?: number;
   pageSize?: number;
 }
@@ -40,7 +39,6 @@ export interface FetchFeedResponse {
 export async function getFeedPostsLib({
   type = 'recent',
   categoryId,
-  category,
   page = 1,
   pageSize = 5,
 }: FetchFeedParams): Promise<FetchFeedResponse> {
@@ -64,10 +62,8 @@ export async function getFeedPostsLib({
 
     let query = supabase.from('post_details_view').select('*');
 
-    if (categoryId && categoryId !== 'all' && categoryId !== '전체') {
+    if (categoryId && categoryId !== 'all') {
       query = query.eq('category_id', categoryId);
-    } else if (category && category !== '전체') {
-      query = query.eq('category', category);
     }
 
     if (type === 'hot') {

@@ -2,34 +2,35 @@
 
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { useShallow } from 'zustand/react/shallow';
 import { categoriesQueryOptions } from '../../_lib/getCategories.lib';
-import { useCategoryStore } from '../../_state/useCategoryStore';
+import { useFeedStore } from '../../_state/useFeedStore';
 import { CategoryChip } from '../../_component/CategoryChip';
 
 export function CategoryHeaderAction() {
   const { data: categoryData = [] } = useQuery(categoriesQueryOptions);
 
-  const selectedCategory = useCategoryStore(state => state.selectedCategory);
-  const setSelectedCategory = useCategoryStore(
-    state => state.setSelectedCategory,
+  const { selectedCategoryId, setSelectedCategoryId } = useFeedStore(
+    useShallow(state => ({
+      selectedCategoryId: state.selectedCategoryId,
+      setSelectedCategoryId: state.setSelectedCategoryId,
+    })),
   );
 
-  const categories = [
-    '전체',
-    '인기',
-    ...categoryData
-      .map(c => c.name)
-      .filter(c => c !== '🔥 인기' && c !== '인기'),
+  const categories: { id: string | null; name: string }[] = [
+    { id: null, name: '전체' },
+    { id: 'hot', name: '인기' },
+    ...categoryData.map(c => ({ id: c.id, name: c.name })),
   ];
 
   return (
     <>
-      {categories.map(category => (
+      {categories.map(cat => (
         <CategoryChip
-          key={category}
-          category={category}
-          isSelected={selectedCategory === category}
-          onPress={() => setSelectedCategory(category)}
+          key={cat.id ?? 'all'}
+          category={cat.name}
+          isSelected={selectedCategoryId === cat.id}
+          onPress={() => setSelectedCategoryId(cat.id)}
           variant="communityGlass"
         />
       ))}

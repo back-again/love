@@ -61,12 +61,10 @@ export function CommentInputArea() {
       parentId?: string | null;
     }) => {
       if (!postId) return;
-      const userVoted = targetPost?.myVote || 'O';
       await createCommentLib({
         postId,
         content: text,
         parentId,
-        votedChoice: userVoted,
       });
     },
     onSuccess: () => {

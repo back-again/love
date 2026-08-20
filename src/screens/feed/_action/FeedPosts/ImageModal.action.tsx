@@ -3,14 +3,14 @@
 import React from 'react';
 import { useShallow } from 'zustand/react/shallow';
 import { ImageModal } from '@/components/modal/ImageModal';
-import { useImageModalStore } from '../../_state/useImageModalStore';
+import { useFeedStore } from '../../_state/useFeedStore';
 
 export function ImageModalAction() {
-  const { visible, images, initialIndex, resetImageModal } = useImageModalStore(
+  const { visible, images, initialIndex, resetImageModal } = useFeedStore(
     useShallow(state => ({
-      visible: state.visible,
-      images: state.images,
-      initialIndex: state.initialIndex,
+      visible: state.imageModalVisible,
+      images: state.imageModalImages,
+      initialIndex: state.imageModalInitialIndex,
       resetImageModal: state.resetImageModal,
     })),
   );

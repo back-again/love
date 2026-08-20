@@ -38,25 +38,16 @@ export function PushNotificationProvider({
         if (postIdStr) {
           useCommentStore.getState().openComments({
             id: postIdStr,
+            userId: '',
             title: postTitleStr,
+            content: postTitleStr,
             category: '고민',
-            storySummary: postTitleStr,
-            fullStory: postTitleStr,
             images: [],
             voteO: '괜찮은데?',
             voteX: '난 싫어',
-            topComments: [],
-            reviewStatus: 'none',
-            fireCount: 0,
-            facepalmCount: 0,
             commentCount: 0,
             voteOCount: 0,
             voteXCount: 0,
-            totalVoteCount: 0,
-            totalVotes: 0,
-            percentO: 50,
-            percentX: 50,
-            myVote: null,
             createdAt: new Date().toISOString(),
           });
         }

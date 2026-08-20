@@ -4,8 +4,8 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useHeaderStore } from '@/_state/useHeaderStore';
 import { CategoryHeaderArea } from './_area/CategoryHeader.area';
-import { GeneralPostsListAction } from './_action/FeedPosts/GeneralPostsList.action';
-import { ImageModalAction } from './_action/FeedPosts/ImageModal.action';
+import { FeedPostsListAction } from './_action/FeedPosts/FeedPostsList.action';
+import { InViewSentinelAction } from './_action/FeedPosts/InViewSentinel.action';
 
 export default function FeedScreen() {
   const insets = useSafeAreaInsets();
@@ -58,11 +58,10 @@ export default function FeedScreen() {
           <CategoryHeaderArea />
         </Animated.View>
         <View style={styles.postsContainer}>
-          <GeneralPostsListAction />
+          <FeedPostsListAction />
+          <InViewSentinelAction />
         </View>
       </Animated.ScrollView>
-
-      <ImageModalAction />
     </View>
   );
 }

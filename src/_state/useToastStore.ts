@@ -12,8 +12,13 @@ const initialState = {
   message: '',
 };
 
-export const useToastStore = create<ToastState>(set => ({
+const store = create<ToastState>(set => ({
   ...initialState,
   showToast: (message: string) => set({ visible: true, message }),
   hideToast: () => set(initialState),
 }));
+
+export const useToastStore = Object.assign(store, {
+  showToast: (message: string) => store.getState().showToast(message),
+  hideToast: () => store.getState().hideToast(),
+});

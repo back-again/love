@@ -8,7 +8,6 @@ import { OptionItem } from '../_component/OptionItem';
 import { usePostOptionsStore } from '../_state/usePostOptionsStore';
 import { useToastStore } from '@/_state/useToastStore';
 import { deletePostLib } from '../_lib/deletePost.lib';
-import { useLocalPostsStore } from '@/screens/feed/_state/useLocalPostsStore';
 
 export function DeleteOptionAction() {
   const queryClient = useQueryClient();
@@ -24,7 +23,6 @@ export function DeleteOptionAction() {
   const { mutate: deletePost } = useMutation({
     mutationFn: async (postId: string) => await deletePostLib(postId),
     onSuccess: () => {
-      useLocalPostsStore.getState().clearLocalPosts();
       queryClient.invalidateQueries({ queryKey: ['feedPosts'] });
       showToast('게시글이 삭제되었습니다.');
     },

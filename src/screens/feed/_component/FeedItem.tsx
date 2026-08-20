@@ -4,88 +4,65 @@ import React, { useState } from 'react';
 import { StyleSheet, View, Text, TouchableOpacity, Image } from 'react-native';
 import { MoreOptionsSvg, VoteStatsSvg, CommentCountSvg } from '../_svg';
 import { Post } from '../_model/feed.model';
-import {
-  useVoteState,
-  getHasSeenFirstVoteGuide,
-  setHasSeenFirstVoteGuideTrue,
-} from '../_state/useVoteState';
-import { VoteConfirmModal } from './VoteConfirmModal';
-import { useImageModalStore } from '../_state/useImageModalStore';
-import { usePostOptionsStore } from '@/screens/postOptions/_state/usePostOptionsStore';
-import { useCommentStore } from '@/screens/feed/comment/_state/useCommentStore';
+import { useVoteMutation } from '../_state/useVoteMutation';
 import { useToastStore } from '@/_state/useToastStore';
 import { formatTimeAgo } from '../_lib/formatTimeAgo.lib';
 
+import { VoteButton } from './FeedItem/VoteButton';
+import { ResultBar } from './FeedItem/ResultBar';
+
 interface FeedItemProps {
   post: Post;
+  myVote?: 'O' | 'X' | null;
+  isHot?: boolean;
+  onOpenImageModal?: (images: string[], index: number) => void;
+  onOpenPostOptions?: (post: Post) => void;
+  onOpenComments?: (post: Post) => void;
 }
 
-export function FeedItem({ post }: FeedItemProps) {
-  const { selectedVote, isVoted, totalVotes, percentO, percentX, handleVote } =
-    useVoteState(post);
+export function FeedItem({
+  post,
+  myVote = null,
+  isHot,
+  onOpenImageModal,
+  onOpenPostOptions,
+  onOpenComments,
+}: FeedItemProps) {
+  const { mutate: vote } = useVoteMutation();
 
-  const openImageModal = useImageModalStore(state => state.openImageModal);
-  const openPostOptions = usePostOptionsStore(state => state.openPostOptions);
-  const openComments = useCommentStore(state => state.openComments);
-  const showToast = useToastStore(state => state.showToast);
+  const totalVotes = (post.voteOCount ?? 0) + (post.voteXCount ?? 0);
+  const percentO =
+    totalVotes > 0
+      ? Math.round(((post.voteOCount ?? 0) / totalVotes) * 100)
+      : 50;
+  const percentX = 100 - percentO;
 
   const [isExpanded, setIsExpanded] = useState(false);
-  const [pendingVoteChoice, setPendingVoteChoice] = useState<'O' | 'X' | null>(
-    null,
-  );
-
-  const hasVoteOption =
-    !!post.voteO &&
-    !!post.voteX &&
-    post.voteO !== 'null' &&
-    post.voteX !== 'null' &&
-    post.voteO.trim().length > 0 &&
-    post.voteX.trim().length > 0;
 
   const handleCardVote = (choice: 'O' | 'X') => {
-    if (isVoted) return;
+    if (myVote) return;
 
-    if (!getHasSeenFirstVoteGuide()) {
-      setPendingVoteChoice(choice);
-    } else {
-      handleVote(choice);
-    }
-  };
-
-  const handleConfirmVote = () => {
-    if (pendingVoteChoice) {
-      setHasSeenFirstVoteGuideTrue();
-      handleVote(pendingVoteChoice);
-      setPendingVoteChoice(null);
-    }
+    vote({ postId: post.id, choice });
   };
 
   const handleImageClick = (index: number) => {
-    openImageModal(post.images, index);
+    onOpenImageModal?.(post.images, index);
   };
 
   const handleOpenComments = () => {
-    if (hasVoteOption && !isVoted) {
-      showToast('💡 소신 있는 투표를 위해, 투표 후 댓글이 열려요!');
+    if (!myVote) {
+      useToastStore.showToast(
+        '💡 소신 있는 투표를 위해, 투표 후 댓글이 열려요!',
+      );
       return;
     }
 
-    openComments(post);
+    onOpenComments?.(post);
   };
-
-  const rawVoteO = post.voteO || '괜찮은데?';
-  const rawVoteX = post.voteX || '난 싫어';
-  const cleanOptionO = rawVoteO.replace(/^(O\s*|O)/i, '');
-  const cleanOptionX = rawVoteX.replace(/^(X\s*|X)/i, '');
-  const fullText = (post.fullStory || post.storySummary || '').trim();
-  const isHot =
-    (post.isHot || totalVotes >= 20 || (post.totalVoteCount ?? 0) >= 20) &&
-    totalVotes >= 20;
 
   return (
     <View style={styles.cardPageWrapper}>
       <View style={styles.cardContainer}>
-        {/* Top Meta Row */}
         <View style={styles.topMetaRow}>
           <View style={styles.badgeChipsContainer}>
             {isHot && (
@@ -105,7 +82,7 @@ export function FeedItem({ post }: FeedItemProps) {
             style={styles.moreOptionsButton}
             onPress={e => {
               e.stopPropagation();
-              openPostOptions(post);
+              onOpenPostOptions?.(post);
             }}
             hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
             activeOpacity={0.6}
@@ -114,25 +91,23 @@ export function FeedItem({ post }: FeedItemProps) {
           </TouchableOpacity>
         </View>
 
-        {/* Story Text Area */}
         <TouchableOpacity
           onPress={() => setIsExpanded(prev => !prev)}
           activeOpacity={0.9}
           style={styles.storyClickArea}
         >
           <Text style={styles.questionTitle}>{(post.title || '').trim()}</Text>
-          {fullText ? (
+          {post.content ? (
             <Text
               style={styles.storyPreviewText}
               numberOfLines={isExpanded ? undefined : 3}
               ellipsizeMode="tail"
             >
-              {fullText}
+              {post.content.trim()}
             </Text>
           ) : null}
         </TouchableOpacity>
 
-        {/* Attached Images */}
         {post.images && post.images.length > 0 && (
           <View style={styles.imageListRow}>
             {post.images.slice(0, 3).map((imgUri: string, index: number) => (
@@ -154,180 +129,43 @@ export function FeedItem({ post }: FeedItemProps) {
           </View>
         )}
 
-        {/* Vote Selection / Result Bar */}
-        {hasVoteOption && (
-          !isVoted ? (
-            <View style={styles.votedResultsContainer}>
-              <TouchableOpacity
-                style={styles.votedBarWrapper}
-                onPress={e => {
-                  e.stopPropagation();
-                  handleCardVote('O');
-                }}
-                activeOpacity={0.88}
-              >
-                <View style={styles.votedBarTrack}>
-                  <Text
-                    style={styles.votedBarOptionTextUnvoted}
-                    numberOfLines={1}
-                    adjustsFontSizeToFit={true}
-                    minimumFontScale={0.6}
-                  >
-                    <Text style={styles.badgeOText}>O </Text>
-                    <Text style={styles.optionContentText}>{cleanOptionO}</Text>
-                  </Text>
-                </View>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                style={styles.votedBarWrapper}
-                onPress={e => {
-                  e.stopPropagation();
-                  handleCardVote('X');
-                }}
-                activeOpacity={0.88}
-              >
-                <View style={styles.votedBarTrack}>
-                  <Text
-                    style={styles.votedBarOptionTextUnvoted}
-                    numberOfLines={1}
-                    adjustsFontSizeToFit={true}
-                    minimumFontScale={0.6}
-                  >
-                    <Text style={styles.badgeXText}>X </Text>
-                    <Text style={styles.optionContentText}>{cleanOptionX}</Text>
-                  </Text>
-                </View>
-              </TouchableOpacity>
-            </View>
-          ) : (
-            <View style={styles.votedResultsContainer}>
-              <View style={styles.votedBarWrapper}>
-                <View
-                  style={[
-                    styles.votedBarTrack,
-                    selectedVote === 'O'
-                      ? styles.votedBarTrackOSelected
-                      : styles.votedBarTrackUnselected,
-                  ]}
-                >
-                  <View
-                    style={[
-                      styles.votedBarFill,
-                      selectedVote === 'O'
-                        ? styles.votedBarFillOSelected
-                        : styles.votedBarFillUnselected,
-                      { width: `${percentO}%` },
-                    ]}
-                  />
-                  <Text
-                    style={styles.votedBarOptionText}
-                    numberOfLines={1}
-                    adjustsFontSizeToFit={true}
-                    minimumFontScale={0.6}
-                  >
-                    <Text
-                      style={
-                        selectedVote === 'O'
-                          ? styles.badgeOText
-                          : styles.badgeUnselectedText
-                      }
-                    >
-                      O{' '}
-                    </Text>
-                    <Text
-                      style={
-                        selectedVote === 'O'
-                          ? styles.optionContentTextSelectedO
-                          : styles.optionContentTextUnselected
-                      }
-                    >
-                      {cleanOptionO}
-                    </Text>
-                  </Text>
-                  <Text
-                    style={[
-                      styles.votedPercentText,
-                      selectedVote === 'O'
-                        ? styles.votedPercentTextOSelected
-                        : styles.votedPercentTextUnselected,
-                    ]}
-                  >
-                    {percentO}%
-                  </Text>
-                </View>
-              </View>
-
-              <View style={styles.votedBarWrapper}>
-                <View
-                  style={[
-                    styles.votedBarTrack,
-                    selectedVote === 'X'
-                      ? styles.votedBarTrackXSelected
-                      : styles.votedBarTrackUnselected,
-                  ]}
-                >
-                  <View
-                    style={[
-                      styles.votedBarFill,
-                      selectedVote === 'X'
-                        ? styles.votedBarFillXSelected
-                        : styles.votedBarFillUnselected,
-                      { width: `${percentX}%` },
-                    ]}
-                  />
-                  <Text
-                    style={styles.votedBarOptionText}
-                    numberOfLines={1}
-                    adjustsFontSizeToFit={true}
-                    minimumFontScale={0.6}
-                  >
-                    <Text
-                      style={
-                        selectedVote === 'X'
-                          ? styles.badgeXText
-                          : styles.badgeUnselectedText
-                      }
-                    >
-                      X{' '}
-                    </Text>
-                    <Text
-                      style={
-                        selectedVote === 'X'
-                          ? styles.optionContentTextSelectedX
-                          : styles.optionContentTextUnselected
-                      }
-                    >
-                      {cleanOptionX}
-                    </Text>
-                  </Text>
-                  <Text
-                    style={[
-                      styles.votedPercentText,
-                      selectedVote === 'X'
-                        ? styles.votedPercentTextXSelected
-                        : styles.votedPercentTextUnselected,
-                    ]}
-                  >
-                    {percentX}%
-                  </Text>
-                </View>
-              </View>
-            </View>
-          )
+        {!myVote ? (
+          <View style={styles.votedResultsContainer}>
+            <FeedItem.VoteButton
+              choice="O"
+              content={post.voteO}
+              onPress={() => handleCardVote('O')}
+            />
+            <FeedItem.VoteButton
+              choice="X"
+              content={post.voteX}
+              onPress={() => handleCardVote('X')}
+            />
+          </View>
+        ) : (
+          <View style={styles.votedResultsContainer}>
+            <FeedItem.ResultBar
+              choice="O"
+              content={post.voteO}
+              percent={percentO}
+              isSelected={myVote === 'O'}
+            />
+            <FeedItem.ResultBar
+              choice="X"
+              content={post.voteX}
+              percent={percentX}
+              isSelected={myVote === 'X'}
+            />
+          </View>
         )}
 
         <View style={styles.bottomStatsRow}>
-          {hasVoteOption ? (
-            <View style={styles.statLeftCol}>
-              <VoteStatsSvg />
-              <Text style={styles.statLeftText}>
-                {totalVotes.toLocaleString()}명 투표 중
-              </Text>
-            </View>
-          ) : (
-            <View style={styles.statLeftCol} />
-          )}
+          <View style={styles.statLeftCol}>
+            <VoteStatsSvg />
+            <Text style={styles.statLeftText}>
+              {totalVotes.toLocaleString()}명 투표 중
+            </Text>
+          </View>
 
           <TouchableOpacity
             style={styles.statRightCol}
@@ -341,23 +179,13 @@ export function FeedItem({ post }: FeedItemProps) {
             <Text style={styles.statRightText}>{post.commentCount}</Text>
           </TouchableOpacity>
         </View>
-
-        <VoteConfirmModal
-          visible={!!pendingVoteChoice}
-          onClose={() => setPendingVoteChoice(null)}
-          onConfirm={handleConfirmVote}
-          choiceText={
-            pendingVoteChoice === 'O'
-              ? `O  ${cleanOptionO}`
-              : pendingVoteChoice === 'X'
-                ? `X  ${cleanOptionX}`
-                : ''
-          }
-        />
       </View>
     </View>
   );
 }
+
+FeedItem.VoteButton = VoteButton;
+FeedItem.ResultBar = ResultBar;
 
 const styles = StyleSheet.create({
   cardPageWrapper: {
@@ -462,110 +290,6 @@ const styles = StyleSheet.create({
     width: '100%',
     gap: 10,
     marginBottom: 14,
-  },
-  votedBarWrapper: {
-    width: '100%',
-  },
-  votedBarTrack: {
-    width: '100%',
-    height: 48,
-    backgroundColor: '#FFFFFF',
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: '#E8E8E8',
-    position: 'relative',
-    justifyContent: 'center',
-    overflow: 'hidden',
-  },
-  votedBarTrackOSelected: {
-    borderColor: '#E8E3FF',
-  },
-  votedBarTrackXSelected: {
-    borderColor: '#FFE3E5',
-  },
-  votedBarTrackUnselected: {
-    borderColor: '#E8E8E8',
-  },
-  votedBarFill: {
-    position: 'absolute',
-    left: 0,
-    top: 0,
-    bottom: 0,
-    borderRadius: 15,
-  },
-  votedBarOptionText: {
-    position: 'absolute',
-    left: 16,
-    right: 64,
-    fontSize: 15,
-    zIndex: 2,
-  },
-  votedBarOptionTextUnvoted: {
-    position: 'absolute',
-    left: 16,
-    right: 16,
-    fontSize: 15,
-    zIndex: 2,
-  },
-  badgeOText: {
-    color: '#8B75F9',
-    fontWeight: '900',
-    fontSize: 16,
-  },
-  badgeXText: {
-    color: '#FF5D7B',
-    fontWeight: '900',
-    fontSize: 16,
-  },
-  badgeUnselectedText: {
-    color: '#8F8F8F',
-    fontWeight: '700',
-    fontSize: 16,
-  },
-  optionContentText: {
-    color: '#0F172A',
-    fontWeight: '600',
-    fontSize: 14.5,
-  },
-  optionContentTextSelectedO: {
-    color: '#8B75F9',
-    fontWeight: '800',
-    fontSize: 14.5,
-  },
-  optionContentTextSelectedX: {
-    color: '#FF5D7B',
-    fontWeight: '800',
-    fontSize: 14.5,
-  },
-  optionContentTextUnselected: {
-    color: '#8F8F8F',
-    fontWeight: '600',
-    fontSize: 14.5,
-  },
-  votedBarFillOSelected: {
-    backgroundColor: '#F5F1FF',
-  },
-  votedBarFillXSelected: {
-    backgroundColor: '#FFF3F4',
-  },
-  votedBarFillUnselected: {
-    backgroundColor: '#F5F5F5',
-  },
-  votedPercentText: {
-    position: 'absolute',
-    right: 16,
-    fontSize: 15,
-    fontWeight: '800',
-    zIndex: 2,
-  },
-  votedPercentTextOSelected: {
-    color: '#8B75F9',
-  },
-  votedPercentTextXSelected: {
-    color: '#FF5D7B',
-  },
-  votedPercentTextUnselected: {
-    color: '#8F8F8F',
   },
   bottomStatsRow: {
     width: '100%',

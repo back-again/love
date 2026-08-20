@@ -10,7 +10,10 @@ import { DeleteOptionAction } from './_action/DeleteOption.action';
 import { BlockOptionAction } from './_action/BlockOption.action';
 import { ReportOptionAction } from './_action/ReportOption.action';
 
+import { useUserStore } from '@/_state/useUserStore';
+
 export function PostOptionsScreen() {
+  const user = useUserStore(state => state.user);
   const { visible, targetPost, closePostOptions } = usePostOptionsStore(
     useShallow(state => ({
       visible: state.visible,
@@ -19,7 +22,9 @@ export function PostOptionsScreen() {
     })),
   );
 
-  const isMyPost = Boolean(targetPost?.isMyPost);
+  const isMyPost = Boolean(
+    user?.id && targetPost?.userId && user.id === targetPost.userId,
+  );
 
   if (!visible) return null;
 
