@@ -62,7 +62,7 @@ export async function getFeedPostsLib({
 
     let query = supabase.from('post_details_view').select('*');
 
-    if (categoryId && categoryId !== 'all') {
+    if (categoryId) {
       query = query.eq('category_id', categoryId);
     }
 

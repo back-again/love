@@ -1,21 +1,16 @@
+'use client';
+
 import React from 'react';
-import {
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  Platform,
-  Alert,
-  View,
-} from 'react-native';
+import { StyleSheet, Text, TouchableOpacity } from 'react-native';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useShallow } from 'zustand/react/shallow';
 import { useCreateForm } from '../_state/useCreateForm';
 import { createPost } from '../_lib/createPost.lib';
 import { updatePost } from '../_lib/updatePost.lib';
-import { navigationRef } from '@/_lib/navigation';
-import { useFeedStore } from '@/screens/feed/_state/useFeedStore';
-
 import { inspectPostQualityLib } from '../_lib/inspectPostQuality.lib';
+import { navigate } from '@/_lib/navigation';
+import { useFeedStore } from '@/screens/feed/_state/useFeedStore';
+import { useToastStore } from '@/_state/useToastStore';
 
 export function CreateSubmitAction() {
   const queryClient = useQueryClient();
@@ -29,7 +24,6 @@ export function CreateSubmitAction() {
     voteX,
     isEditMode,
     editPostId,
-    hasVote,
     reset,
   } = useCreateForm(
     useShallow(state => ({
@@ -41,15 +35,30 @@ export function CreateSubmitAction() {
       voteX: state.voteX,
       isEditMode: state.isEditMode,
       editPostId: state.editPostId,
-      hasVote: state.hasVote,
       reset: state.reset,
     })),
   );
 
+  const isFormValid =
+    questionTitle.trim().length > 0 &&
+    category.trim().length > 0 &&
+    detailSituation.trim().length > 0;
+
   const createMutation = useMutation({
-    mutationFn: () => {
-      const finalVoteO = hasVote ? voteO.trim() || '괜찮은 것 같아' : null;
-      const finalVoteX = hasVote ? voteX.trim() || '난 별로야' : null;
+    mutationFn: async () => {
+      const inspection = await inspectPostQualityLib(
+        questionTitle,
+        detailSituation,
+      );
+
+      if (!inspection.isApproved) {
+        throw new Error(
+          inspection.message || '등록할 수 없는 사연 내용입니다.',
+        );
+      }
+
+      const finalVoteO = voteO.trim();
+      const finalVoteX = voteX.trim();
 
       if (isEditMode && editPostId) {
         return updatePost({
@@ -62,6 +71,7 @@ export function CreateSubmitAction() {
           voteX: finalVoteX,
         });
       }
+
       return createPost({
         title: questionTitle.trim(),
         category,
@@ -73,66 +83,28 @@ export function CreateSubmitAction() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['feedPosts'] });
-
-      Alert.alert(
-        '완료',
+      useToastStore.showToast(
         isEditMode
-          ? '오답노트에 사연이 성공적으로 수정되었습니다!'
-          : '오답노트에 사연이 성공적으로 등록되었습니다!',
+          ? '사연이 성공적으로 수정되었습니다!'
+          : '사연이 성공적으로 등록되었습니다!',
       );
 
       reset();
       useFeedStore.getState().setSelectedCategoryId(null);
-      if (navigationRef.current?.isReady()) {
-        navigationRef.current.navigate('Feed');
-      }
+      navigate('Feed');
     },
-    onError: error => {
+    onError: (error: any) => {
       console.error('Submit post error:', error);
-      if (Platform.OS === 'web') {
-        alert(
-          isEditMode
+      useToastStore.showToast(
+        error?.message ||
+          (isEditMode
             ? '수정 중 오류가 발생했습니다.'
-            : '등록 중 오류가 발생했습니다.',
-        );
-      } else {
-        Alert.alert(
-          '오류',
-          isEditMode
-            ? '수정 중 오류가 발생했습니다.'
-            : '등록 중 오류가 발생했습니다.',
-        );
-      }
+            : '등록 중 오류가 발생했습니다.'),
+      );
     },
   });
 
-  const isFormValid =
-    questionTitle.trim().length > 0 &&
-    category.trim().length > 0 &&
-    detailSituation.trim().length > 0;
   const isLoading = createMutation.isPending;
-
-  const handleSubmit = async () => {
-    if (!isFormValid || isLoading) return;
-
-    const inspection = await inspectPostQualityLib(
-      questionTitle,
-      detailSituation,
-    );
-    if (!inspection.isApproved) {
-      if (Platform.OS === 'web') {
-        alert(inspection.message || '등록할 수 없는 사연 내용입니다.');
-      } else {
-        Alert.alert(
-          '등록 제한',
-          inspection.message || '등록할 수 없는 사연 내용입니다.',
-        );
-      }
-      return;
-    }
-
-    createMutation.mutate();
-  };
 
   return (
     <TouchableOpacity
@@ -140,7 +112,7 @@ export function CreateSubmitAction() {
         styles.submitButton,
         (!isFormValid || isLoading) && styles.submitButtonDisabled,
       ]}
-      onPress={handleSubmit}
+      onPress={() => createMutation.mutate()}
       disabled={!isFormValid || isLoading}
       activeOpacity={0.8}
     >
@@ -168,7 +140,6 @@ const styles = StyleSheet.create({
     height: 56,
     borderRadius: 28,
     backgroundColor: '#F9758D',
-    borderWidth: 0,
     alignItems: 'center',
     justifyContent: 'center',
     shadowColor: '#F9758D',
@@ -179,7 +150,6 @@ const styles = StyleSheet.create({
   },
   submitButtonDisabled: {
     backgroundColor: '#FFFFFF',
-    borderWidth: 0,
     shadowColor: '#000000',
     shadowOffset: { width: 0, height: 0 },
     shadowOpacity: 0.06,

@@ -15,10 +15,10 @@ export async function updatePost({
   id,
   title,
   content,
-  category = '연애/썸',
+  category = '고민',
   images = [],
-  voteO = '괜찮은데?',
-  voteX = '난 싫어',
+  voteO,
+  voteX,
 }: UpdatePostParams) {
   // 1. 카테고리 ID 확인 (categories 테이블 조회)
   let categoryId: string | null = null;
@@ -61,13 +61,12 @@ export async function updatePost({
     throw new Error('이미지 업로드 중 오류가 발생했습니다.');
   }
 
-  // 3. Supabase posts 테이블 업데이트
   const updatePayload: any = {
     title,
     content,
     category,
-    vote_o: voteO,
-    vote_x: voteX,
+    vote_o: voteO ? voteO.trim() : null,
+    vote_x: voteX ? voteX.trim() : null,
   };
   if (categoryId) {
     updatePayload.category_id = categoryId;

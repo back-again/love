@@ -14,11 +14,15 @@ const AnimatedTextInput = Animated.createAnimatedComponent(TextInput);
 export interface AnimatedTextInputFieldProps extends TextInputProps {
   charCounter?: { current: number; max: number };
   height?: number;
+  focusBorderColor?: string;
+  focusShadowColor?: string;
 }
 
 export function AnimatedTextInputField({
   charCounter,
   height = 56,
+  focusBorderColor = '#FFB5C5',
+  focusShadowColor = 'rgba(255, 181, 197, 0.25)',
   style,
   onFocus,
   onBlur,
@@ -49,7 +53,7 @@ export function AnimatedTextInputField({
 
   const animatedBorderColor = focusAnim.interpolate({
     inputRange: [0, 1],
-    outputRange: ['#E8E8E8', '#FFB5C5'],
+    outputRange: ['#E8E8E8', focusBorderColor],
   });
 
   return (
@@ -65,7 +69,7 @@ export function AnimatedTextInputField({
           },
           Platform.OS === 'web' && isFocused
             ? ({
-                boxShadow: '0 0 0 3px rgba(255, 181, 197, 0.25)',
+                boxShadow: `0 0 0 3px ${focusShadowColor}`,
               } as any)
             : {},
           style,

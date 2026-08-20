@@ -5,7 +5,7 @@ import { OptionItem } from '../_component/OptionItem';
 import { usePostOptionsStore } from '../_state/usePostOptionsStore';
 import { useCreateForm } from '@/screens/create/_state/useCreateForm';
 import { useToastStore } from '@/_state/useToastStore';
-import { navigationRef } from '@/_lib/navigation';
+import { navigate } from '@/_lib/navigation';
 
 export function EditOptionAction() {
   const { targetPost, closePostOptions } = usePostOptionsStore(
@@ -33,9 +33,7 @@ export function EditOptionAction() {
     });
 
     showToast('사연 수정 모드로 전환되었습니다.');
-    if (navigationRef.isReady()) {
-      navigationRef.navigate('Create');
-    }
+    navigate('Create');
   };
 
   return (

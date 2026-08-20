@@ -8,10 +8,17 @@ export function navigate(name: string, params?: any) {
   const lowerName = name.toLowerCase() as MainTabType;
   if (['feed', 'create', 'chat', 'my'].includes(lowerName)) {
     useTabStore.getState().setActiveTab(lowerName);
+
+    if (navigationRef.isReady()) {
+      const currentRoute = navigationRef.getCurrentRoute();
+      if (currentRoute?.name !== 'Main') {
+        navigationRef.navigate('Main');
+      }
+    }
+    return;
   }
 
   if (navigationRef.isReady()) {
     navigationRef.navigate(name, params);
   }
 }
-

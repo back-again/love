@@ -1,40 +1,24 @@
 import React from 'react';
-import { StyleSheet, View, Text, Switch } from 'react-native';
-import { useShallow } from 'zustand/react/shallow';
-import { useCreateForm } from '../_state/useCreateForm';
+import { StyleSheet, View, Text } from 'react-native';
 import { VoteOptionInputAction } from '../_action/VoteOptionInput.action';
+import { AiVoteRecommendAction } from '../_action/AiVoteRecommend.action';
 
 export function VoteOptionSettingArea() {
-  const { hasVote, setHasVote } = useCreateForm(
-    useShallow(state => ({
-      hasVote: state.hasVote,
-      setHasVote: state.setHasVote,
-    }))
-  );
-
   return (
     <View style={styles.createSection}>
       <View style={styles.titleRow}>
         <View style={styles.titleTextWrap}>
-          <Text style={styles.createSectionTitle}>OX로 빠른 의견 받기</Text>
+          <Text style={styles.createSectionTitle}>OX</Text>
           <Text style={styles.createSectionSub}>
             선택지를 직접 입력해 피드백을 받아보세요.
           </Text>
         </View>
-        <Switch
-          value={hasVote}
-          onValueChange={setHasVote}
-          trackColor={{ false: '#E2E8F0', true: '#FFB5C5' }}
-          thumbColor={hasVote ? '#FF5D7B' : '#F4F4F5'}
-          ios_backgroundColor="#E2E8F0"
-        />
+        <AiVoteRecommendAction />
       </View>
 
-      {hasVote && (
-        <View style={styles.optionsContent}>
-          <VoteOptionInputAction />
-        </View>
-      )}
+      <View style={styles.optionsContent}>
+        <VoteOptionInputAction />
+      </View>
     </View>
   );
 }

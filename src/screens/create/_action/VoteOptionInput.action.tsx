@@ -1,46 +1,20 @@
 'use client';
 
-import React, { useState, useRef, useEffect } from 'react';
-import {
-  StyleSheet,
-  View,
-  Text,
-  TextInput,
-  Platform,
-} from 'react-native';
+import React from 'react';
+import { StyleSheet, View, Text } from 'react-native';
 import { useShallow } from 'zustand/react/shallow';
 import { useCreateForm } from '../_state/useCreateForm';
-import { getDefaultVoteOptions } from '../_lib/getDefaultVoteOptions.lib';
+import { AnimatedTextInputField } from '../_component/AnimatedTextInputField';
 
 export function VoteOptionInputAction() {
-  const {
-    questionTitle,
-    detailSituation,
-    voteO,
-    voteX,
-    setVoteO,
-    setVoteX,
-  } = useCreateForm(
+  const { voteO, voteX, setVoteO, setVoteX } = useCreateForm(
     useShallow(state => ({
-      questionTitle: state.questionTitle,
-      detailSituation: state.detailSituation,
       voteO: state.voteO,
       voteX: state.voteX,
       setVoteO: state.setVoteO,
       setVoteX: state.setVoteX,
-    }))
+    })),
   );
-
-  const [focusedField, setFocusedField] = useState<'O' | 'X' | null>(null);
-  const isManuallyEditedRef = useRef(false);
-
-  useEffect(() => {
-    if (!isManuallyEditedRef.current && !voteO && !voteX) {
-      const defaults = getDefaultVoteOptions(questionTitle, detailSituation);
-      setVoteO(defaults.voteO);
-      setVoteX(defaults.voteX);
-    }
-  }, [questionTitle, detailSituation, voteO, voteX, setVoteO, setVoteX]);
 
   return (
     <View style={styles.container}>
@@ -49,25 +23,18 @@ export function VoteOptionInputAction() {
         <View style={styles.badgeO}>
           <Text style={styles.badgeTextO}>O</Text>
         </View>
-        <TextInput
-          style={[
-            styles.optionInput,
-            focusedField === 'O' && styles.optionInputActiveO,
-            Platform.OS === 'web' && focusedField === 'O'
-              ? ({ boxShadow: '0 0 0 3px rgba(139, 117, 249, 0.15)' } as any)
-              : {},
-          ]}
-          placeholder="O 선택지 직접 입력 (최대 15자)"
-          placeholderTextColor="#8F8F8F"
-          value={voteO}
-          onChangeText={text => {
-            isManuallyEditedRef.current = true;
-            setVoteO(text);
-          }}
-          onFocus={() => setFocusedField('O')}
-          onBlur={() => setFocusedField(null)}
-          maxLength={15}
-        />
+        <View style={styles.inputFlex}>
+          <AnimatedTextInputField
+            height={48}
+            focusBorderColor="#8B75F9"
+            focusShadowColor="rgba(139, 117, 249, 0.15)"
+            placeholder="O 선택지 직접 입력 (최대 15자)"
+            placeholderTextColor="#8F8F8F"
+            value={voteO}
+            onChangeText={setVoteO}
+            maxLength={15}
+          />
+        </View>
       </View>
 
       {/* Option X Input Row */}
@@ -75,25 +42,18 @@ export function VoteOptionInputAction() {
         <View style={styles.badgeX}>
           <Text style={styles.badgeTextX}>X</Text>
         </View>
-        <TextInput
-          style={[
-            styles.optionInput,
-            focusedField === 'X' && styles.optionInputActiveX,
-            Platform.OS === 'web' && focusedField === 'X'
-              ? ({ boxShadow: '0 0 0 3px rgba(249, 117, 141, 0.15)' } as any)
-              : {},
-          ]}
-          placeholder="X 선택지 직접 입력 (최대 15자)"
-          placeholderTextColor="#8F8F8F"
-          value={voteX}
-          onChangeText={text => {
-            isManuallyEditedRef.current = true;
-            setVoteX(text);
-          }}
-          onFocus={() => setFocusedField('X')}
-          onBlur={() => setFocusedField(null)}
-          maxLength={15}
-        />
+        <View style={styles.inputFlex}>
+          <AnimatedTextInputField
+            height={48}
+            focusBorderColor="#FF5D7B"
+            focusShadowColor="rgba(255, 93, 123, 0.15)"
+            placeholder="X 선택지 직접 입력 (최대 15자)"
+            placeholderTextColor="#8F8F8F"
+            value={voteX}
+            onChangeText={setVoteX}
+            maxLength={15}
+          />
+        </View>
       </View>
     </View>
   );
@@ -138,25 +98,9 @@ const styles = StyleSheet.create({
   badgeTextX: {
     fontSize: 16,
     fontWeight: '800',
-    color: '#F9758D',
+    color: '#FF5D7B',
   },
-  optionInput: {
+  inputFlex: {
     flex: 1,
-    height: 48,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: '#E8E8E8',
-    paddingHorizontal: 14,
-    fontSize: 14,
-    color: '#0F172A',
-    backgroundColor: '#FFFFFF',
-  },
-  optionInputActiveO: {
-    borderColor: '#8B75F9',
-    borderWidth: 1,
-  },
-  optionInputActiveX: {
-    borderColor: '#F9758D',
-    borderWidth: 1,
   },
 });

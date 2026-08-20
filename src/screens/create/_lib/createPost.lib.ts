@@ -15,19 +15,17 @@ export interface CreatePostParams {
 export async function createPost({
   title,
   content,
-  category = '연애/썸',
+  category = '고민',
   images = [],
   userId,
-  voteO = '괜찮은데?',
-  voteX = '난 싫어',
+  voteO,
+  voteX,
 }: CreatePostParams) {
-  // 1. 로그인 유저 ID 확인
   const activeUserId = userId || (await getCurrentUserId());
   if (!activeUserId) {
     throw new Error('로그인이 필요합니다.');
   }
 
-  // 2. 카테고리 ID 확인 (categories 테이블 조회)
   let categoryId: string | null = null;
   try {
     const { data: catData } = await supabase
@@ -43,7 +41,6 @@ export async function createPost({
     console.warn('Category lookup warning:', catErr);
   }
 
-  // 3. 게시글 등록 전 Cloudflare R2 스토리지로 이미지 일괄 업로드
   const uploadedImageUrls: string[] = [];
   if (images.length > 0) {
     try {
@@ -66,59 +63,27 @@ export async function createPost({
     }
   }
 
-  // 4. Supabase public.posts 레코드 생성
-  let postData: any = null;
-  let postError: any = null;
-
-  const fullPayload: any = {
+  const insertPayload: any = {
     user_id: activeUserId,
     title,
     content,
     category,
-    vote_o: voteO,
-    vote_x: voteX,
+    vote_o: voteO ? voteO.trim() : null,
+    vote_x: voteX ? voteX.trim() : null,
   };
-  if (categoryId) fullPayload.category_id = categoryId;
+  if (categoryId) insertPayload.category_id = categoryId;
 
-  const res1 = await supabase.from('posts').insert([fullPayload]).select().single();
-  postData = res1.data;
-  postError = res1.error;
-
-  if (postError) {
-    console.warn('Posts insert Attempt 1 failed:', postError.message);
-    const payload2: any = {
-      user_id: activeUserId,
-      title,
-      content,
-      category,
-    };
-    if (categoryId) payload2.category_id = categoryId;
-
-    const res2 = await supabase.from('posts').insert([payload2]).select().single();
-    postData = res2.data;
-    postError = res2.error;
-  }
+  const { data: postData, error: postError } = await supabase
+    .from('posts')
+    .insert([insertPayload])
+    .select()
+    .single();
 
   if (postError) {
-    console.warn('Posts insert Attempt 2 failed:', postError.message);
-    const payload3: any = {
-      user_id: activeUserId,
-      title,
-      content,
-    };
-    if (categoryId) payload3.category_id = categoryId;
-
-    const res3 = await supabase.from('posts').insert([payload3]).select().single();
-    postData = res3.data;
-    postError = res3.error;
-  }
-
-  if (postError) {
-    console.error('CRITICAL: All Supabase posts insert attempts failed:', postError);
+    console.error('Supabase posts insert error:', postError);
     throw new Error('게시글 등록에 실패했습니다.');
   }
 
-  // 5. Supabase public.post_images 레코드 저장
   if (uploadedImageUrls.length > 0 && postData?.id) {
     const imageRecords = uploadedImageUrls.map((url, index) => ({
       post_id: postData.id,
