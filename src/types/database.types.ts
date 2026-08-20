@@ -92,6 +92,7 @@ export interface Notification {
 export interface UserBlock {
   blocker_id: string;
   blocked_id: string;
+  post_title?: string | null;
   created_at: string;
 }
 

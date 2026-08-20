@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { StyleSheet, Text } from 'react-native';
-import { useSettingStore } from '../_state/useSettingStore';
+import { useSettingStore } from '../../_state/useSettingStore';
 
 export function SettingTitleAction() {
   const activeSubView = useSettingStore((state) => state.activeSubView);
@@ -15,6 +15,8 @@ export function SettingTitleAction() {
         return '개인정보처리방침';
       case 'settings':
         return '계정 설정';
+      case 'blocks':
+        return '차단 목록 관리';
       default:
         return '설정';
     }

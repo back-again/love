@@ -22,6 +22,7 @@ export interface RawFeedPost {
 
 export interface FetchFeedParams {
   type?: 'hot' | 'recent';
+  categoryId?: string;
   category?: string;
   page?: number;
   pageSize?: number;
@@ -38,7 +39,8 @@ export interface FetchFeedResponse {
 
 export async function getFeedPostsLib({
   type = 'recent',
-  category = '전체',
+  categoryId,
+  category,
   page = 1,
   pageSize = 5,
 }: FetchFeedParams): Promise<FetchFeedResponse> {
@@ -48,7 +50,6 @@ export async function getFeedPostsLib({
 
     const userId = await getCurrentUserId();
 
-    // 1. 차단된 사용자 목록 조회
     const blockedUserIds = new Set<string>();
     if (userId) {
       const { data: userBlocks } = await supabase
@@ -63,14 +64,13 @@ export async function getFeedPostsLib({
 
     let query = supabase.from('post_details_view').select('*');
 
-    const isHotCategory = category === '🔥 인기' || category === '인기';
-    const effectiveType = isHotCategory ? 'hot' : type;
-
-    if (category && category !== '전체' && !isHotCategory) {
+    if (categoryId && categoryId !== 'all' && categoryId !== '전체') {
+      query = query.eq('category_id', categoryId);
+    } else if (category && category !== '전체') {
       query = query.eq('category', category);
     }
 
-    if (effectiveType === 'hot') {
+    if (type === 'hot') {
       query = query
         .order('vote_o_count', { ascending: false })
         .order('created_at', { ascending: false });
@@ -89,9 +89,9 @@ export async function getFeedPostsLib({
       (p: any) => !blockedUserIds.has(p.user_id),
     );
 
-    if (effectiveType === 'hot') {
+    if (type === 'hot') {
       filteredDbPosts = filteredDbPosts.filter(
-        (p: any) => ((p.vote_o_count ?? 0) + (p.vote_x_count ?? 0)) >= 20
+        (p: any) => (p.vote_o_count ?? 0) + (p.vote_x_count ?? 0) >= 20,
       );
     }
 

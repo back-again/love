@@ -6,7 +6,7 @@ import { useHeaderStore } from '@/_state/useHeaderStore';
 
 import { HeaderTitleAction } from './_action/HeaderTitle.action';
 import { NotificationBellButtonAction } from './_action/NotificationBellButton.action';
-import { OpenSettingBottomSheetAction } from '@/screens/setting/_action/OpenSettingBottomSheet.action';
+import { OpenSettingBottomSheetAction } from '@/screens/setting/_action/OpenSetting/OpenSettingBottomSheet.action';
 import { BottomNavArea } from './_area/BottomNav.area';
 import { ToastProvider } from '@/_provider/ToastProvider';
 import { PushNotificationProvider } from '@/_provider/PushNotificationProvider';

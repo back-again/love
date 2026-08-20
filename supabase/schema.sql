@@ -95,6 +95,7 @@ CREATE TABLE IF NOT EXISTS public.notifications (
 CREATE TABLE IF NOT EXISTS public.user_blocks (
   blocker_id UUID REFERENCES public.users(id) ON DELETE CASCADE,
   blocked_id UUID REFERENCES public.users(id) ON DELETE CASCADE,
+  post_title TEXT,
   created_at TIMESTAMPTZ DEFAULT NOW(),
   PRIMARY KEY (blocker_id, blocked_id)
 );

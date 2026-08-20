@@ -20,7 +20,13 @@ export function BlockOptionAction() {
   const showToast = useToastStore(state => state.showToast);
 
   const { mutate: blockUser } = useMutation({
-    mutationFn: async (userId: string) => await blockUserLib(userId),
+    mutationFn: async ({
+      userId,
+      postTitle,
+    }: {
+      userId: string;
+      postTitle?: string;
+    }) => await blockUserLib(userId, postTitle),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['feedPosts'] });
       showToast('해당 사용자가 차단되었습니다.');
@@ -37,6 +43,7 @@ export function BlockOptionAction() {
     }
 
     const targetUserId = targetPost.userId;
+    const postTitle = targetPost.title;
     closePostOptions();
 
     Alert.alert(
@@ -47,7 +54,7 @@ export function BlockOptionAction() {
         {
           text: '차단',
           style: 'destructive',
-          onPress: () => blockUser(targetUserId),
+          onPress: () => blockUser({ userId: targetUserId, postTitle }),
         },
       ],
     );

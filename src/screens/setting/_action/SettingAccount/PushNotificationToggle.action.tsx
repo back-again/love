@@ -3,7 +3,8 @@
 import React, { useState, useEffect } from 'react';
 import { StyleSheet, View, Text, Switch } from 'react-native';
 import { useUserStore } from '@/_state/useUserStore';
-import { updateNotificationAllowed } from '../_lib/updateNotificationAllowed.lib';
+import { updateNotificationAllowed } from '../../_lib/updateNotificationAllowed.lib';
+import { supabase } from '@/api/supabase';
 
 export function PushNotificationToggleAction() {
   const { user, setUser } = useUserStore();

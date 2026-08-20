@@ -1,9 +1,9 @@
 'use client';
 
-import React, { useState } from 'react';
-import { StyleSheet, TouchableOpacity } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { StyleSheet, TouchableOpacity, View } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
-import SettingScreen from '../SettingScreen';
+import SettingScreen from '../../SettingScreen';
 
 interface OpenSettingBottomSheetActionProps {
   onSettingsPress?: () => void;

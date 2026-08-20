@@ -1,11 +1,17 @@
-import React, { useState } from 'react';
-import { StyleSheet, Text, TouchableOpacity, Platform, Alert, View } from 'react-native';
+import React from 'react';
+import {
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  Platform,
+  Alert,
+  View,
+} from 'react-native';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useShallow } from 'zustand/react/shallow';
 import { useCreateForm } from '../_state/useCreateForm';
 import { createPost } from '../_lib/createPost.lib';
 import { updatePost } from '../_lib/updatePost.lib';
-import { useLocalPostsStore } from '@/screens/feed/_state/useLocalPostsStore';
 import { navigationRef } from '@/_lib/navigation';
 import { useCategoryStore } from '@/screens/feed/_state/useCategoryStore';
 
@@ -13,6 +19,7 @@ import { inspectPostQualityLib } from '../_lib/inspectPostQuality.lib';
 
 export function CreateSubmitAction() {
   const queryClient = useQueryClient();
+
   const {
     questionTitle,
     category,
@@ -25,7 +32,7 @@ export function CreateSubmitAction() {
     hasVote,
     reset,
   } = useCreateForm(
-    useShallow((state) => ({
+    useShallow(state => ({
       questionTitle: state.questionTitle,
       category: state.category,
       detailSituation: state.detailSituation,
@@ -36,13 +43,13 @@ export function CreateSubmitAction() {
       editPostId: state.editPostId,
       hasVote: state.hasVote,
       reset: state.reset,
-    }))
+    })),
   );
 
   const createMutation = useMutation({
     mutationFn: () => {
-      const finalVoteO = hasVote ? (voteO.trim() || '괜찮은 것 같아') : null;
-      const finalVoteX = hasVote ? (voteX.trim() || '난 별로야') : null;
+      const finalVoteO = hasVote ? voteO.trim() || '괜찮은 것 같아' : null;
+      const finalVoteX = hasVote ? voteX.trim() || '난 별로야' : null;
 
       if (isEditMode && editPostId) {
         return updatePost({
@@ -64,63 +71,37 @@ export function CreateSubmitAction() {
         voteX: finalVoteX,
       });
     },
-    onSuccess: (newPostData) => {
-      if (newPostData) {
-        useLocalPostsStore.getState().addPost({
-          id: newPostData.id || String(Date.now()),
-          category: category || '고민',
-          isHot: false,
-          title: questionTitle.trim(),
-          storySummary: detailSituation.trim(),
-          fullStory: detailSituation.trim(),
-          images: newPostData.images || images || [],
-          voteO: voteO.trim() || '괜찮은데?',
-          voteX: voteX.trim() || '난 싫어',
-          topComments: [],
-          reviewStatus: '후기 요청',
-          reviewContent: '',
-          hasReview: false,
-          fireCount: 0,
-          facepalmCount: 0,
-          commentCount: 0,
-          voteOCount: 0,
-          voteXCount: 0,
-          totalVoteCount: 0,
-          totalVotes: 0,
-          percentO: 50,
-          percentX: 50,
-          myVote: null,
-          createdAt: new Date().toISOString(),
-        });
-      }
-
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['feedPosts'] });
-      if (Platform.OS === 'web') {
-        alert(
-          isEditMode
-            ? '오답노트에 사연이 성공적으로 수정되었습니다!'
-            : '오답노트에 사연이 성공적으로 등록되었습니다!'
-        );
-      } else {
-        Alert.alert(
-          '완료',
-          isEditMode
-            ? '오답노트에 사연이 성공적으로 수정되었습니다!'
-            : '오답노트에 사연이 성공적으로 등록되었습니다!'
-        );
-      }
+
+      Alert.alert(
+        '완료',
+        isEditMode
+          ? '오답노트에 사연이 성공적으로 수정되었습니다!'
+          : '오답노트에 사연이 성공적으로 등록되었습니다!',
+      );
+
       reset();
       useCategoryStore.getState().setSelectedCategory('전체');
       if (navigationRef.current?.isReady()) {
         navigationRef.current.navigate('Feed');
       }
     },
-    onError: (error) => {
+    onError: error => {
       console.error('Submit post error:', error);
       if (Platform.OS === 'web') {
-        alert(isEditMode ? '수정 중 오류가 발생했습니다.' : '등록 중 오류가 발생했습니다.');
+        alert(
+          isEditMode
+            ? '수정 중 오류가 발생했습니다.'
+            : '등록 중 오류가 발생했습니다.',
+        );
       } else {
-        Alert.alert('오류', isEditMode ? '수정 중 오류가 발생했습니다.' : '등록 중 오류가 발생했습니다.');
+        Alert.alert(
+          '오류',
+          isEditMode
+            ? '수정 중 오류가 발생했습니다.'
+            : '등록 중 오류가 발생했습니다.',
+        );
       }
     },
   });
@@ -134,12 +115,18 @@ export function CreateSubmitAction() {
   const handleSubmit = async () => {
     if (!isFormValid || isLoading) return;
 
-    const inspection = await inspectPostQualityLib(questionTitle, detailSituation);
+    const inspection = await inspectPostQualityLib(
+      questionTitle,
+      detailSituation,
+    );
     if (!inspection.isApproved) {
       if (Platform.OS === 'web') {
         alert(inspection.message || '등록할 수 없는 사연 내용입니다.');
       } else {
-        Alert.alert('등록 제한', inspection.message || '등록할 수 없는 사연 내용입니다.');
+        Alert.alert(
+          '등록 제한',
+          inspection.message || '등록할 수 없는 사연 내용입니다.',
+        );
       }
       return;
     }
@@ -163,7 +150,13 @@ export function CreateSubmitAction() {
           (!isFormValid || isLoading) && styles.submitButtonTextDisabled,
         ]}
       >
-        {isLoading ? (isEditMode ? '수정 중...' : '등록 중...') : (isEditMode ? '수정 완료' : '작성 완료')}
+        {isLoading
+          ? isEditMode
+            ? '수정 중...'
+            : '등록 중...'
+          : isEditMode
+            ? '수정 완료'
+            : '작성 완료'}
       </Text>
     </TouchableOpacity>
   );
@@ -178,7 +171,6 @@ const styles = StyleSheet.create({
     borderWidth: 0,
     alignItems: 'center',
     justifyContent: 'center',
-    marginTop: 12,
     shadowColor: '#F9758D',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.25,

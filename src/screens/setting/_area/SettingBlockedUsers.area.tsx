@@ -1,11 +1,11 @@
 import React from 'react';
 import { StyleSheet, View } from 'react-native';
-import { SettingMenuAction } from '../_action/SettingMenu/SettingMenu.action';
+import { BlockedUsersListAction } from '../_action/SettingBlockedUsers/BlockedUsersList.action';
 
-export function SettingMenuArea() {
+export function SettingBlockedUsersArea() {
   return (
     <View style={styles.container}>
-      <SettingMenuAction />
+      <BlockedUsersListAction />
     </View>
   );
 }
@@ -13,6 +13,5 @@ export function SettingMenuArea() {
 const styles = StyleSheet.create({
   container: {
     width: '100%',
-    backgroundColor: '#FFFFFF',
   },
 });

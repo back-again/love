@@ -3,7 +3,7 @@
 import React from 'react';
 import { StyleSheet, TouchableOpacity } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
-import { useSettingStore } from '../_state/useSettingStore';
+import { useSettingStore } from '../../_state/useSettingStore';
 
 export function SettingBackAction() {
   const activeSubView = useSettingStore((state) => state.activeSubView);

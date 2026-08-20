@@ -1,10 +1,10 @@
 import React from 'react';
 import { StyleSheet, View } from 'react-native';
-import { LogoutAction } from '../_action/Logout.action';
-import { AccountInfoAction } from '../_action/AccountInfo.action';
-import { PushNotificationToggleAction } from '../_action/PushNotificationToggle.action';
-import { MarketingNotificationToggleAction } from '../_action/MarketingNotificationToggle.action';
-import { WithdrawAction } from '../_action/Withdraw.action';
+import { LogoutAction } from '../_action/SettingAccount/Logout.action';
+import { AccountInfoAction } from '../_action/SettingAccount/AccountInfo.action';
+import { PushNotificationToggleAction } from '../_action/SettingAccount/PushNotificationToggle.action';
+// import { MarketingNotificationToggleAction } from '../_action/SettingAccount/MarketingNotificationToggle.action';
+import { WithdrawAction } from '../_action/SettingAccount/Withdraw.action';
 import { useSettingStore } from '../_state/useSettingStore';
 
 export function SettingAccountArea() {
@@ -15,7 +15,7 @@ export function SettingAccountArea() {
       <AccountInfoAction />
 
       <PushNotificationToggleAction />
-      <MarketingNotificationToggleAction />
+      {/* <MarketingNotificationToggleAction /> */}
 
       <View style={styles.dangerZoneGroup}>
         <LogoutAction

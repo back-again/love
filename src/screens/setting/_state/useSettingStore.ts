@@ -1,6 +1,11 @@
 import { create } from 'zustand';
 
-export type SettingSubViewType = 'terms' | 'privacy' | 'settings' | null;
+export type SettingSubViewType =
+  | 'terms'
+  | 'privacy'
+  | 'settings'
+  | 'blocks'
+  | null;
 
 export interface SettingState {
   activeSubView: SettingSubViewType;

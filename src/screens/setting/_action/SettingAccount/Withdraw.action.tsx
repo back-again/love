@@ -9,8 +9,8 @@ import {
   Alert,
 } from 'react-native';
 import { useUserStore } from '@/_state/useUserStore';
-import { useSettingStore } from '../_state/useSettingStore';
-import { withdrawUser } from '../_lib/withdrawUser.lib';
+import { useSettingStore } from '../../_state/useSettingStore';
+import { withdrawUser } from '../../_lib/withdrawUser.lib';
 
 export function WithdrawAction() {
   const { user, clearUser } = useUserStore();

@@ -1,8 +1,7 @@
 'use client';
 
-import React from 'react';
-import { SettingMenuItem } from '../_component/SettingMenuItem';
-import { useSettingStore } from '../_state/useSettingStore';
+import { SettingMenuItem } from '../../_component/SettingMenuItem';
+import { useSettingStore } from '../../_state/useSettingStore';
 
 export function SettingMenuAction() {
   const setActiveSubView = useSettingStore((state) => state.setActiveSubView);
@@ -16,6 +15,10 @@ export function SettingMenuAction() {
       <SettingMenuItem
         label="개인정보처리방침"
         onPress={() => setActiveSubView('privacy')}
+      />
+      <SettingMenuItem
+        label="차단 목록 관리"
+        onPress={() => setActiveSubView('blocks')}
       />
       <SettingMenuItem
         label="계정 설정"
