@@ -35,6 +35,8 @@ export function ReviewSubmitAction({
       createReview({ postId, reviewContent: content }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['writtenPosts'] });
+      queryClient.invalidateQueries({ queryKey: ['postDetail'] });
+      queryClient.invalidateQueries({ queryKey: ['feedPosts'] });
 
       if (Platform.OS === 'web') {
         alert('후기가 성공적으로 등록되었습니다!');

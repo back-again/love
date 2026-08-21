@@ -9,6 +9,7 @@ import { WrittenPostCard, WrittenPost } from '../_component/WrittenPostCard';
 import { getWrittenPosts } from '../_lib/getWrittenPosts.lib';
 import { useReviewModalStore, ReviewMode } from '@/screens/review/_state/useReviewModalStore';
 import { usePostOptionsStore } from '@/screens/postOptions/_state/usePostOptionsStore';
+import { useDetailStore } from '@/screens/detail/_state/useDetailStore';
 import { navigationRef } from '@/_lib/navigation';
 
 export function WrittenPostListAction() {
@@ -21,6 +22,8 @@ export function WrittenPostListAction() {
   });
 
   const openReviewModal = useReviewModalStore(state => state.openReviewModal);
+  const openDetail = useDetailStore(state => state.openDetail);
+  const openPostOptions = usePostOptionsStore(state => state.openPostOptions);
 
   const handleOpenReview = (mode: ReviewMode) => (post: WrittenPost) => {
     openReviewModal({
@@ -29,8 +32,6 @@ export function WrittenPostListAction() {
       postId: post.id,
     });
   };
-
-  const openPostOptions = usePostOptionsStore(state => state.openPostOptions);
 
   if (writtenPosts.length === 0)
     return (
@@ -66,6 +67,7 @@ export function WrittenPostListAction() {
         <WrittenPostCard
           key={post.id}
           post={post}
+          onPress={p => openDetail(p.id)}
           onOpenViewReview={handleOpenReview('view')}
           onOpenWriteReview={handleOpenReview('write')}
           onOpenOptions={targetPost => {

@@ -6,9 +6,7 @@ import { NotificationItem as NotificationItemType } from '../_model/notification
 import { NotificationItem } from '../_component/NotificationItem';
 import { markNotificationReadLib } from '../_lib/markNotificationRead.lib';
 import { useNotificationStore } from '../_state/useNotificationStore';
-import { useCommentStore } from '@/screens/feed/comment/_state/useCommentStore';
-import { navigationRef } from '@/_lib/navigation';
-import { getSinglePostLib } from '@/screens/feed/_lib/getSinglePost.lib';
+import { useDetailStore } from '@/screens/detail/_state/useDetailStore';
 
 interface NotificationItemClickActionProps {
   item: NotificationItemType;
@@ -27,19 +25,10 @@ export function NotificationItemClickAction({
         queryClient.invalidateQueries({ queryKey: ['notifications'] });
       }
 
-      // 2. If it has a post ID, close notifications, navigate to Feed, and open comments bottom sheet
+      // 2. If it has a post ID, close notifications and open detail right-slide modal
       if (item.postId) {
         useNotificationStore.getState().closeNotification();
-
-        if (navigationRef.current?.isReady()) {
-          navigationRef.current.navigate('Feed');
-        }
-
-        // Fetch post details asynchronously and open the comments modal
-        const postDetail = await getSinglePostLib(item.postId);
-        if (postDetail) {
-          useCommentStore.getState().openComments(postDetail);
-        }
+        useDetailStore.getState().openDetail(item.postId);
       }
     } catch (err) {
       console.error('Notification click error:', err);

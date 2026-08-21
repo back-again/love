@@ -19,6 +19,7 @@ export interface WrittenPost {
 
 interface WrittenPostCardProps {
   post: WrittenPost;
+  onPress?: (post: WrittenPost) => void;
   onOpenViewReview?: (post: WrittenPost) => void;
   onOpenWriteReview?: (post: WrittenPost) => void;
   onOpenOptions?: (post: WrittenPost) => void;
@@ -26,6 +27,7 @@ interface WrittenPostCardProps {
 
 export function WrittenPostCard({
   post,
+  onPress,
   onOpenViewReview,
   onOpenWriteReview,
   onOpenOptions,
@@ -53,7 +55,11 @@ export function WrittenPostCard({
   }
 
   return (
-    <View style={styles.myPostCard}>
+    <TouchableOpacity
+      style={styles.myPostCard}
+      onPress={() => onPress && onPress(post)}
+      activeOpacity={0.88}
+    >
       {ddayLabel ? (
         <Text style={styles.ddayLabelText}>{ddayLabel}</Text>
       ) : null}
@@ -64,7 +70,10 @@ export function WrittenPostCard({
         </Text>
         <TouchableOpacity
           style={styles.moreOptionsBtn}
-          onPress={() => onOpenOptions && onOpenOptions(post)}
+          onPress={e => {
+            e.stopPropagation();
+            onOpenOptions && onOpenOptions(post);
+          }}
           hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
           activeOpacity={0.6}
         >
@@ -139,7 +148,10 @@ export function WrittenPostCard({
         {post.hasReview ? (
           <TouchableOpacity
             style={styles.myPostReviewedBtn}
-            onPress={() => onOpenViewReview && onOpenViewReview(post)}
+            onPress={e => {
+              e.stopPropagation();
+              onOpenViewReview && onOpenViewReview(post);
+            }}
             activeOpacity={0.8}
           >
             <Text style={styles.myPostReviewedBtnText}>후기 보기</Text>
@@ -147,14 +159,17 @@ export function WrittenPostCard({
         ) : (
           <TouchableOpacity
             style={styles.myPostReviewBtn}
-            onPress={() => onOpenWriteReview && onOpenWriteReview(post)}
+            onPress={e => {
+              e.stopPropagation();
+              onOpenWriteReview && onOpenWriteReview(post);
+            }}
             activeOpacity={0.8}
           >
             <Text style={styles.myPostReviewBtnText}>작성하기</Text>
           </TouchableOpacity>
         )}
       </View>
-    </View>
+    </TouchableOpacity>
   );
 }
 

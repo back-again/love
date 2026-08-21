@@ -15,6 +15,7 @@ import { PostOptionsScreen } from '@/screens/postOptions/PostOptionsScreen';
 import { CommentScreen } from '@/screens/feed/comment/CommentScreen';
 import ReviewScreen from '@/screens/review/ReviewScreen';
 import { NotificationModalAction } from '@/screens/notification/_action/NotificationModal.action';
+import { DetailScreen } from '@/screens/detail/DetailScreen';
 
 export type MainTabType = 'feed' | 'chat' | 'create' | 'my';
 
@@ -101,11 +102,12 @@ export function Layout({
           onTabChange(tab);
         }}
       />
-      <ToastProvider />
+      <DetailScreen />
+      <NotificationModalAction />
       <PostOptionsScreen />
       <CommentScreen />
       <ReviewScreen />
-      <NotificationModalAction />
+      <ToastProvider />
     </View>
   );
 }

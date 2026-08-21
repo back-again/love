@@ -7,7 +7,6 @@ import {
   Animated,
   Dimensions,
   TouchableWithoutFeedback,
-  Modal,
   PanResponder,
   StyleProp,
   ViewStyle,
@@ -130,61 +129,58 @@ export function RightSlideModal({
   if (!isRendered) return null;
 
   return (
-    <Modal
-      transparent
-      visible={isRendered}
-      onRequestClose={handleClose}
-      statusBarTranslucent
-      animationType="none"
-    >
-      <View style={[styles.rootContainer, containerStyle]}>
-        {/* Animated Dark Backdrop */}
-        {!hideBackdrop && (
-          <TouchableWithoutFeedback onPress={handleClose}>
-            <Animated.View
-              style={[
-                styles.backdrop,
-                {
-                  opacity: backdropAnim.interpolate({
-                    inputRange: [0, 1],
-                    outputRange: [0, backdropOpacity],
-                  }),
-                },
-              ]}
-            />
-          </TouchableWithoutFeedback>
-        )}
+    <View style={[styles.rootContainer, containerStyle]}>
+      {/* Animated Dark Backdrop */}
+      {!hideBackdrop && (
+        <TouchableWithoutFeedback onPress={handleClose}>
+          <Animated.View
+            style={[
+              styles.backdrop,
+              {
+                opacity: backdropAnim.interpolate({
+                  inputRange: [0, 1],
+                  outputRange: [0, backdropOpacity],
+                }),
+              },
+            ]}
+          />
+        </TouchableWithoutFeedback>
+      )}
 
-        {/* Sliding Content Drawer */}
-        <Animated.View
-          {...(enablePanGesture ? panResponder.panHandlers : {})}
-          style={[
-            styles.slideDrawer,
-            {
-              width: modalWidth,
-              borderTopLeftRadius: width === '100%' ? 0 : 24,
-              borderBottomLeftRadius: width === '100%' ? 0 : 24,
-              paddingTop: applySafeAreaPadding ? insets.top : 0,
-              paddingBottom: applySafeAreaPadding ? insets.bottom : 0,
-              transform: [{ translateX: translateXAnim }],
-            },
-            contentStyle,
-          ]}
-        >
-          {children}
-        </Animated.View>
-      </View>
-    </Modal>
+      {/* Sliding Content Drawer */}
+      <Animated.View
+        {...(enablePanGesture ? panResponder.panHandlers : {})}
+        style={[
+          styles.slideDrawer,
+          {
+            width: modalWidth,
+            borderTopLeftRadius: width === '100%' ? 0 : 24,
+            borderBottomLeftRadius: width === '100%' ? 0 : 24,
+            paddingTop: applySafeAreaPadding ? insets.top : 0,
+            paddingBottom: applySafeAreaPadding ? insets.bottom : 0,
+            transform: [{ translateX: translateXAnim }],
+          },
+          contentStyle,
+        ]}
+      >
+        {children}
+      </Animated.View>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   rootContainer: {
-    flex: 1,
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
     flexDirection: 'row',
     justifyContent: 'flex-end',
     backgroundColor: 'transparent',
-    zIndex: 9999,
+    zIndex: 20000,
+    elevation: 20000,
   },
   backdrop: {
     ...StyleSheet.absoluteFillObject,

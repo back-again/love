@@ -106,8 +106,8 @@ export function BottomSheetModal({
 
 const styles = StyleSheet.create({
   containerStyle: {
-    zIndex: 9999,
-    elevation: 9999,
+    zIndex: 30000,
+    elevation: 30000,
   },
   sheetBackground: {
     backgroundColor: '#FFFFFF',
