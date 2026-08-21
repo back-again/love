@@ -3,6 +3,7 @@
 import React from 'react';
 import { StyleSheet, Text } from 'react-native';
 import { useUserStore } from '@/_state/useUserStore';
+import { useCreateForm } from '@/screens/create/_state/useCreateForm';
 import { MainTabType } from '../Layout';
 
 interface HeaderTitleActionProps {
@@ -11,6 +12,7 @@ interface HeaderTitleActionProps {
 
 export function HeaderTitleAction({ activeTab }: HeaderTitleActionProps) {
   const datingStartedAt = useUserStore(state => state.user?.dating_started_at);
+  const isEditMode = useCreateForm(state => state.isEditMode);
 
   let ddayText = 'D+1';
   if (datingStartedAt) {
@@ -41,7 +43,7 @@ export function HeaderTitleAction({ activeTab }: HeaderTitleActionProps) {
       ]}
     >
       {activeTab === 'feed' && ddayText}
-      {activeTab === 'create' && '작성'}
+      {activeTab === 'create' && (isEditMode ? '수정' : '작성')}
       {activeTab === 'chat' && '상담'}
       {activeTab === 'my' && '마이'}
     </Text>

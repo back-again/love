@@ -24,6 +24,7 @@ export function DeleteOptionAction() {
     mutationFn: async (postId: string) => await deletePostLib(postId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['feedPosts'] });
+      queryClient.invalidateQueries({ queryKey: ['writtenPosts'] });
       showToast('게시글이 삭제되었습니다.');
     },
     onError: () => {

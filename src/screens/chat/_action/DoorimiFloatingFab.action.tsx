@@ -3,12 +3,22 @@
 import React from 'react';
 import { StyleSheet, View, Text, TouchableOpacity, Image } from 'react-native';
 import { useChatDetailStore } from '../detail/_state/useChatDetailStore';
+import { useToastStore } from '@/_state/useToastStore';
+import { getCurrentUserId } from '@/_lib/getCurrentUserId.lib';
+
+const ALLOWED_USER_ID = 'f91a2e4a-f2b6-4c09-a7d4-afae43684c45';
 
 export function DoorimiFloatingFabAction() {
   const enterChatRoom = useChatDetailStore(state => state.enterChatRoom);
 
-  const handlePress = () => {
-    enterChatRoom();
+  const handlePress = async () => {
+    const currentUserId = await getCurrentUserId();
+    if (currentUserId === ALLOWED_USER_ID) {
+      enterChatRoom();
+      return;
+    }
+
+    useToastStore.showToast('서비스 준비 중입니다.');
   };
 
   return (

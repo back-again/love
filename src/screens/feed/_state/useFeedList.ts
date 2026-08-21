@@ -57,6 +57,7 @@ export function useFeedList(pageSize: number = 5) {
         page.rawPosts.map((item: RawFeedPost): Post => ({
           id: item.id,
           userId: item.user_id,
+          categoryId: item.category_id,
           category: item.category || '',
           title: item.title,
           content: item.content,

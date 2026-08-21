@@ -8,7 +8,10 @@ export function VoteOptionSettingArea() {
     <View style={styles.createSection}>
       <View style={styles.titleRow}>
         <View style={styles.titleTextWrap}>
-          <Text style={styles.createSectionTitle}>OX</Text>
+          <Text style={styles.createSectionTitle}>
+            OX
+            <Text style={styles.requiredAsterisk}> *</Text>
+          </Text>
           <Text style={styles.createSectionSub}>
             선택지를 직접 입력해 피드백을 받아보세요.
           </Text>
@@ -44,6 +47,10 @@ const styles = StyleSheet.create({
     color: '#0F172A',
     letterSpacing: -0.3,
     marginBottom: 4,
+  },
+  requiredAsterisk: {
+    color: '#FF5D7B',
+    fontWeight: '800',
   },
   createSectionSub: {
     fontSize: 13,

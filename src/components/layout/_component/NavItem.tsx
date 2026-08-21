@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from 'react';
-import { StyleSheet, Text, TouchableOpacity, Animated } from 'react-native';
+import { StyleSheet, Text, TouchableOpacity, Animated, View } from 'react-native';
 import { MainTabType } from '../Layout';
 import { FeedTabSvg } from '../_svg/FeedTabSvg';
 import { ChatTabSvg } from '../_svg/ChatTabSvg';
@@ -10,12 +10,19 @@ interface NavItemProps {
   type: MainTabType;
   label: string;
   isActive: boolean;
+  isEditing?: boolean;
   onPress: () => void;
 }
 
-export function NavItem({ type, label, isActive, onPress }: NavItemProps) {
-  const activeColor = '#0F172A';
-  const inactiveColor = '#8F8F8F';
+export function NavItem({
+  type,
+  label,
+  isActive,
+  isEditing,
+  onPress,
+}: NavItemProps) {
+  const activeColor = isEditing ? '#FF5D7B' : '#0F172A';
+  const inactiveColor = isEditing ? '#FF8BA0' : '#8F8F8F';
   const iconColor = isActive ? activeColor : inactiveColor;
 
   const scaleAnim = useRef(new Animated.Value(1)).current;
@@ -56,12 +63,22 @@ export function NavItem({ type, label, isActive, onPress }: NavItemProps) {
       activeOpacity={0.85}
     >
       <Animated.View style={[styles.innerContent, { transform: [{ scale: scaleAnim }] }]}>
-        {type === 'feed' && <FeedTabSvg isActive={isActive} color={iconColor} />}
-        {type === 'chat' && <ChatTabSvg isActive={isActive} color={iconColor} />}
-        {type === 'create' && <CreateTabSvg isActive={isActive} color={iconColor} />}
-        {type === 'my' && <MyTabSvg isActive={isActive} color={iconColor} />}
+        <View style={styles.iconWrapper}>
+          {type === 'feed' && <FeedTabSvg isActive={isActive} color={iconColor} />}
+          {type === 'chat' && <ChatTabSvg isActive={isActive} color={iconColor} />}
+          {type === 'create' && <CreateTabSvg isActive={isActive} color={iconColor} />}
+          {type === 'my' && <MyTabSvg isActive={isActive} color={iconColor} />}
+          {type === 'create' && isEditing && <View style={styles.editDotBadge} />}
+        </View>
 
-        <Text style={[styles.navText, isActive && styles.navTextActive]}>
+        <Text
+          style={[
+            styles.navText,
+            isEditing && styles.navTextEditing,
+            isActive && styles.navTextActive,
+            isActive && isEditing && styles.navTextActiveEditing,
+          ]}
+        >
           {label}
         </Text>
       </Animated.View>
@@ -82,14 +99,38 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     gap: 3,
   },
+  iconWrapper: {
+    position: 'relative',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  editDotBadge: {
+    position: 'absolute',
+    top: -2,
+    right: -4,
+    width: 7,
+    height: 7,
+    borderRadius: 3.5,
+    backgroundColor: '#FF5D7B',
+    borderWidth: 1.5,
+    borderColor: '#FFFFFF',
+  },
   navText: {
     fontSize: 10,
     fontWeight: '600',
     color: '#8F8F8F',
     letterSpacing: -0.2,
   },
+  navTextEditing: {
+    color: '#FF8BA0',
+    fontWeight: '700',
+  },
   navTextActive: {
     color: '#0F172A',
+    fontWeight: '800',
+  },
+  navTextActiveEditing: {
+    color: '#FF5D7B',
     fontWeight: '800',
   },
 });

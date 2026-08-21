@@ -7,6 +7,7 @@ import { useHeaderStore } from '@/_state/useHeaderStore';
 import { HeaderTitleAction } from './_action/HeaderTitle.action';
 import { NotificationBellButtonAction } from './_action/NotificationBellButton.action';
 import { OpenSettingBottomSheetAction } from '@/screens/setting/_action/OpenSetting/OpenSettingBottomSheet.action';
+import { CreateSubmitHandler } from '@/screens/create/_handler/CreateSubmit.handler';
 import { BottomNavArea } from './_area/BottomNav.area';
 import { ToastProvider } from '@/_provider/ToastProvider';
 import { PushNotificationProvider } from '@/_provider/PushNotificationProvider';
@@ -48,7 +49,9 @@ export function Layout({
             <HeaderTitleAction activeTab={activeTab} />
             {activeTab === 'my' ? (
               <OpenSettingBottomSheetAction onSettingsPress={onSettingsPress} />
-            ) : activeTab === 'create' || activeTab === 'chat' ? null : (
+            ) : activeTab === 'create' ? (
+              <CreateSubmitHandler />
+            ) : activeTab === 'chat' ? null : (
               <NotificationBellButtonAction onTabChange={onTabChange} />
             )}
           </View>

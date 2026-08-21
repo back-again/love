@@ -5,13 +5,13 @@ import { StyleSheet, Text, TouchableOpacity } from 'react-native';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useShallow } from 'zustand/react/shallow';
 import { useCreateForm } from '../_state/useCreateForm';
-import { createPost } from '../_lib/createPost.lib';
+import { updatePost } from '../_lib/updatePost.lib';
 import { inspectPostQualityLib } from '../_lib/inspectPostQuality.lib';
 import { navigate } from '@/_lib/navigation';
 import { useFeedStore } from '@/screens/feed/_state/useFeedStore';
 import { useToastStore } from '@/_state/useToastStore';
 
-export function CreateSubmitAction() {
+export function EditSubmitAction() {
   const queryClient = useQueryClient();
 
   const {
@@ -21,6 +21,7 @@ export function CreateSubmitAction() {
     images,
     voteO,
     voteX,
+    editPostId,
     reset,
   } = useCreateForm(
     useShallow(state => ({
@@ -30,6 +31,7 @@ export function CreateSubmitAction() {
       images: state.images,
       voteO: state.voteO,
       voteX: state.voteX,
+      editPostId: state.editPostId,
       reset: state.reset,
     })),
   );
@@ -39,10 +41,15 @@ export function CreateSubmitAction() {
     category.trim().length > 0 &&
     detailSituation.trim().length > 0 &&
     voteO.trim().length > 0 &&
-    voteX.trim().length > 0;
+    voteX.trim().length > 0 &&
+    Boolean(editPostId);
 
-  const createMutation = useMutation({
+  const updateMutation = useMutation({
     mutationFn: async () => {
+      if (!editPostId) {
+        throw new Error('수정할 게시글 정보를 찾을 수 없습니다.');
+      }
+
       const inspection = await inspectPostQualityLib(
         questionTitle,
         detailSituation,
@@ -57,7 +64,8 @@ export function CreateSubmitAction() {
       const finalVoteO = voteO.trim();
       const finalVoteX = voteX.trim();
 
-      return createPost({
+      return updatePost({
+        id: editPostId,
         title: questionTitle.trim(),
         category,
         content: detailSituation.trim(),
@@ -69,21 +77,21 @@ export function CreateSubmitAction() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['feedPosts'] });
       queryClient.invalidateQueries({ queryKey: ['writtenPosts'] });
-      useToastStore.showToast('사연이 성공적으로 등록되었습니다!');
+      useToastStore.showToast('사연이 성공적으로 수정되었습니다!');
 
       reset();
       useFeedStore.getState().setSelectedCategoryId(null);
       navigate('Feed');
     },
     onError: (error: any) => {
-      console.error('Submit create post error:', error);
+      console.error('Submit edit post error:', error);
       useToastStore.showToast(
-        error?.message || '등록 중 오류가 발생했습니다.',
+        error?.message || '수정 중 오류가 발생했습니다.',
       );
     },
   });
 
-  const isLoading = createMutation.isPending;
+  const isLoading = updateMutation.isPending;
 
   const handleSubmit = () => {
     if (!category.trim()) {
@@ -106,7 +114,11 @@ export function CreateSubmitAction() {
       useToastStore.showToast('X 선택지를 입력해 주세요.');
       return;
     }
-    createMutation.mutate();
+    if (!editPostId) {
+      useToastStore.showToast('수정할 게시글 정보를 찾을 수 없습니다.');
+      return;
+    }
+    updateMutation.mutate();
   };
 
   return (
@@ -125,7 +137,7 @@ export function CreateSubmitAction() {
           (!isFormValid || isLoading) && styles.submitButtonTextDisabled,
         ]}
       >
-        {isLoading ? '등록 중...' : '완료'}
+        {isLoading ? '수정 중...' : '완료'}
       </Text>
     </TouchableOpacity>
   );

@@ -29,6 +29,7 @@ export function BlockOptionAction() {
     }) => await blockUserLib(userId, postTitle),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['feedPosts'] });
+      queryClient.invalidateQueries({ queryKey: ['writtenPosts'] });
       showToast('해당 사용자가 차단되었습니다.');
     },
     onError: () => {

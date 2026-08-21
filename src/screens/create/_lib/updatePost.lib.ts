@@ -20,23 +20,7 @@ export async function updatePost({
   voteO,
   voteX,
 }: UpdatePostParams) {
-  // 1. 카테고리 ID 확인 (categories 테이블 조회)
-  let categoryId: string | null = null;
-  try {
-    const { data: catData } = await supabase
-      .from('categories')
-      .select('id')
-      .eq('name', category)
-      .maybeSingle();
-
-    if (catData?.id) {
-      categoryId = catData.id;
-    }
-  } catch (catErr) {
-    console.warn('Category lookup warning:', catErr);
-  }
-
-  // 2. 이미지 처리: 로컬 이미지 업로드
+  // 1. 이미지 처리: 로컬 이미지 업로드
   const uploadedImageUrls: string[] = [];
   try {
     const uploadPromises = images.map(async (imgUri, index) => {
@@ -46,7 +30,7 @@ export async function updatePost({
       }
       const uploadRes = await uploadImageToR2(
         imgUri,
-        `post_img_${Date.now()}_${index}.jpg`
+        `post_img_${Date.now()}_${index}.jpg`,
       );
       if (!uploadRes?.imageUrl) {
         throw new Error(`Image upload failed at index ${index}`);
@@ -64,13 +48,10 @@ export async function updatePost({
   const updatePayload: any = {
     title,
     content,
-    category,
+    category_id: category,
     vote_o: voteO ? voteO.trim() : null,
     vote_x: voteX ? voteX.trim() : null,
   };
-  if (categoryId) {
-    updatePayload.category_id = categoryId;
-  }
 
   const { data: postData, error: postError } = await supabase
     .from('posts')

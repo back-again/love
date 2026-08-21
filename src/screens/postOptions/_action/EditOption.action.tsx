@@ -23,7 +23,7 @@ export function EditOptionAction() {
     // 1. Populate the write form state with target post data
     useCreateForm.setState({
       questionTitle: targetPost.title || '',
-      category: targetPost.category || '고민',
+      category: targetPost.categoryId || targetPost.category || '',
       detailSituation: targetPost.content || '',
       images: targetPost.images || [],
       voteO: targetPost.voteO || '',

@@ -10,13 +10,7 @@ import { BlurView } from 'expo-blur';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { MainTabType } from '../Layout';
 import { NavItem } from '../_component/NavItem';
-
-const NAV_TABS: { type: MainTabType; label: string }[] = [
-  { type: 'feed', label: '커뮤니티' },
-  { type: 'create', label: '작성' },
-  { type: 'chat', label: '상담' },
-  { type: 'my', label: '마이' },
-];
+import { useCreateForm } from '@/screens/create/_state/useCreateForm';
 
 const tabIndexMap: Record<MainTabType, number> = {
   feed: 0,
@@ -32,6 +26,7 @@ interface BottomNavAreaProps {
 
 export function BottomNavArea({ activeTab, onTabChange }: BottomNavAreaProps) {
   const insets = useSafeAreaInsets();
+  const isEditMode = useCreateForm(state => state.isEditMode);
   const [containerWidth, setContainerWidth] = useState(0);
 
   const leftEdgeAnim = useRef(
@@ -144,12 +139,22 @@ export function BottomNavArea({ activeTab, onTabChange }: BottomNavAreaProps) {
           style={styles.bottomNavContainer}
           onLayout={e => setContainerWidth(e.nativeEvent.layout.width)}
         >
-          {NAV_TABS.map(tab => (
+          {[
+            { type: 'feed' as const, label: '커뮤니티' },
+            {
+              type: 'create' as const,
+              label: isEditMode ? '수정' : '작성',
+              isEditing: isEditMode,
+            },
+            { type: 'chat' as const, label: '상담' },
+            { type: 'my' as const, label: '마이' },
+          ].map(tab => (
             <NavItem
               key={tab.type}
               type={tab.type}
               label={tab.label}
               isActive={activeTab === tab.type}
+              isEditing={tab.isEditing}
               onPress={() => onTabChange(tab.type)}
             />
           ))}

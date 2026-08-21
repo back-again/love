@@ -26,21 +26,6 @@ export async function createPost({
     throw new Error('로그인이 필요합니다.');
   }
 
-  let categoryId: string | null = null;
-  try {
-    const { data: catData } = await supabase
-      .from('categories')
-      .select('id')
-      .eq('name', category)
-      .maybeSingle();
-
-    if (catData?.id) {
-      categoryId = catData.id;
-    }
-  } catch (catErr) {
-    console.warn('Category lookup warning:', catErr);
-  }
-
   const uploadedImageUrls: string[] = [];
   if (images.length > 0) {
     try {
@@ -58,20 +43,22 @@ export async function createPost({
       const results = await Promise.all(uploadPromises);
       uploadedImageUrls.push(...results);
     } catch (uploadError) {
-      console.error('R2 storage upload error before post creation:', uploadError);
+      console.error(
+        'R2 storage upload error before post creation:',
+        uploadError
+      );
       throw new Error('이미지 업로드 중 오류가 발생했습니다.');
     }
   }
 
   const insertPayload: any = {
     user_id: activeUserId,
+    category_id: category,
     title,
     content,
-    category,
     vote_o: voteO ? voteO.trim() : null,
     vote_x: voteX ? voteX.trim() : null,
   };
-  if (categoryId) insertPayload.category_id = categoryId;
 
   const { data: postData, error: postError } = await supabase
     .from('posts')

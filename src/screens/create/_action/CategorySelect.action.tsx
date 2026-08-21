@@ -27,8 +27,8 @@ export function CategorySelectAction() {
         <CategoryChip
           key={item.id}
           category={item.name}
-          isSelected={category === item.name}
-          onPress={() => setCategory(item.name)}
+          isSelected={category === item.id}
+          onPress={() => setCategory(item.id)}
           variant="pink"
         />
       ))}

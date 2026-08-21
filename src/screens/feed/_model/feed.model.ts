@@ -1,6 +1,7 @@
 export interface Post {
   id: string;
   userId: string;
+  categoryId?: string;
   category: string;
   title: string;
   content: string;
